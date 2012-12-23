@@ -1,0 +1,1122 @@
+package com.RotN.aceydeucey.logic;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+import java.util.Map.Entry;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
+import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
+import com.RotN.aceydeucey.logic.TheGame.ButtonState;
+
+public class TheGameImpl {
+	Context fileContext;	
+	private TheGame gammon = new TheGame();	
+			
+	public void setFileContext(Context fileContext) {
+		this.fileContext = fileContext;
+	}
+
+	public TheGame getGammonData() {
+		return gammon;
+	}
+
+	public void setGammonData(TheGame gammon) {
+		this.gammon = gammon;
+	}
+
+	private static final String TAG = TheGameImpl.class.getSimpleName();
+
+	public interface GammonEventHandler{
+		void onDataChange(String key, String value);
+		void onUndoChange(boolean undoEnabled);
+		void onMoreDrinks(String player, String toastMessage);
+	};
+	
+	private List<GammonEventHandler> handlers = new ArrayList<GammonEventHandler>(); 
+	
+	public void addListener(GammonEventHandler handler) {
+		handlers.add(handler);
+	}
+	
+	public void removeListener(GammonEventHandler handler) {
+		handlers.remove(handler);
+	}
+
+	public TheGameImpl() {
+		
+		
+		initializeGame();
+	}
+	
+	public void initializeGame() {		
+		gammon.turn = GameColor.NEITHER;
+		
+		Set<Entry<Integer, CheckerContainer>> set = gammon.containers.entrySet();
+		Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
+		while (it.hasNext()) {
+			Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
+			m.getValue().setWhiteCheckerCount(0);
+			m.getValue().setBlackCheckerCount(0);
+		}
+		
+		gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(15);
+		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(15);
+		
+		gammon.whiteMovingIn = false;
+		gammon.blackMovingIn = false;
+		gammon.allBlackPiecesOut = false;
+		gammon.allWhitePiecesOut = false;
+		
+		gammon.aceyDeucey = false;
+		
+		gammon.blackDie1 = 0;
+		gammon.blackDie2 = 0;
+		gammon.whiteDie1 = 0;
+		gammon.whiteDie2 = 0;
+		
+		gammon.whiteDrinks = 0;
+		gammon.blackDrinks = 0;
+		
+		gammon.whiteNumber = 0;
+		gammon.blackNumber = 0;
+		
+		gammon.socials.clear();
+		gammon.drinkingEvents.clear();
+		gammon.savedStatesCount = 0;
+				
+		gammon.buttonState = ButtonState.ROLL_FOR_NUMBER;
+		
+		updateButtonDisplay();
+		
+		updateTurnDisplay();
+	}
+	
+	private int rollDie() {
+		return (int) (1 + Math.random() * 6);
+	}
+	
+	private void nextTurn() {
+		if (canMove() == false) {
+			
+			if (gammon.movesRemaining.size() > 0) {
+				if (gammon.turn == GameColor.BLACK) {
+					gammon.whiteDrinks += gammon.movesRemaining.size();
+					gammon.drinkingEvents.add(0, "Red drink " + gammon.movesRemaining.size() + " for not moving");
+					updateDrinkEvents("Red Player", "Drink " + gammon.movesRemaining.size() + " for not\n being able to move");
+				} else if (gammon.turn == GameColor.WHITE) {
+					gammon.blackDrinks += gammon.movesRemaining.size();
+					gammon.drinkingEvents.add(0, "White drink " + gammon.movesRemaining.size() + " for not moving");
+					updateDrinkEvents("White Player", "Drink " + gammon.movesRemaining.size() + " for not\n being able to move");
+				}
+			}
+			gammon.movesRemaining.clear();
+			
+			if (doubles() == true) 
+			{
+				//leave the turn alone and clear out the dice
+			} else if (gammon.turn == GameColor.WHITE) {
+				gammon.turn = GameColor.BLACK;
+			}
+			else if (gammon.turn == GameColor.BLACK) {
+				gammon.turn = GameColor.WHITE;
+			}
+			
+			int roll = 0;
+			if (gammon.blackDie1 == 0 && gammon.blackDie2 == 0) {
+				roll = gammon.whiteDie1 + gammon.whiteDie2;
+			} else if (gammon.whiteDie1 == 0 && gammon.whiteDie2 == 0){
+				roll = gammon.blackDie1 + gammon.blackDie2;
+			} else {
+				roll = gammon.blackDie1 + gammon.whiteDie1;
+			}
+			
+			Log.d(TAG, "Roll Value: " + roll);
+			if (roll == gammon.whiteNumber) {
+				gammon.whiteDrinks++;
+				gammon.drinkingEvents.add(0, "White number was rolled");
+				updateDrinkEvents("White Number", "Was Rolled");
+			} else if (roll == gammon.blackNumber) {
+				gammon.blackDrinks++;
+				gammon.drinkingEvents.add(0, "Red number was rolled");
+				updateDrinkEvents("Red Number", "Was Rolled");
+			}
+			
+			gammon.blackDie1 = 0;
+			gammon.blackDie2 = 0;
+			gammon.whiteDie1 = 0;
+			gammon.whiteDie2 = 0;
+		
+			gammon.buttonState = ButtonState.ROLL;
+			updateButtonDisplay();
+			gammon.savedStatesCount = 0;
+		}
+		
+		updateUndoEnabled();
+		updateTurnDisplay();
+	}
+	
+	private void rollForTurn() {
+		gammon.whiteDie1 = 0;
+		gammon.whiteDie2 = 0;
+		gammon.blackDie1 = 0;
+		gammon.blackDie2 = 0;
+		gammon.whiteDie1 = rollDie();
+		gammon.blackDie1 = rollDie();
+		
+		gammon.movesRemaining.clear();
+		
+		Log.d(TAG, "Black: " + gammon.blackDie1 + " White: " + gammon.whiteDie1);
+		
+		if ((gammon.whiteDie1 == 2 && gammon.blackDie1 == 1) ||
+				(gammon.blackDie1 == 2 && gammon.whiteDie1 == 1)) {
+			gammon.aceyDeucey = true;
+			gammon.movesRemaining.add(1);
+			gammon.movesRemaining.add(2);
+			gammon.movesRemaining.add(3);
+			gammon.movesRemaining.add(4);
+			gammon.movesRemaining.add(5);
+			gammon.movesRemaining.add(6);
+			if (gammon.whiteDie1 == 2) {
+				gammon.turn = GameColor.WHITE;
+			} else {
+				gammon.turn = GameColor.BLACK;
+			}
+		} else if (gammon.whiteDie1 > gammon.blackDie1) {
+			gammon.turn = GameColor.WHITE;
+			gammon.movesRemaining.add(gammon.whiteDie1);
+			gammon.movesRemaining.add(gammon.blackDie1);
+		}
+		else if (gammon.blackDie1 > gammon.whiteDie1) {
+			gammon.turn = GameColor.BLACK;
+			gammon.movesRemaining.add(gammon.whiteDie1);
+			gammon.movesRemaining.add(gammon.blackDie1);
+		}
+		else {
+			gammon.blackDie2 = 0;
+			gammon.whiteDie2 = 0;
+			while (gammon.blackDie2 == gammon.whiteDie2) {
+				gammon.whiteDie2 = rollDie();
+				gammon.blackDie2 = rollDie();
+			}
+			
+			if (gammon.whiteDie2 > gammon.blackDie2) {
+				gammon.turn = GameColor.WHITE;
+			}
+			else  {
+				gammon.turn = GameColor.BLACK;
+			}
+			gammon.movesRemaining.add(gammon.whiteDie1);
+			gammon.movesRemaining.add(gammon.whiteDie1);
+			gammon.movesRemaining.add(gammon.whiteDie1);
+			gammon.movesRemaining.add(gammon.whiteDie1);
+		}
+		
+		Log.d(TAG, "Moves Remaining: " + gammon.movesRemaining.size());
+		
+		gammon.buttonState = ButtonState.TURN_FINISHED;
+		updateButtonDisplay();
+		updateTurnDisplay();
+	}
+	
+	private boolean haveRolled() {
+		return (gammon.blackDie1 != 0 && gammon.blackDie2 != 0) || 
+				(gammon.whiteDie1 != 0 && gammon.whiteDie2 != 0) ||
+				(gammon.blackDie1 != 0 && gammon.whiteDie1 != 0);
+	}
+	
+	public Vector<BoardPositions> getPossibleMoves(BoardPositions pieceLocation) {
+		Vector<BoardPositions> moves = new Vector<BoardPositions>();		
+		
+		if (hasAChecker(pieceLocation)) {
+			if (haveRolled() == true && onPokey() == false) {
+				if (pieceLocation == CheckerContainer.BoardPositions.WHITE_BUNKER) {
+					checkWhiteBunker(moves);
+				}
+				else if (pieceLocation == CheckerContainer.BoardPositions.BLACK_BUNKER) {
+					checkBlackBunker(moves);
+				}
+				else {
+					checkPointMove(pieceLocation, moves, gammon.movesRemaining, gammon.aceyDeucey);
+				}
+			} else if (haveRolled() == true && onPokey() == true && pieceLocation == BoardPositions.POKEY) {
+				if (gammon.turn == GameColor.WHITE && doubles()) {
+					checkWhiteBunker(moves);
+				}
+				else if (gammon.turn == GameColor.BLACK && doubles()){
+					checkBlackBunker(moves);
+				}
+			}
+		}
+		
+		return moves;
+	}
+	
+	private boolean hasAChecker(BoardPositions containerPosition) {
+		boolean hasAChecker = false;
+		if (gammon.turn == GameColor.WHITE) {
+			hasAChecker = (gammon.containers.get(containerPosition.getIndex()).getWhiteCheckerCount() > 0);
+		} else {
+			hasAChecker = (gammon.containers.get(containerPosition.getIndex()).getBlackCheckerCount() > 0);
+		}
+		return hasAChecker;
+	}
+	
+	public boolean onPokey() {
+		boolean onPokey = false;
+		
+		if ( (gammon.turn == GameColor.BLACK && gammon.containers.get(BoardPositions.POKEY.getIndex()).getBlackCheckerCount() > 0) ||
+				(gammon.turn == GameColor.WHITE && gammon.containers.get(BoardPositions.POKEY.getIndex()).getWhiteCheckerCount() > 0) ) {
+			onPokey = true;
+		}		
+		return onPokey;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void checkWhiteBunker(Vector<CheckerContainer.BoardPositions> moves) {
+		//check that it is white
+		if (gammon.turn == GameColor.WHITE  && 
+				//needs pieces in the bunker/still moving out or something on pokey
+				((gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).getWhiteCheckerCount() > 0 && false == gammon.allWhitePiecesOut)
+						|| onPokey()) )
+		{
+			for (int i = 0; i < gammon.movesRemaining.size(); i++) 
+			{
+				int moveLength = gammon.movesRemaining.get(i);
+				CheckerContainer possibleMove;
+				BoardPositions destMove = BoardPositions.NONE;
+				possibleMove = gammon.containers.get(moveLength);
+				
+				if (false == (possibleMove.getBlackCheckerCount() > 1) ) 
+				{
+					destMove = possibleMove.getPosition();
+					moves.add(destMove);
+				}
+				
+				if (destMove != BoardPositions.NONE) {
+					ArrayList<Integer> newMovesAvailable = (ArrayList<Integer>) gammon.movesRemaining.clone();
+					if (gammon.aceyDeucey) {
+						aceyDeuceyChosen(moveLength, newMovesAvailable);
+					} else if (newMovesAvailable.contains(moveLength)) {						
+						newMovesAvailable.remove((Object)moveLength);
+					}
+					checkPointMove(destMove, moves, newMovesAvailable, false);
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void checkBlackBunker(Vector<CheckerContainer.BoardPositions> moves) {
+		//check that it is black
+		if (gammon.turn == GameColor.BLACK && 
+				// have to have pieces in the bunker or on pokey for this move
+				( (gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).getBlackCheckerCount() > 0 && false == gammon.allBlackPiecesOut)
+						|| onPokey()))
+		{
+			for (int i = 0; i < gammon.movesRemaining.size(); i++)
+			{
+				int moveLength = gammon.movesRemaining.get(i);
+				CheckerContainer possibleMove;
+				BoardPositions destMove = BoardPositions.NONE;
+				//black pieces go backwards. This moves us this direction from the bunker
+				int moveIndex = CheckerContainer.BoardPositions.BLACK_BUNKER.getIndex() - moveLength;
+				possibleMove = gammon.containers.get(moveIndex);
+				
+				if (false == (possibleMove.getWhiteCheckerCount() > 1) )
+				{
+					destMove = possibleMove.getPosition();
+					moves.add(destMove);
+				}
+				
+				if (destMove != BoardPositions.NONE) {
+					ArrayList<Integer> newMovesAvailable = (ArrayList<Integer>) gammon.movesRemaining.clone();
+					if (gammon.aceyDeucey) {
+						aceyDeuceyChosen(moveLength, newMovesAvailable);
+					} else if (newMovesAvailable.contains(moveLength)) {						
+						newMovesAvailable.remove((Object)moveLength);
+					}
+					checkPointMove(destMove, moves, newMovesAvailable, false);					
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void checkPointMove(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable, boolean acdc) {
+		ArrayList<Integer> newMovesAvailable = (ArrayList<Integer>) movesAvailable.clone();
+		
+		if (onPokey()) {
+			return; // they still need to move pieces out. Get out of here.
+		}
+		if (gammon.turn == GameColor.BLACK)
+		{
+			for (int i = 0; i < movesAvailable.size(); i++)
+			{
+				int moveLength = movesAvailable.get(i);
+				BoardPositions destMove = BoardPositions.NONE;
+				CheckerContainer possibleMove;
+				//black pieces go backwards. This moves us this direction from the bunker
+				int moveIndex = pieceLocation.getIndex() - moveLength;
+				
+				//it is in the final quadrant only moves into the bunker are allowed
+				if (pieceLocation.getIndex() <= 6) {
+					if (moveIndex == CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex() && gammon.blackMovingIn)
+					{
+						moves.add(BoardPositions.BLACK_BUNKER);
+					}
+				}					
+				else if (moveIndex > CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex())
+				{
+					possibleMove = gammon.containers.get(moveIndex);
+				
+					if (false == (possibleMove.getWhiteCheckerCount() > 1) )
+					{
+						destMove = gammon.containers.get(moveIndex).getPosition();
+						moves.add(destMove);
+					}
+				}
+				
+				if (destMove != BoardPositions.NONE) {
+					if (acdc) {
+						aceyDeuceyChosen(moveLength, newMovesAvailable);
+					} else if (newMovesAvailable.contains(moveLength)) {						
+						newMovesAvailable.remove((Object)moveLength);
+					}
+					checkPointMove(destMove, moves, newMovesAvailable, false);
+				}
+			}			
+		}
+		else if (gammon.turn == GameColor.WHITE)
+		{
+			for (int i = 0; i < movesAvailable.size(); i++)
+			{
+				int moveLength = movesAvailable.get(i);
+				BoardPositions destMove = BoardPositions.NONE;
+				CheckerContainer possibleMove;
+				//black pieces go backwards. This moves us this direction from the bunker
+				int moveIndex = pieceLocation.getIndex() + moveLength;
+				
+				//it is in the final quadrant only moves into the bunker are allowed
+				if (pieceLocation.getIndex() >= 19) {
+					if (moveIndex == CheckerContainer.BoardPositions.BLACK_BUNKER.getIndex() && gammon.whiteMovingIn)
+					{
+						moves.add(BoardPositions.WHITE_BUNKER);
+					}
+				}
+				else if (moveIndex <= CheckerContainer.BoardPositions.BLACK_BUNKER.getIndex())
+				{
+					possibleMove = gammon.containers.get(moveIndex);
+				
+					if (false == (possibleMove.getBlackCheckerCount() > 1) )
+					{
+						destMove = gammon.containers.get(moveIndex).getPosition();
+						moves.add(destMove);
+					}
+				}
+				
+				if (destMove != BoardPositions.NONE) {
+					if (acdc) {
+						aceyDeuceyChosen(moveLength, newMovesAvailable);
+					} else if (newMovesAvailable.contains(moveLength)) {						
+						newMovesAvailable.remove((Object)moveLength);
+					}
+					checkPointMove(destMove, moves, newMovesAvailable, false);
+				}				
+			}
+		}
+	}
+	
+	public int getBlackBunkerCount()
+	{
+		return gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).getBlackCheckerCount();
+	}
+	
+	public int getWhiteBunkerCount()
+	{
+		return gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).getWhiteCheckerCount();
+	}
+	
+	public CheckerContainer getContainer(BoardPositions position) {
+		return gammon.containers.get(position.getIndex());
+	}
+	
+	public CheckerContainer getContainer(int index) {
+		return gammon.containers.get(index);
+	}
+	
+	public boolean movePiece(BoardPositions origPos, BoardPositions newPos) {
+		boolean pieceMoved = false;
+		
+		// make sure they picked something legit
+		boolean canMove = false;
+		Vector<BoardPositions> possibleMoves = getPossibleMoves(origPos);		
+		Iterator<BoardPositions> itr = possibleMoves.iterator();
+		while (itr.hasNext()) {
+			BoardPositions openMove = itr.next();
+			if (openMove == newPos) {
+				canMove = true;
+				break;
+			}
+		}
+		
+		if (canMove) {	
+			//save where it was for undo purposes
+			storeState();
+			int newIndex = newPos.getIndex();
+			int moveLength = 0;
+			
+			if (newPos == BoardPositions.BLACK_BUNKER) { // can't move into your oppenent's bunker
+				newIndex = BoardPositions.WHITE_BUNKER.getIndex();
+			} else if (newPos == BoardPositions.WHITE_BUNKER) {
+				newIndex = BoardPositions.BLACK_BUNKER.getIndex();
+			} 
+			
+			int startIndex = origPos.getIndex(); // we need this later to pokey them			
+			if (origPos == BoardPositions.POKEY) { // the pokey value changes the distance you went
+				if (gammon.turn == GameColor.BLACK) {
+					moveLength = BoardPositions.BLACK_BUNKER.getIndex() - newIndex;
+					startIndex = BoardPositions.BLACK_BUNKER.getIndex();
+				} else {
+					moveLength = newIndex;
+					startIndex = BoardPositions.WHITE_BUNKER.getIndex();
+				}
+			}
+			else {
+				moveLength = Math.abs(newIndex - origPos.getIndex());
+			}
+			
+			ArrayList<Integer> howWeGotThere;
+			//decrement remaining moves
+			if (gammon.aceyDeucey) {					
+				gammon.aceyDeucey = false;
+				howWeGotThere = aceyDeuceyChosen(moveLength, gammon.movesRemaining);
+			}
+			else {
+				howWeGotThere = moveUsed(moveLength);
+			}
+			
+			pokeyThem(startIndex, howWeGotThere);
+		
+			//decrement old container
+			gammon.containers.get(origPos.getIndex()).removePiece(gammon.turn);
+
+			
+			CheckerContainer newContainer = gammon.containers.get(newPos.getIndex());
+			newContainer.addPiece(gammon.turn);
+			
+			updateMovingIn();
+			checkForWin();
+			updateUndoEnabled();
+		}
+		
+		return pieceMoved;
+	}
+	
+	private void pokeyThem(Integer origIndex, ArrayList<Integer> howWeGotThere) {
+		boolean gotEm = false;
+		int tempIndex = origIndex;
+		for (int index = 0; index < howWeGotThere.size(); index++) {
+			int moveIndex = 0;
+			int moveLength = howWeGotThere.get(index);
+			if (gammon.turn == GameColor.WHITE){
+				moveIndex = tempIndex + moveLength;
+			} else {
+				//black pieces go backwards. This moves us this direction from the bunker
+				moveIndex = tempIndex - moveLength;
+			}
+			CheckerContainer newContainer;
+			newContainer = gammon.containers.get(moveIndex);
+			tempIndex = newContainer.getPosition().getIndex();
+			
+			//put them on pokey
+			gotEm = movePieceToPokey(newContainer);
+		}
+		
+		if (gotEm == false) { // missed them the first time, lets try again.
+			tempIndex = origIndex;
+			for (int index = howWeGotThere.size() - 1; index > 0; index--) {
+				int moveIndex = 0;
+				int moveLength = howWeGotThere.get(index);
+				if (gammon.turn == GameColor.WHITE){
+					moveIndex = tempIndex + moveLength;
+				} else {
+					//black pieces go backwards. This moves us this direction from the bunker
+					moveIndex = tempIndex - moveLength;
+				}
+				CheckerContainer newContainer;
+				newContainer = gammon.containers.get(moveIndex);
+				tempIndex = newContainer.getPosition().getIndex();
+				
+				//put them on pokey
+				gotEm = movePieceToPokey(newContainer);
+			}
+		}
+	}
+	
+	private boolean movePieceToPokey(CheckerContainer newContainer) {
+		boolean gotEm = false;
+		
+		//makes sure that we don't steal the last one out of their bunker
+		if (newContainer.getPosition() != BoardPositions.WHITE_BUNKER &&
+				newContainer.getPosition() != BoardPositions.BLACK_BUNKER) {	
+			if (gammon.turn == GameColor.BLACK && newContainer.getWhiteCheckerCount() == 1) {
+				// add a piece to pokey
+				gammon.containers.get(BoardPositions.POKEY.getIndex()).addPiece(GameColor.WHITE);
+				//remove the piece that went to pokey
+				newContainer.removePiece(GameColor.WHITE);
+				gotEm = true;
+			} else if (gammon.turn == GameColor.WHITE && newContainer.getBlackCheckerCount() == 1) {
+				// add a piece to pokey
+				gammon.containers.get(BoardPositions.POKEY.getIndex()).addPiece(GameColor.BLACK);
+				//remove the piece that went to pokey
+				newContainer.removePiece(GameColor.BLACK);
+				gotEm = true;
+			}
+		}
+		
+		return gotEm;
+	}
+	
+	public void undoMove() {
+		if (gammon.savedStatesCount > 0) {
+			String FILENAME = "";
+			switch (gammon.savedStatesCount) {
+			case 1:
+				FILENAME = "move0";
+				gammon.savedStatesCount = 0;
+				break;
+			case 2:
+				FILENAME = "move1";
+				gammon.savedStatesCount = 1;
+				break;
+			case 3:
+				FILENAME = "move2";
+				gammon.savedStatesCount = 2;
+				break;
+			case 4:
+				FILENAME = "move3";
+				gammon.savedStatesCount = 3;
+				break;
+			}
+			
+			try {
+				FileInputStream fis = fileContext.openFileInput(FILENAME);
+				ObjectInputStream objIn = new ObjectInputStream(fis);						
+				gammon = (TheGame) objIn.readObject();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			//Log.d(TAG, "SavedStatesCount: " + gammon.savedStatesCount);
+			updateUndoEnabled();
+		}
+		
+	}
+	
+	public void storeState() {
+		String FILENAME = "";
+		switch (gammon.savedStatesCount) {
+		case 0:
+			FILENAME = "move0";
+			break;
+		case 1:
+			FILENAME = "move1";
+			break;
+		case 2:
+			FILENAME = "move2";
+			break;
+		case 3:
+			FILENAME = "move3";
+			break;
+		}
+		try {
+			FileOutputStream stream = fileContext.openFileOutput(FILENAME, Context.MODE_PRIVATE);
+			ObjectOutputStream objOut = new ObjectOutputStream(stream);
+			objOut.writeObject(gammon);
+			objOut.close();
+			gammon.savedStatesCount++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public int getB1DieValue() {
+		return gammon.blackDie1;
+	}
+	
+	public int getB2DieValue() {
+		return this.gammon.blackDie2;
+	}
+	
+	public int getW1DieValue() {
+		return this.gammon.whiteDie1;
+	}
+	
+	public int getW2DieValue() {
+		return this.gammon.whiteDie2;
+	}
+	
+	public String getButtonText() {
+		return this.gammon.buttonState.getText();
+	}
+	
+	public void buttonPushed() {
+		switch (gammon.buttonState) {
+		case ROLL_FOR_TURN:
+			rollForTurn();
+			break;
+		case ROLL:
+			roll();
+			break;
+		case TURN_FINISHED:
+			nextTurn();
+			break;
+		case ROLL_FOR_NUMBER:
+			rollForNumbers();
+			break;
+		default:
+			initializeGame();
+			break;
+		}
+	}
+	
+	private ArrayList<Integer> moveUsed(int moveLength) {
+		ArrayList<Integer> howWeGotThere = new ArrayList<Integer>();
+		Log.d(TAG, "Move used: " + moveLength);
+		if (gammon.movesRemaining.contains(moveLength)) {
+			howWeGotThere.add(moveLength);
+			gammon.movesRemaining.remove((Object)moveLength);
+		} else { // we used multiple to get there
+			int sumOfMoves = 0;
+			while (gammon.movesRemaining.size() > 0) {
+				sumOfMoves += gammon.movesRemaining.get(0);
+				howWeGotThere.add(gammon.movesRemaining.get(0));
+				gammon.movesRemaining.remove(0);
+				if (sumOfMoves == moveLength) {
+					break;
+				}
+			}
+		}
+				
+		Log.d(TAG, "Moves remaining: " + gammon.movesRemaining.size());
+		return howWeGotThere;
+	}
+	
+	private void roll() {
+		if (gammon.turn == GameColor.BLACK) {
+			gammon.blackDie1 = rollDie();
+			gammon.blackDie2 = rollDie();
+			
+			// for testing
+			//gammon.blackDie1 = 6;
+			//gammon.blackDie2 = 6;
+			
+			if ((gammon.blackDie1 == 1 && gammon.blackDie2 == 2) ||
+					(gammon.blackDie1 == 2 && gammon.blackDie2 == 1)) {
+				gammon.aceyDeucey = true;
+				gammon.movesRemaining.add(1);
+				gammon.movesRemaining.add(2);
+				gammon.movesRemaining.add(3);
+				gammon.movesRemaining.add(4);
+				gammon.movesRemaining.add(5);
+				gammon.movesRemaining.add(6);
+				
+				//drink for doubles
+				gammon.whiteDrinks++;
+				gammon.drinkingEvents.add(0, "White drink for black doubles");
+				updateDrinkEvents("White Player", "Drink For Doubles");
+			} else {
+				gammon.movesRemaining.add(gammon.blackDie1);
+				gammon.movesRemaining.add(gammon.blackDie2);
+				if (gammon.blackDie1 == gammon.blackDie2) {
+					gammon.movesRemaining.add(gammon.blackDie1);
+					gammon.movesRemaining.add(gammon.blackDie1);
+					//drink for doubles
+					gammon.whiteDrinks++;
+					updateDrinkEvents("White Player", "Drink For Doubles");
+					gammon.drinkingEvents.add(0, "White drink for black doubles");
+				}
+			}
+		} else {
+			gammon.whiteDie1 = rollDie();
+			gammon.whiteDie2 = rollDie();
+			
+			// for testing
+			//gammon.whiteDie1 = 1;
+			//gammon.whiteDie2 = 2;
+			
+			if ((gammon.whiteDie1 == 1 && gammon.whiteDie2 == 2) ||
+					(gammon.whiteDie1 == 2 && gammon.whiteDie2 == 1)) {
+				gammon.aceyDeucey = true;
+				gammon.movesRemaining.add(1);
+				gammon.movesRemaining.add(2);
+				gammon.movesRemaining.add(3);
+				gammon.movesRemaining.add(4);
+				gammon.movesRemaining.add(5);
+				gammon.movesRemaining.add(6);
+				//drink for doubles
+				gammon.blackDrinks++;
+				gammon.drinkingEvents.add(0, "Red drink for white doubles");
+				updateDrinkEvents("Red Player", "Drink For Doubles");
+			} else {
+				gammon.movesRemaining.add(gammon.whiteDie1);
+				gammon.movesRemaining.add(gammon.whiteDie2);
+				if (gammon.whiteDie1 == gammon.whiteDie2) {
+					gammon.movesRemaining.add(gammon.whiteDie1);
+					gammon.movesRemaining.add(gammon.whiteDie1);
+					//drink for doubles
+					gammon.blackDrinks++;
+					gammon.drinkingEvents.add(0, "Red drink for white doubles");
+					updateDrinkEvents("Red Player", "Drink For Doubles");
+				}
+			}
+		}
+		checkSocial();
+		
+		gammon.buttonState = ButtonState.TURN_FINISHED;
+		updateButtonDisplay();
+	}
+	
+	private void checkSocial() {
+		int roll = 0;
+		if (gammon.blackDie1 == 0 && gammon.blackDie2 == 0) {
+			roll = gammon.whiteDie1 + gammon.whiteDie2;
+		} else if (gammon.whiteDie1 == 0 && gammon.whiteDie2 == 0){
+			roll = gammon.blackDie1 + gammon.blackDie2;
+		} else {
+			roll = gammon.blackDie1 + gammon.whiteDie1;
+		}
+		
+		if ( roll == 10 ||
+				gammon.socials.contains(roll))
+		{
+			gammon.blackDrinks++;
+			gammon.whiteDrinks++;
+			gammon.drinkingEvents.add(0, "Social!!");
+			updateDrinkEvents("Both Players", "Social!!!");
+		} 
+	}
+	
+	private ArrayList<Integer> aceyDeuceyChosen(int adMoveLength, ArrayList<Integer> movesAvailable) {
+		ArrayList<Integer> howWeGotThere = new ArrayList<Integer>();
+		int movesUsed = 0;
+		int acdcNumber = 6;
+		//iterate over all the possible acdc choices starting highest
+		for (; acdcNumber >= 1; acdcNumber--) {
+			int sumOfMoves = 0;
+			howWeGotThere.clear();
+			movesUsed = 0;
+			// maximum of 4 moves
+			while (movesUsed <= 4) {
+				sumOfMoves += acdcNumber;
+				howWeGotThere.add(acdcNumber);
+				movesUsed++;
+				if (sumOfMoves >= adMoveLength) {
+					break;
+				}
+			}
+			if (sumOfMoves == adMoveLength) {
+				break;
+			}
+		}
+		
+		Log.d(TAG, "ACDC number: " + acdcNumber);
+		
+		movesAvailable.clear();		
+		
+		for (int i = 0; i < 4 - movesUsed; i++) {
+			movesAvailable.add(acdcNumber);
+		}
+		
+		return howWeGotThere;
+	}
+	
+	public boolean canMove() {
+		boolean canMove = false;
+		
+		if (gammon.movesRemaining.size() > 0) {
+			Set<Entry<Integer, CheckerContainer>> set = gammon.containers.entrySet();
+			Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
+			while (it.hasNext()) {
+				Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
+				CheckerContainer orig = m.getValue();
+				Vector<BoardPositions> options = getPossibleMoves(orig.getPosition());
+				if (options.size() != 0) {
+					canMove = true;
+					break;
+				}
+			}
+		}
+		
+		return canMove;
+	}
+	
+	private boolean doubles() {
+		boolean rolledDoubles = false;
+		
+		if (gammon.turn == GameColor.WHITE && (gammon.whiteDie1 == gammon.whiteDie2 || gammon.aceyDeucey ||
+				(gammon.whiteDie1 == 2 && gammon.whiteDie2 == 1) ||
+				(gammon.whiteDie1 == 1 && gammon.whiteDie2 == 2) ||
+				(gammon.whiteDie1 == 2 && gammon.blackDie1 == 1) )) {
+			rolledDoubles = true;
+		} else if (gammon.turn == GameColor.BLACK && (gammon.blackDie1 == gammon.blackDie2 || gammon.aceyDeucey ||
+				(gammon.blackDie1 == 2 && gammon.blackDie2 == 1) ||
+				(gammon.blackDie1 == 1 && gammon.blackDie2 == 2) ||
+				(gammon.blackDie1 == 2 && gammon.whiteDie1 == 1) )) {
+			rolledDoubles = true;
+		}
+		else if (gammon.blackDie1 == gammon.whiteDie1 && gammon.blackDie1 != 0){
+			rolledDoubles = true;
+		}
+		
+		return rolledDoubles;
+	}
+	
+	private void updateMovingIn() {
+		if (getBlackBunkerCount() == 0) {
+			gammon.allBlackPiecesOut = true;
+			Log.d(TAG, "Black pulled Freddy");
+		}
+		
+		if (getWhiteBunkerCount() == 0) {
+			gammon.allWhitePiecesOut = true;
+			Log.d(TAG, "White pulled Freddy");
+		}
+		
+		int pieceCount = getWhiteBunkerCount();
+		for (int index = 24; index >= 19; index--) {
+			pieceCount += gammon.containers.get(index).getWhiteCheckerCount();
+		}		
+		if (pieceCount == 15 && gammon.allWhitePiecesOut) {
+			gammon.whiteMovingIn = true;
+		}
+		else {
+			gammon.whiteMovingIn = false;
+		}
+		
+		pieceCount = getBlackBunkerCount();
+		for (int index = 1; index <= 6; index++) {
+			pieceCount += gammon.containers.get(index).getBlackCheckerCount();
+		}		
+		if (pieceCount == 15 && gammon.allBlackPiecesOut) {
+			gammon.blackMovingIn = true;
+		}
+		else {
+			gammon.blackMovingIn = false;
+		}
+	}
+	
+	private void checkForWin() {
+		if (gammon.allWhitePiecesOut && getWhiteBunkerCount() == 15) {
+			gammon.buttonState = ButtonState.WHITE_WON;
+			gammon.movesRemaining.clear();
+			gammon.blackDie1 = 0;
+			gammon.blackDie2 = 0;
+			gammon.whiteDie1 = 0;
+			gammon.whiteDie2 = 0;
+		}
+		else if (gammon.allBlackPiecesOut && getBlackBunkerCount() == 15) {
+			gammon.buttonState = ButtonState.BLACK_WON;
+			gammon.movesRemaining.clear();
+			gammon.blackDie1 = 0;
+			gammon.blackDie2 = 0;
+			gammon.whiteDie1 = 0;
+			gammon.whiteDie2 = 0;
+		}
+		updateButtonDisplay();
+	}
+	
+	public Map<Integer, CheckerContainer> getContainers() {
+		return gammon.containers;
+	}
+
+	public GameColor getTurn() {
+		return gammon.turn;
+	}
+
+	public void setTurn(GameColor turn) {
+		gammon.turn = turn;
+		Log.d(TAG, "Should say turn: " + turn);
+		updateTurnDisplay();
+	}
+
+	public int getWhiteDie1() {
+		return gammon.whiteDie1;
+	}
+
+	public void setWhiteDie1(int whiteDie1) {
+		gammon.whiteDie1 = whiteDie1;
+	}
+
+	public int getWhiteDie2() {
+		return gammon.whiteDie2;
+	}
+
+	public void setWhiteDie2(int whiteDie2) {
+		gammon.whiteDie2 = whiteDie2;
+	}
+
+	public int getBlackDie1() {
+		return gammon.blackDie1;
+	}
+
+	public void setBlackDie1(int blackDie1) {
+		gammon.blackDie1 = blackDie1;
+	}
+
+	public int getBlackDie2() {
+		return gammon.blackDie2;
+	}
+
+	public void setBlackDie2(int blackDie2) {
+		gammon.blackDie2 = blackDie2;
+	}
+
+	public boolean isWhiteMovingIn() {
+		return gammon.whiteMovingIn;
+	}
+
+	public void setWhiteMovingIn(boolean whiteMovingIn) {
+		gammon.whiteMovingIn = whiteMovingIn;
+	}
+
+	public boolean isBlackMovingIn() {
+		return gammon.blackMovingIn;
+	}
+
+	public void setBlackMovingIn(boolean blackMovingIn) {
+		gammon.blackMovingIn = blackMovingIn;
+	}
+
+	public boolean isAllBlackPiecesOut() {
+		return gammon.allBlackPiecesOut;
+	}
+
+	public void setAllBlackPiecesOut(boolean allBlackPiecesOut) {
+		gammon.allBlackPiecesOut = allBlackPiecesOut;
+	}
+
+	public boolean isAllWhitePiecesOut() {
+		return gammon.allWhitePiecesOut;
+	}
+
+	public void setAllWhitePiecesOut(boolean allWhitePiecesOut) {
+		gammon.allWhitePiecesOut = allWhitePiecesOut;
+	}
+	
+	private void updateTurnDisplay(){
+		for (GammonEventHandler listener : handlers) {
+			String turn;
+			if (gammon.turn == GameColor.NEITHER) {
+				turn = "Start Game";
+			} else if (gammon.turn == GameColor.BLACK){
+				turn = "Red Turn";
+			} else {
+				turn = "White Turn";
+			}
+			listener.onDataChange("turn", turn.toString());
+		}
+	}
+	
+	private void updateButtonDisplay(){
+		for (GammonEventHandler listener : handlers) {
+			listener.onDataChange("button", gammon.buttonState.getText());
+		}
+	}
+	
+	private void updateUndoEnabled(){
+		for (GammonEventHandler listener : handlers) {
+			boolean undoEnabled = (gammon.savedStatesCount > 0);
+			listener.onUndoChange(undoEnabled);
+		}
+	}
+	
+	private void updateDrinkEvents(String player, String toastMessage) {
+		for (GammonEventHandler listener : handlers) {
+			listener.onMoreDrinks(player, toastMessage);
+		}
+	}
+	
+	private void rollForNumbers() {
+		if (gammon.blackNumber == 0) {
+			gammon.blackDie1 = rollDie();
+			gammon.blackDie2 = rollDie();
+			while (gammon.blackDie1 + gammon.blackDie2 == 3) {
+				gammon.blackDie1 = rollDie();
+				gammon.blackDie2 = rollDie();
+			}
+		}
+		
+		if (gammon.whiteNumber == 0){
+			gammon.whiteDie1 = rollDie();
+			gammon.whiteDie2 = rollDie();
+			while (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
+				gammon.whiteDie1 = rollDie();
+				gammon.whiteDie2 = rollDie();
+			}
+		}
+		
+		if (gammon.blackDie1 + gammon.blackDie2 == gammon.whiteDie1 + gammon.whiteDie2) {
+			int social = gammon.blackDie1 + gammon.blackDie2;
+			//no need to add it twice
+			if (false == gammon.socials.contains(social)) {
+				gammon.socials.add(gammon.blackDie1 + gammon.blackDie2);
+				updateDrinkEvents("Bam", social + " is now a social");
+				gammon.drinkingEvents.add(0, social + " is now a social");
+			}
+		}
+		else {
+			if (gammon.whiteNumber == 0) {
+				gammon.whiteNumber = gammon.whiteDie1 + gammon.whiteDie2;
+				gammon.drinkingEvents.add(0, "White number is " + gammon.whiteNumber);
+			}
+			
+			if (gammon.blackNumber == 0) {
+				gammon.blackNumber = gammon.blackDie1 + gammon.blackDie2;
+				gammon.drinkingEvents.add(0, "Red number is " + gammon.blackNumber);
+			}
+			
+			gammon.buttonState = ButtonState.ROLL_FOR_TURN;
+			updateButtonDisplay();
+		}
+	}
+	
+	public int getBlackNumber() {
+		return gammon.blackNumber;
+	}
+	
+	public int getWhiteNumber() {
+		return gammon.whiteNumber;
+	}
+	
+	public void setNumbers(int whiteNumber, int blackNumber) {
+		if (gammon.whiteNumber != whiteNumber) {
+			gammon.whiteNumber = whiteNumber;
+			gammon.drinkingEvents.add(0, "White number is " + gammon.whiteNumber);
+		}
+		
+		if (gammon.blackNumber != blackNumber) {
+			gammon.blackNumber = blackNumber;
+			gammon.drinkingEvents.add(0, "Red number is " + gammon.blackNumber);
+		}
+	}
+	
+	public ButtonState getButtonState(){
+		return gammon.buttonState;
+	}
+}
+
+

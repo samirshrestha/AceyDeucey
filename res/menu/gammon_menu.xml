@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/new_game"
+          android:title="@string/new_game"
+          android:showAsAction="never|withText"/>
+    <item android:id="@+id/advanced_mode"
+          android:title="@string/advanced_mode" 
+          android:checkable = "true" android:checked="false"
+          android:showAsAction="never|withText"
+          android:visible="false"
+          android:enabled="false"/>
+    <item android:id="@+id/directions"
+          android:title="@string/directions_button"
+          android:showAsAction="never|withText"/>
+</menu>

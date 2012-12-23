@@ -1,0 +1,74 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        > 
+	<ImageView 
+		android:src = "@drawable/bartop"
+		android:contentDescription="@string/gammon_table"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"		
+        android:scaleType="centerCrop"
+		/>   
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <RelativeLayout
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/game_panel"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal" >
+	    
+        <FrameLayout android:id="@+id/adLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+	        <ImageView android:id="@+id/image"
+	            android:layout_width="wrap_content"
+				android:contentDescription="@string/gammon_table"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/ad_filler" />
+	        <com.google.ads.AdView
+		        xmlns:googleads="http://schemas.android.com/apk/lib/com.google.ads"
+		        android:id="@+id/ad"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        googleads:adSize="BANNER"
+		        googleads:adUnitId="@string/admob_id"/>
+    	</FrameLayout>
+	    
+	  
+	    <Button 
+	        android:id="@+id/undo_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentRight="true"
+	        android:text="@string/undo_button"/>	    
+
+	    <Button
+	        android:id="@+id/action_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_toLeftOf="@id/undo_button"
+	        android:gravity="center"/>
+	    
+	</RelativeLayout>
+	
+     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+		android:orientation="vertical" >
+    
+
+		<com.RotN.aceydeucey.GammonBoard
+			android:id="@+id/gammonBoard"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_gravity="center"
+		/>	
+	</LinearLayout>
+
+</LinearLayout>
+</FrameLayout>

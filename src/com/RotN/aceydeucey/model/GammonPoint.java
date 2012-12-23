@@ -1,0 +1,457 @@
+package com.RotN.aceydeucey.model;
+
+import com.RotN.aceydeucey.logic.CheckerContainer;
+import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.util.SparseArray;
+
+public class GammonPoint {
+	//private static final String TAG = GammonPoint.class.getSimpleName();
+
+	private boolean isSelected; 
+	private boolean isPossibleMove;
+	private boolean isHovering;
+	private Rect pointRect;
+	private CheckerContainer.BoardPositions pointPos;
+	
+	public GammonPoint(CheckerContainer.BoardPositions pointPos, Rect boardRect) {
+		this.isSelected = false;
+		this.isPossibleMove = false;
+		this.pointPos = pointPos;
+		this.isHovering = false;
+		
+		SetPointRect(boardRect);
+	}	
+
+	public CheckerContainer.BoardPositions getPointPos() {
+		return pointPos;
+	}
+	
+	public boolean wasTouched(float eventX, float eventY) {
+		boolean wasTouched = false;
+		
+		int leftCheck = pointRect.left;
+		int rightCheck = pointRect.right;
+		int topCheck = pointRect.top;
+		int bottomCheck = pointRect.bottom;
+	
+		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+			if (eventY >= topCheck && (eventY <= bottomCheck)) {
+				wasTouched = true;
+			}
+		}
+		
+		return wasTouched;
+	}
+	
+	public void setSelected(boolean selected) {
+		isSelected = selected;
+	}
+	
+	public void setPossibleMove(boolean possibleMove) {
+		this.isPossibleMove = possibleMove;
+	}
+	
+	// the draw method which draws the corresponding frame
+	public void draw(Canvas canvas, SparseArray<Bitmap> pieceBitmaps, CheckerContainer pointData) {	
+		
+		int pointWidth = pointRect.right - pointRect.left;
+		int bitmapWidth = pieceBitmaps.get(1).getWidth();
+		
+		int left = pointRect.left + (pointWidth - bitmapWidth) / 2;
+
+		int count = 0;
+		if (pointData.getBlackCheckerCount() > 0) {
+			count = pointData.getBlackCheckerCount();
+		} else {
+			count = pointData.getWhiteCheckerCount();
+		}
+		
+		if (isSelected) {
+			count--;
+		}
+		
+		if (pointPos == BoardPositions.POINT_13 ||
+				pointPos == BoardPositions.POINT_14 ||
+				pointPos == BoardPositions.POINT_15 ||
+				pointPos == BoardPositions.POINT_16 ||
+				pointPos == BoardPositions.POINT_17 ||
+				pointPos == BoardPositions.POINT_18 ||
+				pointPos == BoardPositions.POINT_19 ||
+				pointPos == BoardPositions.POINT_20 ||
+				pointPos == BoardPositions.POINT_21 ||
+				pointPos == BoardPositions.POINT_22 ||
+				pointPos == BoardPositions.POINT_23 ||
+				pointPos == BoardPositions.POINT_24) {
+			int startPos = pointRect.top;
+			
+			//first piece
+			if (count >= 11) { //requires 3 initial pieces
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(3).getHeight();
+			} else if (count >= 6){
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(2).getHeight();
+			}
+			else if (count > 0){
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(1).getHeight();
+			}
+			
+			//second piece
+			if (count >= 12) { //requires 3 second pieces
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(3).getHeight();
+			} else if (count >= 7){
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(2).getHeight();
+			}
+			else if (count > 1){
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(1).getHeight();
+			}
+			
+			//third piece
+			if (count >= 13) { //requires 3 third pieces
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(3).getHeight();
+			} else if (count >= 8){
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(2).getHeight();
+			}
+			else if (count > 2){
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(1).getHeight();
+			}
+			
+			//fourth piece
+			if (count >= 14) { //requires 3 fourth pieces
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(3).getHeight();
+			} else if (count >= 9){
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(2).getHeight();
+			}
+			else if (count > 3){
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(1).getHeight();
+			}
+			
+			//fifth piece
+			if (count == 15) { 
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(3).getHeight();
+			} else if (count >= 10){
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(2).getHeight();
+			}
+			else if (count > 4){
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+				startPos = startPos + pieceBitmaps.get(1).getHeight();
+			}
+		}
+		else {
+			int startPos = pointRect.bottom;
+			
+			//first piece
+			if (count >= 11) { //requires 3 initial pieces
+				startPos = startPos - pieceBitmaps.get(3).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+			} else if (count >= 6){
+				startPos = startPos - pieceBitmaps.get(2).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+			}
+			else if (count > 0){
+				startPos = startPos - pieceBitmaps.get(1).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+			}
+			
+			//second piece
+			if (count >= 12) { //requires 3 second pieces
+				startPos = startPos - pieceBitmaps.get(3).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+			} else if (count >= 7){
+				startPos = startPos - pieceBitmaps.get(2).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+			}
+			else if (count > 1){
+				startPos = startPos - pieceBitmaps.get(1).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+			}
+			
+			//third piece
+			if (count >= 13) { //requires 3 third pieces
+				startPos = startPos - pieceBitmaps.get(3).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+			} else if (count >= 8){
+				startPos = startPos - pieceBitmaps.get(2).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+			}
+			else if (count > 2){
+				startPos = startPos - pieceBitmaps.get(1).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+			}
+			
+			//fourth piece
+			if (count >= 14) { //requires 3 fourth pieces
+				startPos = startPos - pieceBitmaps.get(3).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+			} else if (count >= 9){
+				startPos = startPos - pieceBitmaps.get(2).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+			}
+			else if (count > 3){
+				startPos = startPos - pieceBitmaps.get(1).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+			}
+			
+			//fifth piece
+			if (count == 15) { 
+				startPos = startPos - pieceBitmaps.get(3).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(3), left, startPos, null);
+			} else if (count >= 10){
+				startPos = startPos - pieceBitmaps.get(2).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(2), left, startPos, null);
+			}
+			else if (count > 4){
+				startPos = startPos - pieceBitmaps.get(1).getHeight();
+				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
+			}
+		}
+		
+		drawTriangleShading(canvas);			
+	}
+	
+	private void SetPointRect(Rect boardRect) //pass in the board rect
+	{
+		int left = 0, top = 0, right = 0, bottom = 0;
+		switch (pointPos) {
+		case POINT_1:
+			left = (int)(boardRect.width() * .1044);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .1649);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_10:
+			left = (int)(boardRect.width() * .7128);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .7714);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_11:
+			left = (int)(boardRect.width() * .7714);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .8339);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_12:
+			left = (int)(boardRect.width() * .8339);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .8955);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_13:
+			left = (int)(boardRect.width() * .8339);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .8955);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_14:
+			left = (int)(boardRect.width() * .7714);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .8339);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_15:
+			left = (int)(boardRect.width() * .7128);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .7714);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_16:
+			left = (int)(boardRect.width() * .6523);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .7128);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_17:
+			left = (int)(boardRect.width() * .5907);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .6523);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_18:
+			left = (int)(boardRect.width() * .5302);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .5908);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_19:
+			left = (int)(boardRect.width() * .4072);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .4677);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_2:
+			left = (int)(boardRect.width() * .1650);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .2265);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_20:
+			left = (int)(boardRect.width() * .3466);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .4072);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_21:
+			left = (int)(boardRect.width() * .2861);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .3466);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_22:
+			left = (int)(boardRect.width() * .2265);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .2861);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_23:
+			left = (int)(boardRect.width() * .165);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .223);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_24:
+			left = (int)(boardRect.width() * .107);
+			top = (int)(boardRect.height() * .04);
+			right = (int)(boardRect.width() * .165);
+			bottom = (int)(boardRect.height() * .42);
+			break;
+		case POINT_3:
+			left = (int)(boardRect.width() * .2265);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .2861);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_4:
+			left = (int)(boardRect.width() * .2861);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .3466);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_5:
+			left = (int)(boardRect.width() * .3466);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .4072);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_6:
+			left = (int)(boardRect.width() * .4072);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .4677);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_7:
+			left = (int)(boardRect.width() * .5302);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .5908);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_8:
+			left = (int)(boardRect.width() * .5907);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .6523);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		case POINT_9:
+			left = (int)(boardRect.width() * .6523);
+			top = (int)(boardRect.height() * .58);
+			right = (int)(boardRect.width() * .7128);
+			bottom = (int)(boardRect.height() * .96);
+			break;
+		default:
+			break; 
+		}		
+
+		pointRect = new Rect(left, top, right, bottom);			
+	}
+	
+	private void drawTriangleShading(Canvas canvas) {
+		if (this.isPossibleMove || this.isSelected || this.isHovering) {
+			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			if (this.isSelected) {				
+				paint.setARGB(200, 255, 255, 255);
+			}
+			else if (this.isPossibleMove){
+				int transparent = 200;
+				if (this.isHovering) {
+					transparent = 225;
+				}
+				paint.setARGB(transparent, 0, 0, 255);
+			}		
+			else {
+				paint.setARGB(100, 255, 255, 255);
+			}
+	
+		    paint.setStrokeWidth(2);   
+		    paint.setStyle(Paint.Style.FILL_AND_STROKE);
+		    paint.setAntiAlias(true);
+	
+		    Point point1_draw = new Point();        
+		    Point point2_draw = new Point();    
+		    Point point3_draw = new Point();
+		    
+		    //determine the direction the triangle goes
+		    if (pointPos == BoardPositions.POINT_13 ||
+					pointPos == BoardPositions.POINT_14 ||
+					pointPos == BoardPositions.POINT_15 ||
+					pointPos == BoardPositions.POINT_16 ||
+					pointPos == BoardPositions.POINT_17 ||
+					pointPos == BoardPositions.POINT_18 ||
+					pointPos == BoardPositions.POINT_19 ||
+					pointPos == BoardPositions.POINT_20 ||
+					pointPos == BoardPositions.POINT_21 ||
+					pointPos == BoardPositions.POINT_22 ||
+					pointPos == BoardPositions.POINT_23 ||
+					pointPos == BoardPositions.POINT_24)
+		    {
+		    	point1_draw.x = pointRect.left;
+		    	point1_draw.y = pointRect.top;
+		    	point2_draw.x = pointRect.right;
+		    	point2_draw.y = pointRect.top;
+		    	point3_draw.x = (pointRect.left + pointRect.right) / 2;
+		    	point3_draw.y = pointRect.bottom;
+		    }
+		    else
+		    {
+		    	point1_draw.x = pointRect.left;
+		    	point1_draw.y = pointRect.bottom;
+		    	point2_draw.x = pointRect.right;
+		    	point2_draw.y = pointRect.bottom;
+		    	point3_draw.x = (pointRect.left + pointRect.right) / 2;
+		    	point3_draw.y = pointRect.top;
+		    }
+	
+		    Path path = new Path();
+		    path.setFillType(Path.FillType.EVEN_ODD);
+		    path.moveTo(point1_draw.x,point1_draw.y);
+		    path.lineTo(point2_draw.x,point2_draw.y);
+		    path.lineTo(point3_draw.x,point3_draw.y);
+		    path.lineTo(point1_draw.x,point1_draw.y);
+		    path.close();
+	
+		    canvas.drawPath(path, paint);
+		}
+	}
+
+	public void setHovering(boolean isHovering) {
+		this.isHovering = isHovering;
+	}
+}

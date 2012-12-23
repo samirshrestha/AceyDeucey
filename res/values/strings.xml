@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AceyDeucey</string>
+    <string name="title_activity_main">AceyDeucey</string>
+    <string name="new_game">New Game</string>
+    <string name="advanced_mode">Advanced Mode</string>
+    <string name="roll">Roll Dice</string>
+    <string name="undo_button">Undo</string>
+    <string name="white_drinks">White Drinks</string>
+    <string name="black_drinks">Black Drinks</string>
+    <string name="white_player">White Player</string>
+    <string name="black_player">Black Player</string>
+    <string name="title_activity_own_number">Choose Your Number</string>
+    <string name="choose_numbers">Choose New Numbers</string>
+    <string name="admob_id">a150d2602e1c3e9</string>
+    <string name="gammon_table">Our table for playing Gammon</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_directions">Directions</string>
+    <string name="rules">AceyDeucey Rules</string>
+    <string name="directions_button">Directions</string>
+    <string name="object_label">Object</string>
+    <string name="acdc_label">Acey-deucey</string>
+    <string name="acdc1">The roll of 1 and 2 (acey-deucey) is especially valuable. When you roll 1-2, you name any roll of doubles you wish and play it accordingly.</string>
+    <string name="doubles_label">Doubles</string>
+    <string name="doubles_move">After taking your 4 moves with doubles, the player rolls again.</string>
+    <string name="pokeying_label">Pokeying</string>
+    <string name="pokeying_move">A checker sitting alone on a point is called a blot. If an opposing checker lands on a blot, the blot is hit and placed on pokey.</string>
+    <string name="getting_off_label">Getting Off Pokey</string>
+    <string name="getting_off_move">Any time you have one or more checkers on pokey, you have to reenter them on the board before moving any other pieces. You reenter a checker by rolling doubles and moving it to an open point corresponding to one of the numbers on the rolled dice.</string>
+    <string name="bearing_off_label">Bearing Off/Moving In</string>
+    <string name="bearing_off_move">Once you have moved all fifteen of your checkers into your opponent\'s home board, you may begin bearing off. You bear off a checker by rolling a number that corresponds to the point on which it resides, then removing the checker from the board.</string>
+    <string name="scoring_label">Scoring</string>
+    <string name="scoring_description">The loser drinks one for each of his checkers still on the board (or yet to be entered). Gammons and backgammons do not count extra.</string>
+
+</resources>
