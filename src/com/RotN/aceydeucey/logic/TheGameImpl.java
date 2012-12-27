@@ -382,10 +382,12 @@ public class TheGameImpl {
 	}
 	
 	private void checkBlackBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
-		//first see if you can move straight in. otherwise move inside the home quadrant
-		if (moveIndex == CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex() && gammon.blackMovingIn)
-		{
-			moves.add(BoardPositions.BLACK_BUNKER);
+		// do we even need to check?
+		if (gammon.blackMovingIn) {
+			if (movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
+				moves.add(BoardPositions.BLACK_BUNKER);
+			}
+			// TODO add moving in the last quadrant code
 		}
 	}
 	
