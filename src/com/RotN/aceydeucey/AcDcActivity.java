@@ -14,20 +14,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler, AdListener{
 
@@ -154,43 +148,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         }
 	}
 
-	@Override
-	public void onMoreDrinks(String player, String toastMessage) {
-		// get your custom_toast.xml layout
-		LayoutInflater inflater = getLayoutInflater();
-
-		View layout = inflater.inflate(R.layout.custom_toast,
-		  (ViewGroup) findViewById(R.id.custom_toast_layout_id));
-		
-		TextView toastPlayer = (TextView) layout.findViewById(R.id.toast_player);
-		toastPlayer.setText(player);
-
-		// set a message
-		TextView text = (TextView) layout.findViewById(R.id.toast_message);
-		text.setText(toastMessage);
-		
-		if (player == "Red Player") {
-			layout.setBackgroundColor(0x96FF0000);
-			toastPlayer.setTextColor(0x96FFFFFF);
-			text.setTextColor(0x96FFFFFF);
-		}
-		else {
-			layout.setBackgroundColor(0x96FFFFFF);
-			toastPlayer.setTextColor(0x96000000);
-			text.setTextColor(0x96000000);
-		}
-		
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-		// Toast...
-		Toast toast = new Toast(getApplicationContext());
-		toast.setGravity(Gravity.CENTER_VERTICAL, 0, -60);
-		toast.setView(layout);
-		toast.setDuration(Toast.LENGTH_SHORT);
-		toast.show();	
-	}
-	
 	private void closeItDown() {
 		board.saveGame();
 		beerGammon.removeListener(this);

@@ -24,7 +24,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -37,7 +36,7 @@ public class GammonBoard extends SurfaceView implements
 SurfaceHolder.Callback {
 	
 	//private Piece piece;
-	private Bitmap scaledBoard;
+	private Bitmap board;	
 	private Bunker blackBunker;
 	private Bunker whiteBunker;
 	private Pokey pokey;
@@ -91,33 +90,27 @@ SurfaceHolder.Callback {
 	}
 	
 	private void buildOurSurface() {
-		Bitmap background = decodeSampledBitmapFromResource(getResources(), R.drawable.background, getWidth(), getHeight());
-				
+						
 		selectedPosition = BoardPositions.NONE;
 		
 		//determine the scale we're working with
 		BitmapFactory.Options options = getImageOutSize(getResources(), R.drawable.background);
-		float scale = (float)background.getHeight()/(float)getHeight();
-		//scale our board
-		int newWidth = Math.round(background.getWidth()/scale);
-		int newHeight = Math.round(background.getHeight()/scale);
-		scaledBoard = Bitmap.createScaledBitmap(background, newWidth, newHeight, true);
-		scale = (float) options.outHeight/ (float) getHeight();
+		float scale = (float) options.outHeight/ (float) getHeight();
 		createPieceBitmapArray(scale);
-		createBoardPoints(newWidth, newHeight);
+		createBoardPoints(getWidth(), getHeight());
 		dice = new Dice(createDiceBitmapArray(scale));
-		Rect boardRect = new Rect(0,0, newWidth, newHeight);
+		Rect boardRect = new Rect(0,0, getWidth(), getHeight());
 		
 		//create the bunkers
 		options = getImageOutSize(getResources(), R.drawable.red_thin_checker);
-		newWidth = Math.round(options.outWidth/scale);
-		newHeight = Math.round(options.outHeight/scale);
+		int newWidth = Math.round(options.outWidth/scale);
+		int newHeight = Math.round(options.outHeight/scale);
 		Bitmap bitmapBlackBunker = getImageExactSize(getResources(), R.drawable.red_thin_checker, newWidth, newHeight);
 		blackBunker = new Bunker(GameColor.BLACK, bitmapBlackBunker, boardRect);
 		Bitmap bitmapWhiteBunker = getImageExactSize(getResources(), R.drawable.white_thin_checker, newWidth, newHeight);
 		whiteBunker = new Bunker(GameColor.WHITE, bitmapWhiteBunker, boardRect);
 		
-		pokey = new Pokey(new Rect(0, 0, scaledBoard.getWidth(), scaledBoard.getHeight()), pieceBlackBitmaps, pieceWhiteBitmaps);
+		pokey = new Pokey(new Rect(0, 0, getWidth(), getHeight()), pieceBlackBitmaps, pieceWhiteBitmaps);
 		
 		render();		
 	}
@@ -154,6 +147,7 @@ SurfaceHolder.Callback {
 	
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
+		board = decodeSampledBitmapFromResource(getResources(), R.drawable.background, getWidth(), getHeight());
 		buildOurSurface();
 	}
 	
@@ -270,8 +264,7 @@ SurfaceHolder.Callback {
 		pokey.setTurn(beerGammon.getTurn());
 		
 		Canvas canvas = getHolder().lockCanvas();
-		canvas.drawColor(Color.GRAY);
-		canvas.drawBitmap(scaledBoard, 0, 0, null); // draw the background
+		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
 		blackBunker.draw(canvas);
 		whiteBunker.draw(canvas);
 		dice.draw(canvas, beerGammon);
@@ -503,6 +496,8 @@ SurfaceHolder.Callback {
 
 	    // Calculate inSampleSize
 	    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+	    options.inScaled = false;
+	    options.inPreferredConfig = Bitmap.Config.RGB_565;
 
 	    // Decode bitmap with inSampleSize set
 	    options.inJustDecodeBounds = false;

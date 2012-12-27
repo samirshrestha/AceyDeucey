@@ -16,7 +16,7 @@ public class TheGame implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public enum ButtonState {
-		ROLL_FOR_NUMBER("Roll For Numbers"), ROLL_FOR_TURN("Roll For Turn"), ROLL("Roll"), TURN_FINISHED("Turn Finished"), 
+		ROLL_FOR_TURN("Roll For Turn"), ROLL("Roll"), TURN_FINISHED("Turn Finished"), 
 		WHITE_WON("White Won!!!"), BLACK_WON("Red Won!!!");
 		
 		private String buttonText;
@@ -39,12 +39,6 @@ public class TheGame implements Serializable {
 	public ArrayList<Integer> movesRemaining;
 	public boolean whiteMovingIn, blackMovingIn, allBlackPiecesOut, allWhitePiecesOut;
 	public ButtonState buttonState;
-	public int whiteDrinks;
-	public int blackDrinks;
-	public int whiteNumber;
-	public int blackNumber;
-	public ArrayList<String> drinkingEvents = new ArrayList<String>();
-	public ArrayList<Integer> socials = new ArrayList<Integer>();
 	public int savedStatesCount;
 	
 	@SuppressLint("UseSparseArrays")

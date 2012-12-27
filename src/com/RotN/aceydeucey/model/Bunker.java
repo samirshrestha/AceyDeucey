@@ -28,7 +28,7 @@ public class Bunker {
 		this.isPossibleMove = false;
 		this.bitmap = bitmap;
 		bunkerCount = 15;
-		if (bunkerColor == GameColor.BLACK) {
+		if (bunkerColor == GameColor.WHITE) {
 			bunkerRect = new Rect((int)(boardRect.width() * 0.0292), 
 				(int)(boardRect.height() * 0.0390), 
 				(int)(boardRect.width() * 0.0878), 

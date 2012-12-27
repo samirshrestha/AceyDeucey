@@ -41,7 +41,6 @@ public class TheGameImpl {
 	public interface GammonEventHandler{
 		void onDataChange(String key, String value);
 		void onUndoChange(boolean undoEnabled);
-		void onMoreDrinks(String player, String toastMessage);
 	};
 	
 	private List<GammonEventHandler> handlers = new ArrayList<GammonEventHandler>(); 
@@ -85,18 +84,9 @@ public class TheGameImpl {
 		gammon.blackDie2 = 0;
 		gammon.whiteDie1 = 0;
 		gammon.whiteDie2 = 0;
-		
-		gammon.whiteDrinks = 0;
-		gammon.blackDrinks = 0;
-		
-		gammon.whiteNumber = 0;
-		gammon.blackNumber = 0;
-		
-		gammon.socials.clear();
-		gammon.drinkingEvents.clear();
 		gammon.savedStatesCount = 0;
 				
-		gammon.buttonState = ButtonState.ROLL_FOR_NUMBER;
+		gammon.buttonState = ButtonState.ROLL_FOR_TURN;
 		
 		updateButtonDisplay();
 		
@@ -110,55 +100,49 @@ public class TheGameImpl {
 	private void nextTurn() {
 		if (canMove() == false) {
 			
-			if (gammon.movesRemaining.size() > 0) {
-				if (gammon.turn == GameColor.BLACK) {
-					gammon.whiteDrinks += gammon.movesRemaining.size();
-					gammon.drinkingEvents.add(0, "Red drink " + gammon.movesRemaining.size() + " for not moving");
-					updateDrinkEvents("Red Player", "Drink " + gammon.movesRemaining.size() + " for not\n being able to move");
-				} else if (gammon.turn == GameColor.WHITE) {
-					gammon.blackDrinks += gammon.movesRemaining.size();
-					gammon.drinkingEvents.add(0, "White drink " + gammon.movesRemaining.size() + " for not moving");
-					updateDrinkEvents("White Player", "Drink " + gammon.movesRemaining.size() + " for not\n being able to move");
+			//acey deucey rolled
+			if ((gammon.blackDie1 + gammon.blackDie2 == 3 ||
+					gammon.whiteDie1 + gammon.whiteDie2 == 3) &&
+					gammon.movesRemaining.size() == 0) {
+				if (gammon.aceyDeucey) {
+					// we get to roll again
+					gammon.buttonState = ButtonState.ROLL;
+					gammon.aceyDeucey = false;
+					updateButtonDisplay();
+					
+					gammon.blackDie1 = 0;
+					gammon.blackDie2 = 0;
+					gammon.whiteDie1 = 0;
+					gammon.whiteDie2 = 0;
+					return;
+				} else {
+					gammon.aceyDeucey = true;
+					gammon.movesRemaining.add(1);
+					gammon.movesRemaining.add(2);
+					gammon.movesRemaining.add(3);
+					gammon.movesRemaining.add(4);
+					gammon.movesRemaining.add(5);
+					gammon.movesRemaining.add(6);
 				}
-			}
-			gammon.movesRemaining.clear();
-			
-			if (doubles() == true) 
-			{
-				//leave the turn alone and clear out the dice
-			} else if (gammon.turn == GameColor.WHITE) {
-				gammon.turn = GameColor.BLACK;
-			}
-			else if (gammon.turn == GameColor.BLACK) {
-				gammon.turn = GameColor.WHITE;
-			}
-			
-			int roll = 0;
-			if (gammon.blackDie1 == 0 && gammon.blackDie2 == 0) {
-				roll = gammon.whiteDie1 + gammon.whiteDie2;
-			} else if (gammon.whiteDie1 == 0 && gammon.whiteDie2 == 0){
-				roll = gammon.blackDie1 + gammon.blackDie2;
+				gammon.buttonState = ButtonState.ROLL;
 			} else {
-				roll = gammon.blackDie1 + gammon.whiteDie1;
+				gammon.movesRemaining.clear();
+				
+				if (gammon.turn == GameColor.WHITE) {
+					gammon.turn = GameColor.BLACK;
+				}
+				else if (gammon.turn == GameColor.BLACK) {
+					gammon.turn = GameColor.WHITE;
+				}
+				
+				gammon.blackDie1 = 0;
+				gammon.blackDie2 = 0;
+				gammon.whiteDie1 = 0;
+				gammon.whiteDie2 = 0;
+				
+				gammon.buttonState = ButtonState.ROLL;
 			}
 			
-			Log.d(TAG, "Roll Value: " + roll);
-			if (roll == gammon.whiteNumber) {
-				gammon.whiteDrinks++;
-				gammon.drinkingEvents.add(0, "White number was rolled");
-				updateDrinkEvents("White Number", "Was Rolled");
-			} else if (roll == gammon.blackNumber) {
-				gammon.blackDrinks++;
-				gammon.drinkingEvents.add(0, "Red number was rolled");
-				updateDrinkEvents("Red Number", "Was Rolled");
-			}
-			
-			gammon.blackDie1 = 0;
-			gammon.blackDie2 = 0;
-			gammon.whiteDie1 = 0;
-			gammon.whiteDie2 = 0;
-		
-			gammon.buttonState = ButtonState.ROLL;
 			updateButtonDisplay();
 			gammon.savedStatesCount = 0;
 		}
@@ -171,61 +155,22 @@ public class TheGameImpl {
 		gammon.whiteDie1 = 0;
 		gammon.whiteDie2 = 0;
 		gammon.blackDie1 = 0;
-		gammon.blackDie2 = 0;
-		gammon.whiteDie1 = rollDie();
-		gammon.blackDie1 = rollDie();
+		gammon.blackDie2 = 0;		
 		
 		gammon.movesRemaining.clear();
 		
-		Log.d(TAG, "Black: " + gammon.blackDie1 + " White: " + gammon.whiteDie1);
+		while (gammon.whiteDie1 == gammon.blackDie1) {
+			gammon.whiteDie1 = rollDie();
+			gammon.blackDie1 = rollDie();
+		}
 		
-		if ((gammon.whiteDie1 == 2 && gammon.blackDie1 == 1) ||
-				(gammon.blackDie1 == 2 && gammon.whiteDie1 == 1)) {
-			gammon.aceyDeucey = true;
-			gammon.movesRemaining.add(1);
-			gammon.movesRemaining.add(2);
-			gammon.movesRemaining.add(3);
-			gammon.movesRemaining.add(4);
-			gammon.movesRemaining.add(5);
-			gammon.movesRemaining.add(6);
-			if (gammon.whiteDie1 == 2) {
-				gammon.turn = GameColor.WHITE;
-			} else {
-				gammon.turn = GameColor.BLACK;
-			}
-		} else if (gammon.whiteDie1 > gammon.blackDie1) {
+		if (gammon.whiteDie1 > gammon.blackDie1) {
 			gammon.turn = GameColor.WHITE;
-			gammon.movesRemaining.add(gammon.whiteDie1);
-			gammon.movesRemaining.add(gammon.blackDie1);
 		}
 		else if (gammon.blackDie1 > gammon.whiteDie1) {
 			gammon.turn = GameColor.BLACK;
-			gammon.movesRemaining.add(gammon.whiteDie1);
-			gammon.movesRemaining.add(gammon.blackDie1);
 		}
-		else {
-			gammon.blackDie2 = 0;
-			gammon.whiteDie2 = 0;
-			while (gammon.blackDie2 == gammon.whiteDie2) {
-				gammon.whiteDie2 = rollDie();
-				gammon.blackDie2 = rollDie();
-			}
-			
-			if (gammon.whiteDie2 > gammon.blackDie2) {
-				gammon.turn = GameColor.WHITE;
-			}
-			else  {
-				gammon.turn = GameColor.BLACK;
-			}
-			gammon.movesRemaining.add(gammon.whiteDie1);
-			gammon.movesRemaining.add(gammon.whiteDie1);
-			gammon.movesRemaining.add(gammon.whiteDie1);
-			gammon.movesRemaining.add(gammon.whiteDie1);
-		}
-		
-		Log.d(TAG, "Moves Remaining: " + gammon.movesRemaining.size());
-		
-		gammon.buttonState = ButtonState.TURN_FINISHED;
+		gammon.buttonState = ButtonState.ROLL;
 		updateButtonDisplay();
 		updateTurnDisplay();
 	}
@@ -251,10 +196,10 @@ public class TheGameImpl {
 					checkPointMove(pieceLocation, moves, gammon.movesRemaining, gammon.aceyDeucey);
 				}
 			} else if (haveRolled() == true && onPokey() == true && pieceLocation == BoardPositions.POKEY) {
-				if (gammon.turn == GameColor.WHITE && doubles()) {
+				if (gammon.turn == GameColor.WHITE) {
 					checkWhiteBunker(moves);
 				}
-				else if (gammon.turn == GameColor.BLACK && doubles()){
+				else if (gammon.turn == GameColor.BLACK){
 					checkBlackBunker(moves);
 				}
 			}
@@ -362,41 +307,39 @@ public class TheGameImpl {
 		}
 		if (gammon.turn == GameColor.BLACK)
 		{
-			for (int i = 0; i < movesAvailable.size(); i++)
-			{
-				int moveLength = movesAvailable.get(i);
-				BoardPositions destMove = BoardPositions.NONE;
-				CheckerContainer possibleMove;
-				//black pieces go backwards. This moves us this direction from the bunker
-				int moveIndex = pieceLocation.getIndex() - moveLength;
-				
-				//it is in the final quadrant only moves into the bunker are allowed
-				if (pieceLocation.getIndex() <= 6) {
-					if (moveIndex == CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex() && gammon.blackMovingIn)
-					{
-						moves.add(BoardPositions.BLACK_BUNKER);
-					}
-				}					
-				else if (moveIndex > CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex())
+			//it is in the final quadrant only moves into the bunker are allowed
+			if (pieceLocation.getIndex() <= 6) {
+				checkBlackBearingOff(pieceLocation, moves, movesAvailable);
+			} else {
+				for (int i = 0; i < movesAvailable.size(); i++)
 				{
-					possibleMove = gammon.containers.get(moveIndex);
-				
-					if (false == (possibleMove.getWhiteCheckerCount() > 1) )
+					int moveLength = movesAvailable.get(i);
+					BoardPositions destMove = BoardPositions.NONE;
+					CheckerContainer possibleMove;
+					//black pieces go backwards. This moves us this direction from the bunker
+					int moveIndex = pieceLocation.getIndex() - moveLength;
+					
+					if (moveIndex > CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex())
 					{
-						destMove = gammon.containers.get(moveIndex).getPosition();
-						moves.add(destMove);
+						possibleMove = gammon.containers.get(moveIndex);
+					
+						if (false == (possibleMove.getWhiteCheckerCount() > 1) )
+						{
+							destMove = gammon.containers.get(moveIndex).getPosition();
+							moves.add(destMove);
+						}
+					}
+					
+					if (destMove != BoardPositions.NONE) {
+						if (acdc) {
+							aceyDeuceyChosen(moveLength, newMovesAvailable);
+						} else if (newMovesAvailable.contains(moveLength)) {						
+							newMovesAvailable.remove((Object)moveLength);
+						}
+						checkPointMove(destMove, moves, newMovesAvailable, false);
 					}
 				}
-				
-				if (destMove != BoardPositions.NONE) {
-					if (acdc) {
-						aceyDeuceyChosen(moveLength, newMovesAvailable);
-					} else if (newMovesAvailable.contains(moveLength)) {						
-						newMovesAvailable.remove((Object)moveLength);
-					}
-					checkPointMove(destMove, moves, newMovesAvailable, false);
-				}
-			}			
+			}
 		}
 		else if (gammon.turn == GameColor.WHITE)
 		{
@@ -435,6 +378,14 @@ public class TheGameImpl {
 					checkPointMove(destMove, moves, newMovesAvailable, false);
 				}				
 			}
+		}
+	}
+	
+	private void checkBlackBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
+		//first see if you can move straight in. otherwise move inside the home quadrant
+		if (moveIndex == CheckerContainer.BoardPositions.WHITE_BUNKER.getIndex() && gammon.blackMovingIn)
+		{
+			moves.add(BoardPositions.BLACK_BUNKER);
 		}
 	}
 	
@@ -684,9 +635,6 @@ public class TheGameImpl {
 		case TURN_FINISHED:
 			nextTurn();
 			break;
-		case ROLL_FOR_NUMBER:
-			rollForNumbers();
-			break;
 		default:
 			initializeGame();
 			break;
@@ -716,6 +664,10 @@ public class TheGameImpl {
 	}
 	
 	private void roll() {
+		gammon.whiteDie1 = 0;
+		gammon.whiteDie2 = 0;
+		gammon.blackDie1 = 0;
+		gammon.blackDie2 = 0;
 		if (gammon.turn == GameColor.BLACK) {
 			gammon.blackDie1 = rollDie();
 			gammon.blackDie2 = rollDie();
@@ -724,31 +676,11 @@ public class TheGameImpl {
 			//gammon.blackDie1 = 6;
 			//gammon.blackDie2 = 6;
 			
-			if ((gammon.blackDie1 == 1 && gammon.blackDie2 == 2) ||
-					(gammon.blackDie1 == 2 && gammon.blackDie2 == 1)) {
-				gammon.aceyDeucey = true;
-				gammon.movesRemaining.add(1);
-				gammon.movesRemaining.add(2);
-				gammon.movesRemaining.add(3);
-				gammon.movesRemaining.add(4);
-				gammon.movesRemaining.add(5);
-				gammon.movesRemaining.add(6);
-				
-				//drink for doubles
-				gammon.whiteDrinks++;
-				gammon.drinkingEvents.add(0, "White drink for black doubles");
-				updateDrinkEvents("White Player", "Drink For Doubles");
-			} else {
+			gammon.movesRemaining.add(gammon.blackDie1);
+			gammon.movesRemaining.add(gammon.blackDie2);
+			if (gammon.blackDie1 == gammon.blackDie2) {
 				gammon.movesRemaining.add(gammon.blackDie1);
-				gammon.movesRemaining.add(gammon.blackDie2);
-				if (gammon.blackDie1 == gammon.blackDie2) {
-					gammon.movesRemaining.add(gammon.blackDie1);
-					gammon.movesRemaining.add(gammon.blackDie1);
-					//drink for doubles
-					gammon.whiteDrinks++;
-					updateDrinkEvents("White Player", "Drink For Doubles");
-					gammon.drinkingEvents.add(0, "White drink for black doubles");
-				}
+				gammon.movesRemaining.add(gammon.blackDie1);
 			}
 		} else {
 			gammon.whiteDie1 = rollDie();
@@ -767,47 +699,17 @@ public class TheGameImpl {
 				gammon.movesRemaining.add(4);
 				gammon.movesRemaining.add(5);
 				gammon.movesRemaining.add(6);
-				//drink for doubles
-				gammon.blackDrinks++;
-				gammon.drinkingEvents.add(0, "Red drink for white doubles");
-				updateDrinkEvents("Red Player", "Drink For Doubles");
 			} else {
 				gammon.movesRemaining.add(gammon.whiteDie1);
 				gammon.movesRemaining.add(gammon.whiteDie2);
 				if (gammon.whiteDie1 == gammon.whiteDie2) {
 					gammon.movesRemaining.add(gammon.whiteDie1);
 					gammon.movesRemaining.add(gammon.whiteDie1);
-					//drink for doubles
-					gammon.blackDrinks++;
-					gammon.drinkingEvents.add(0, "Red drink for white doubles");
-					updateDrinkEvents("Red Player", "Drink For Doubles");
 				}
 			}
 		}
-		checkSocial();
-		
 		gammon.buttonState = ButtonState.TURN_FINISHED;
 		updateButtonDisplay();
-	}
-	
-	private void checkSocial() {
-		int roll = 0;
-		if (gammon.blackDie1 == 0 && gammon.blackDie2 == 0) {
-			roll = gammon.whiteDie1 + gammon.whiteDie2;
-		} else if (gammon.whiteDie1 == 0 && gammon.whiteDie2 == 0){
-			roll = gammon.blackDie1 + gammon.blackDie2;
-		} else {
-			roll = gammon.blackDie1 + gammon.whiteDie1;
-		}
-		
-		if ( roll == 10 ||
-				gammon.socials.contains(roll))
-		{
-			gammon.blackDrinks++;
-			gammon.whiteDrinks++;
-			gammon.drinkingEvents.add(0, "Social!!");
-			updateDrinkEvents("Both Players", "Social!!!");
-		} 
 	}
 	
 	private ArrayList<Integer> aceyDeuceyChosen(int adMoveLength, ArrayList<Integer> movesAvailable) {
@@ -862,27 +764,6 @@ public class TheGameImpl {
 		}
 		
 		return canMove;
-	}
-	
-	private boolean doubles() {
-		boolean rolledDoubles = false;
-		
-		if (gammon.turn == GameColor.WHITE && (gammon.whiteDie1 == gammon.whiteDie2 || gammon.aceyDeucey ||
-				(gammon.whiteDie1 == 2 && gammon.whiteDie2 == 1) ||
-				(gammon.whiteDie1 == 1 && gammon.whiteDie2 == 2) ||
-				(gammon.whiteDie1 == 2 && gammon.blackDie1 == 1) )) {
-			rolledDoubles = true;
-		} else if (gammon.turn == GameColor.BLACK && (gammon.blackDie1 == gammon.blackDie2 || gammon.aceyDeucey ||
-				(gammon.blackDie1 == 2 && gammon.blackDie2 == 1) ||
-				(gammon.blackDie1 == 1 && gammon.blackDie2 == 2) ||
-				(gammon.blackDie1 == 2 && gammon.whiteDie1 == 1) )) {
-			rolledDoubles = true;
-		}
-		else if (gammon.blackDie1 == gammon.whiteDie1 && gammon.blackDie1 != 0){
-			rolledDoubles = true;
-		}
-		
-		return rolledDoubles;
 	}
 	
 	private void updateMovingIn() {
@@ -1042,77 +923,7 @@ public class TheGameImpl {
 			boolean undoEnabled = (gammon.savedStatesCount > 0);
 			listener.onUndoChange(undoEnabled);
 		}
-	}
-	
-	private void updateDrinkEvents(String player, String toastMessage) {
-		for (GammonEventHandler listener : handlers) {
-			listener.onMoreDrinks(player, toastMessage);
-		}
-	}
-	
-	private void rollForNumbers() {
-		if (gammon.blackNumber == 0) {
-			gammon.blackDie1 = rollDie();
-			gammon.blackDie2 = rollDie();
-			while (gammon.blackDie1 + gammon.blackDie2 == 3) {
-				gammon.blackDie1 = rollDie();
-				gammon.blackDie2 = rollDie();
-			}
-		}
-		
-		if (gammon.whiteNumber == 0){
-			gammon.whiteDie1 = rollDie();
-			gammon.whiteDie2 = rollDie();
-			while (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
-				gammon.whiteDie1 = rollDie();
-				gammon.whiteDie2 = rollDie();
-			}
-		}
-		
-		if (gammon.blackDie1 + gammon.blackDie2 == gammon.whiteDie1 + gammon.whiteDie2) {
-			int social = gammon.blackDie1 + gammon.blackDie2;
-			//no need to add it twice
-			if (false == gammon.socials.contains(social)) {
-				gammon.socials.add(gammon.blackDie1 + gammon.blackDie2);
-				updateDrinkEvents("Bam", social + " is now a social");
-				gammon.drinkingEvents.add(0, social + " is now a social");
-			}
-		}
-		else {
-			if (gammon.whiteNumber == 0) {
-				gammon.whiteNumber = gammon.whiteDie1 + gammon.whiteDie2;
-				gammon.drinkingEvents.add(0, "White number is " + gammon.whiteNumber);
-			}
-			
-			if (gammon.blackNumber == 0) {
-				gammon.blackNumber = gammon.blackDie1 + gammon.blackDie2;
-				gammon.drinkingEvents.add(0, "Red number is " + gammon.blackNumber);
-			}
-			
-			gammon.buttonState = ButtonState.ROLL_FOR_TURN;
-			updateButtonDisplay();
-		}
-	}
-	
-	public int getBlackNumber() {
-		return gammon.blackNumber;
-	}
-	
-	public int getWhiteNumber() {
-		return gammon.whiteNumber;
-	}
-	
-	public void setNumbers(int whiteNumber, int blackNumber) {
-		if (gammon.whiteNumber != whiteNumber) {
-			gammon.whiteNumber = whiteNumber;
-			gammon.drinkingEvents.add(0, "White number is " + gammon.whiteNumber);
-		}
-		
-		if (gammon.blackNumber != blackNumber) {
-			gammon.blackNumber = blackNumber;
-			gammon.drinkingEvents.add(0, "Red number is " + gammon.blackNumber);
-		}
-	}
+	}	
 	
 	public ButtonState getButtonState(){
 		return gammon.buttonState;
