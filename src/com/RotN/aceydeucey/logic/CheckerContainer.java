@@ -16,7 +16,7 @@ public class CheckerContainer implements Cloneable, Serializable{
 	}
 	
 	public enum BoardPositions {
-		NONE(-1), WHITE_BUNKER(25), BLACK_BUNKER(0), POKEY(27), POINT_1(1), POINT_2(2), POINT_3(3),
+		NONE(-1), WHITE_BUNKER(0), BLACK_BUNKER(25), POKEY(27), POINT_1(1), POINT_2(2), POINT_3(3),
 		POINT_4(4), POINT_5(5), POINT_6(6), POINT_7(7), POINT_8(8), POINT_9(9), POINT_10(10),
 		POINT_11(11), POINT_12(12), POINT_13(13), POINT_14(14), POINT_15(15), POINT_16(16), 
 		POINT_17(17), POINT_18(18), POINT_19(19), POINT_20(20), POINT_21(21), POINT_22(22),

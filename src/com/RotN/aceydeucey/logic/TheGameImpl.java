@@ -104,27 +104,7 @@ public class TheGameImpl {
 			if ((gammon.blackDie1 + gammon.blackDie2 == 3 ||
 					gammon.whiteDie1 + gammon.whiteDie2 == 3) &&
 					gammon.movesRemaining.size() == 0) {
-				if (gammon.aceyDeucey) {
-					// we get to roll again
-					gammon.buttonState = ButtonState.ROLL;
-					gammon.aceyDeucey = false;
-					updateButtonDisplay();
-					
-					gammon.blackDie1 = 0;
-					gammon.blackDie2 = 0;
-					gammon.whiteDie1 = 0;
-					gammon.whiteDie2 = 0;
-					return;
-				} else {
-					gammon.aceyDeucey = true;
-					gammon.movesRemaining.add(1);
-					gammon.movesRemaining.add(2);
-					gammon.movesRemaining.add(3);
-					gammon.movesRemaining.add(4);
-					gammon.movesRemaining.add(5);
-					gammon.movesRemaining.add(6);
-				}
-				gammon.buttonState = ButtonState.ROLL;
+				// we get to roll again
 			} else {
 				gammon.movesRemaining.clear();
 				
@@ -134,14 +114,14 @@ public class TheGameImpl {
 				else if (gammon.turn == GameColor.BLACK) {
 					gammon.turn = GameColor.WHITE;
 				}
-				
-				gammon.blackDie1 = 0;
-				gammon.blackDie2 = 0;
-				gammon.whiteDie1 = 0;
-				gammon.whiteDie2 = 0;
-				
-				gammon.buttonState = ButtonState.ROLL;
 			}
+			
+			gammon.blackDie1 = 0;
+			gammon.blackDie2 = 0;
+			gammon.whiteDie1 = 0;
+			gammon.whiteDie2 = 0;
+			
+			gammon.buttonState = ButtonState.ROLL;
 			
 			updateButtonDisplay();
 			gammon.savedStatesCount = 0;
@@ -386,6 +366,33 @@ public class TheGameImpl {
 		if (gammon.blackMovingIn) {
 			if (movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
 				moves.add(BoardPositions.BLACK_BUNKER);
+			} else {
+				for (int i = 6; i > 0; i--) {
+					if (movesAvailable.contains((Object) i)) {
+						// an exact move is possible might as well stop checking
+						return;
+					}
+				}
+				
+				for (int i = 6; i > 0; i--)
+				{
+					CheckerContainer point = gammon.containers.get(i);
+					if (point.getBlackCheckerCount() > 0)
+					{
+						for (Integer moveLength: movesAvailable)
+						{
+							CheckerContainer possibleMove = gammon.containers.get((Object)(i - moveLength));
+							if (possibleMove.getWhiteCheckerCount() < 2) {
+								// a higher value move is available. Nothing to see here
+								if (i > pieceLocation.getIndex()) {
+									break;
+								} else {
+									moves.add(possibleMove.getPosition());
+								}
+							}
+						}
+					}
+				}
 			}
 			// TODO add moving in the last quadrant code
 		}
@@ -472,6 +479,22 @@ public class TheGameImpl {
 			updateMovingIn();
 			checkForWin();
 			updateUndoEnabled();
+			
+			int diceTotal = 0;
+			if (gammon.turn == GameColor.BLACK) {
+				diceTotal = gammon.blackDie1 + gammon.blackDie2;
+			} else {
+				diceTotal = gammon.whiteDie1 + gammon.whiteDie2;
+			}
+			if (gammon.movesRemaining.size() == 0 && diceTotal == 3) {
+				gammon.aceyDeucey = true;
+				gammon.movesRemaining.add(6);
+				gammon.movesRemaining.add(5);
+				gammon.movesRemaining.add(4);
+				gammon.movesRemaining.add(3);
+				gammon.movesRemaining.add(2);
+				gammon.movesRemaining.add(1);
+			}
 		}
 		
 		return pieceMoved;
@@ -544,25 +567,8 @@ public class TheGameImpl {
 	
 	public void undoMove() {
 		if (gammon.savedStatesCount > 0) {
-			String FILENAME = "";
-			switch (gammon.savedStatesCount) {
-			case 1:
-				FILENAME = "move0";
-				gammon.savedStatesCount = 0;
-				break;
-			case 2:
-				FILENAME = "move1";
-				gammon.savedStatesCount = 1;
-				break;
-			case 3:
-				FILENAME = "move2";
-				gammon.savedStatesCount = 2;
-				break;
-			case 4:
-				FILENAME = "move3";
-				gammon.savedStatesCount = 3;
-				break;
-			}
+			int restoreNumber = gammon.savedStatesCount - 1;
+			String FILENAME = "move" + restoreNumber;
 			
 			try {
 				FileInputStream fis = fileContext.openFileInput(FILENAME);
@@ -580,21 +586,7 @@ public class TheGameImpl {
 	}
 	
 	public void storeState() {
-		String FILENAME = "";
-		switch (gammon.savedStatesCount) {
-		case 0:
-			FILENAME = "move0";
-			break;
-		case 1:
-			FILENAME = "move1";
-			break;
-		case 2:
-			FILENAME = "move2";
-			break;
-		case 3:
-			FILENAME = "move3";
-			break;
-		}
+		String FILENAME = "move" + gammon.savedStatesCount;
 		try {
 			FileOutputStream stream = fileContext.openFileOutput(FILENAME, Context.MODE_PRIVATE);
 			ObjectOutputStream objOut = new ObjectOutputStream(stream);
@@ -683,6 +675,8 @@ public class TheGameImpl {
 			if (gammon.blackDie1 == gammon.blackDie2) {
 				gammon.movesRemaining.add(gammon.blackDie1);
 				gammon.movesRemaining.add(gammon.blackDie1);
+			} else if (gammon.blackDie1 + gammon.blackDie2 == 3) { //acdc
+				//gammon.aceyDeucey = true;
 			}
 		} else {
 			gammon.whiteDie1 = rollDie();
@@ -692,22 +686,14 @@ public class TheGameImpl {
 			//gammon.whiteDie1 = 1;
 			//gammon.whiteDie2 = 2;
 			
-			if ((gammon.whiteDie1 == 1 && gammon.whiteDie2 == 2) ||
-					(gammon.whiteDie1 == 2 && gammon.whiteDie2 == 1)) {
-				gammon.aceyDeucey = true;
-				gammon.movesRemaining.add(1);
-				gammon.movesRemaining.add(2);
-				gammon.movesRemaining.add(3);
-				gammon.movesRemaining.add(4);
-				gammon.movesRemaining.add(5);
-				gammon.movesRemaining.add(6);
-			} else {
+			gammon.movesRemaining.add(gammon.whiteDie1);
+			gammon.movesRemaining.add(gammon.whiteDie2);
+			if (gammon.whiteDie1 == gammon.whiteDie2) {
 				gammon.movesRemaining.add(gammon.whiteDie1);
-				gammon.movesRemaining.add(gammon.whiteDie2);
-				if (gammon.whiteDie1 == gammon.whiteDie2) {
-					gammon.movesRemaining.add(gammon.whiteDie1);
-					gammon.movesRemaining.add(gammon.whiteDie1);
-				}
+				gammon.movesRemaining.add(gammon.whiteDie1);
+			}
+			else if (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
+				//gammon.aceyDeucey = true;
 			}
 		}
 		gammon.buttonState = ButtonState.TURN_FINISHED;
