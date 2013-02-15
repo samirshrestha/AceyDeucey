@@ -16,7 +16,7 @@ public class TheGame implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public enum ButtonState {
-		ROLL_FOR_TURN("Roll For Turn"), ROLL("Roll"), TURN_FINISHED("Turn Finished"), 
+		ROLL_FOR_NUMBER("Roll For Numbers"), ROLL_FOR_TURN("Roll For Turn"), RED_ROLL("Red Roll"), WHITE_ROLL("White Roll"), TURN_FINISHED("Clear Dice"), 
 		WHITE_WON("White Won!!!"), BLACK_WON("Red Won!!!");
 		
 		private String buttonText;
@@ -36,6 +36,7 @@ public class TheGame implements Serializable {
 	public int blackDie1;
 	public int blackDie2;
 	public boolean aceyDeucey;
+	public boolean acdcOrigMove = false;
 	public ArrayList<Integer> movesRemaining;
 	public boolean whiteMovingIn, blackMovingIn, allBlackPiecesOut, allWhitePiecesOut;
 	public ButtonState buttonState;

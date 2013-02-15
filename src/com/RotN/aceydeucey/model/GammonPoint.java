@@ -1,5 +1,7 @@
 package com.RotN.aceydeucey.model;
 
+import java.util.Map;
+
 import com.RotN.aceydeucey.logic.CheckerContainer;
 import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
 
@@ -50,6 +52,30 @@ public class GammonPoint {
 		return wasTouched;
 	}
 	
+	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY) {
+		int leftCheck = pointRect.left;
+		int rightCheck = pointRect.right;
+		int topCheck = pointRect.top;
+		int bottomCheck = pointRect.bottom;
+		
+		if (isPossibleMove) {
+			leftCheck = pointRect.left - pointRect.width() / 2;
+			rightCheck = pointRect.right + pointRect.width() /2;
+			topCheck = pointRect.top - pointRect.height() / 2;
+			bottomCheck = pointRect.bottom + pointRect.height() / 2;
+		}
+		
+	
+		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+			if (eventY >= topCheck && (eventY <= bottomCheck)) {
+				double xDistance = eventX - pointRect.exactCenterX();
+				double yDistance = eventY - pointRect.exactCenterY();
+				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+				pointDistances.put(pointPos, distance);
+			}
+		}
+	}
+	
 	public void setSelected(boolean selected) {
 		isSelected = selected;
 	}
@@ -76,6 +102,8 @@ public class GammonPoint {
 		if (isSelected) {
 			count--;
 		}
+		
+		drawTriangleShading(canvas);	
 		
 		if (pointPos == BoardPositions.POINT_13 ||
 				pointPos == BoardPositions.POINT_14 ||
@@ -223,9 +251,7 @@ public class GammonPoint {
 				startPos = startPos - pieceBitmaps.get(1).getHeight();
 				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
 			}
-		}
-		
-		drawTriangleShading(canvas);			
+		}		
 	}
 	
 	private void SetPointRect(Rect boardRect) //pass in the board rect
@@ -394,7 +420,11 @@ public class GammonPoint {
 				if (this.isHovering) {
 					transparent = 225;
 				}
-				paint.setARGB(transparent, 0, 0, 255);
+				if (pointPos.getIndex() % 2 == 0) {
+					paint.setARGB(transparent, 255, 0, 0);
+				} else {
+					paint.setARGB(transparent, 255, 215, 0);
+				}
 			}		
 			else {
 				paint.setARGB(100, 255, 255, 255);
@@ -448,6 +478,14 @@ public class GammonPoint {
 		    path.close();
 	
 		    canvas.drawPath(path, paint);
+		    
+		    Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		    borderPaint.setARGB(255, 255, 255, 255);
+		    borderPaint.setStrokeWidth(4);
+		    borderPaint.setStyle(Paint.Style.STROKE);
+		    canvas.drawLine(point1_draw.x, point1_draw.y, point2_draw.x, point2_draw.y, borderPaint);
+		    canvas.drawLine(point2_draw.x, point2_draw.y, point3_draw.x, point3_draw.y, borderPaint);
+		    canvas.drawLine(point1_draw.x, point1_draw.y, point3_draw.x, point3_draw.y, borderPaint);
 		}
 	}
 

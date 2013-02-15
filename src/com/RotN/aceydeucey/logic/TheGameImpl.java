@@ -121,7 +121,11 @@ public class TheGameImpl {
 			gammon.whiteDie1 = 0;
 			gammon.whiteDie2 = 0;
 			
-			gammon.buttonState = ButtonState.ROLL;
+			if (gammon.turn == GameColor.WHITE) {
+				gammon.buttonState = ButtonState.WHITE_ROLL;
+			} else {
+				gammon.buttonState = ButtonState.RED_ROLL;
+			}
 			
 			updateButtonDisplay();
 			gammon.savedStatesCount = 0;
@@ -150,7 +154,11 @@ public class TheGameImpl {
 		else if (gammon.blackDie1 > gammon.whiteDie1) {
 			gammon.turn = GameColor.BLACK;
 		}
-		gammon.buttonState = ButtonState.ROLL;
+		if (gammon.turn == GameColor.WHITE) {
+			gammon.buttonState = ButtonState.WHITE_ROLL;
+		} else {
+			gammon.buttonState = ButtonState.RED_ROLL;
+		}
 		updateButtonDisplay();
 		updateTurnDisplay();
 	}
@@ -486,7 +494,8 @@ public class TheGameImpl {
 			} else {
 				diceTotal = gammon.whiteDie1 + gammon.whiteDie2;
 			}
-			if (gammon.movesRemaining.size() == 0 && diceTotal == 3) {
+			if (gammon.movesRemaining.size() == 0 && diceTotal == 3 && gammon.acdcOrigMove == true) {
+				gammon.acdcOrigMove = false;
 				gammon.aceyDeucey = true;
 				gammon.movesRemaining.add(6);
 				gammon.movesRemaining.add(5);
@@ -623,7 +632,8 @@ public class TheGameImpl {
 		case ROLL_FOR_TURN:
 			rollForTurn();
 			break;
-		case ROLL:
+		case RED_ROLL:
+		case WHITE_ROLL:
 			roll();
 			break;
 		case TURN_FINISHED:
@@ -676,7 +686,7 @@ public class TheGameImpl {
 				gammon.movesRemaining.add(gammon.blackDie1);
 				gammon.movesRemaining.add(gammon.blackDie1);
 			} else if (gammon.blackDie1 + gammon.blackDie2 == 3) { //acdc
-				//gammon.aceyDeucey = true;
+				gammon.acdcOrigMove = true;
 			}
 		} else {
 			gammon.whiteDie1 = rollDie();
@@ -693,7 +703,7 @@ public class TheGameImpl {
 				gammon.movesRemaining.add(gammon.whiteDie1);
 			}
 			else if (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
-				//gammon.aceyDeucey = true;
+				gammon.acdcOrigMove = true;
 			}
 		}
 		gammon.buttonState = ButtonState.TURN_FINISHED;
