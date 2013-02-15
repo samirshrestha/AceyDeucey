@@ -331,40 +331,36 @@ public class TheGameImpl {
 		}
 		else if (gammon.turn == GameColor.WHITE)
 		{
-			for (int i = 0; i < movesAvailable.size(); i++)
-			{
-				int moveLength = movesAvailable.get(i);
-				BoardPositions destMove = BoardPositions.NONE;
-				CheckerContainer possibleMove;
-				//black pieces go backwards. This moves us this direction from the bunker
-				int moveIndex = pieceLocation.getIndex() + moveLength;
-				
-				//it is in the final quadrant only moves into the bunker are allowed
-				if (pieceLocation.getIndex() >= 19) {
-					if (moveIndex == CheckerContainer.BoardPositions.BLACK_BUNKER.getIndex() && gammon.whiteMovingIn)
+			if (pieceLocation.getIndex() >= 19) {
+				checkWhiteBearingOff(pieceLocation, moves, movesAvailable);
+			} else {
+				for (int i = 0; i < movesAvailable.size(); i++) {
+					int moveLength = movesAvailable.get(i);
+					BoardPositions destMove = BoardPositions.NONE;
+					CheckerContainer possibleMove;
+					//black pieces go backwards. This moves us this direction from the bunker
+					int moveIndex = pieceLocation.getIndex() + moveLength;				
+					
+					if (moveIndex <= CheckerContainer.BoardPositions.BLACK_BUNKER.getIndex())
 					{
-						moves.add(BoardPositions.WHITE_BUNKER);
+						possibleMove = gammon.containers.get(moveIndex);
+					
+						if (false == (possibleMove.getBlackCheckerCount() > 1) )
+						{
+							destMove = gammon.containers.get(moveIndex).getPosition();
+							moves.add(destMove);
+						}
 					}
+					
+					if (destMove != BoardPositions.NONE) {
+						if (acdc) {
+							aceyDeuceyChosen(moveLength, newMovesAvailable);
+						} else if (newMovesAvailable.contains(moveLength)) {						
+							newMovesAvailable.remove((Object)moveLength);
+						}
+						checkPointMove(destMove, moves, newMovesAvailable, false);
+					}				
 				}
-				else if (moveIndex <= CheckerContainer.BoardPositions.BLACK_BUNKER.getIndex())
-				{
-					possibleMove = gammon.containers.get(moveIndex);
-				
-					if (false == (possibleMove.getBlackCheckerCount() > 1) )
-					{
-						destMove = gammon.containers.get(moveIndex).getPosition();
-						moves.add(destMove);
-					}
-				}
-				
-				if (destMove != BoardPositions.NONE) {
-					if (acdc) {
-						aceyDeuceyChosen(moveLength, newMovesAvailable);
-					} else if (newMovesAvailable.contains(moveLength)) {						
-						newMovesAvailable.remove((Object)moveLength);
-					}
-					checkPointMove(destMove, moves, newMovesAvailable, false);
-				}				
 			}
 		}
 	}
@@ -375,34 +371,85 @@ public class TheGameImpl {
 			if (movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
 				moves.add(BoardPositions.BLACK_BUNKER);
 			} else {
-				for (int i = 6; i > 0; i--) {
-					if (movesAvailable.contains((Object) i)) {
+				for (Integer moveLength: movesAvailable) {
+					if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0) {
 						// an exact move is possible might as well stop checking
 						return;
 					}
 				}
 				
-				for (int i = 6; i > 0; i--)
-				{
+				boolean higherLegalMove = false;
+				for (int i = 6; i > pieceLocation.getIndex(); i--) {
 					CheckerContainer point = gammon.containers.get(i);
-					if (point.getBlackCheckerCount() > 0)
-					{
-						for (Integer moveLength: movesAvailable)
-						{
-							CheckerContainer possibleMove = gammon.containers.get((Object)(i - moveLength));
-							if (possibleMove.getWhiteCheckerCount() < 2) {
-								// a higher value move is available. Nothing to see here
-								if (i > pieceLocation.getIndex()) {
-									break;
-								} else {
-									moves.add(possibleMove.getPosition());
-								}
-							}
-						}
+					if (point.getBlackCheckerCount() > 0) {
+						higherLegalMove = true;
 					}
 				}
+				
+				boolean homeBoardMove = false;
+				boolean moveIntoBunker = false;
+				for (Integer moveLength: movesAvailable) {
+					Integer moveIndex = pieceLocation.getIndex() - moveLength;
+					if (moveIndex <= 0) {
+						moveIntoBunker = true;
+					} else {
+						CheckerContainer possibleMove = gammon.containers.get((Object)(moveIndex));
+						if (possibleMove.getWhiteCheckerCount() < 2) {
+							moves.add(possibleMove.getPosition());
+							homeBoardMove = true;
+						}
+					}					
+				}
+				
+				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+					moves.add(BoardPositions.BLACK_BUNKER);
+				}
 			}
-			// TODO add moving in the last quadrant code
+		}
+	}
+	
+	private void checkWhiteBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
+		// do we even need to check?
+		if (gammon.whiteMovingIn) {
+			int distanceFromBunker = 25 - pieceLocation.getIndex();
+			if (movesAvailable.contains((Object) distanceFromBunker) ) { // must make the exact move if possible
+				moves.add(BoardPositions.WHITE_BUNKER);
+			} else {
+				for (Integer moveLength: movesAvailable) {
+					int containerIndex = 25 - moveLength;
+					if (gammon.containers.get(containerIndex).getWhiteCheckerCount() > 0) {
+						// an exact move is possible might as well stop checking
+						return;
+					}
+				}
+				
+				boolean higherLegalMove = false;
+				for (int i = 19; i < pieceLocation.getIndex(); i++) {
+					CheckerContainer point = gammon.containers.get(i);
+					if (point.getWhiteCheckerCount() > 0) {
+						higherLegalMove = true;
+					}
+				}
+				
+				boolean homeBoardMove = false;
+				boolean moveIntoBunker = false;
+				for (Integer moveLength: movesAvailable) {
+					Integer moveIndex = pieceLocation.getIndex() + moveLength;
+					if (moveIndex >= 25) {
+						moveIntoBunker = true;
+					} else {
+						CheckerContainer possibleMove = gammon.containers.get((Object)(moveIndex));
+						if (possibleMove.getBlackCheckerCount() < 2) {
+							moves.add(possibleMove.getPosition());
+							homeBoardMove = true;
+						}
+					}					
+				}
+				
+				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+					moves.add(BoardPositions.WHITE_BUNKER);
+				}
+			}
 		}
 	}
 	
@@ -475,8 +522,10 @@ public class TheGameImpl {
 				howWeGotThere = moveUsed(moveLength);
 			}
 			
-			pokeyThem(startIndex, howWeGotThere);
-		
+			if (newPos != BoardPositions.WHITE_BUNKER && newPos != BoardPositions.BLACK_BUNKER) {
+				pokeyThem(startIndex, howWeGotThere);
+			}
+			
 			//decrement old container
 			gammon.containers.get(origPos.getIndex()).removePiece(gammon.turn);
 
@@ -524,14 +573,13 @@ public class TheGameImpl {
 			CheckerContainer newContainer;
 			newContainer = gammon.containers.get(moveIndex);
 			tempIndex = newContainer.getPosition().getIndex();
-			
-			//put them on pokey
+
 			gotEm = movePieceToPokey(newContainer);
 		}
 		
 		if (gotEm == false) { // missed them the first time, lets try again.
 			tempIndex = origIndex;
-			for (int index = howWeGotThere.size() - 1; index > 0; index--) {
+			for (int index = howWeGotThere.size() - 1; index >= 0; index--) {
 				int moveIndex = 0;
 				int moveLength = howWeGotThere.get(index);
 				if (gammon.turn == GameColor.WHITE){
@@ -543,8 +591,7 @@ public class TheGameImpl {
 				CheckerContainer newContainer;
 				newContainer = gammon.containers.get(moveIndex);
 				tempIndex = newContainer.getPosition().getIndex();
-				
-				//put them on pokey
+
 				gotEm = movePieceToPokey(newContainer);
 			}
 		}
@@ -651,6 +698,16 @@ public class TheGameImpl {
 		if (gammon.movesRemaining.contains(moveLength)) {
 			howWeGotThere.add(moveLength);
 			gammon.movesRemaining.remove((Object)moveLength);
+		} else if ( (gammon.turn == GameColor.BLACK && gammon.blackMovingIn) ||
+				(gammon.turn == GameColor.WHITE && gammon.whiteMovingIn) ) {
+			int longestMoveAvailable = 0;
+			for (Integer moveLengthAvailable: gammon.movesRemaining) {
+				if (moveLengthAvailable > longestMoveAvailable) {
+					longestMoveAvailable = moveLengthAvailable;
+				}
+			}
+			gammon.movesRemaining.remove((Object) longestMoveAvailable);
+			
 		} else { // we used multiple to get there
 			int sumOfMoves = 0;
 			while (gammon.movesRemaining.size() > 0) {

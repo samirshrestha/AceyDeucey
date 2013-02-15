@@ -1,29 +1,28 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        > 
-	<ImageView 
-		android:src = "@drawable/bartop"
-		android:contentDescription="@string/gammon_table"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"		
-        android:scaleType="centerCrop"
-		/>   
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@drawable/bartop" >
     
     <RelativeLayout
 	    xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/game_panel"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:orientation="horizontal" >
+	    android:orientation="horizontal" >	    
+	  
+	    <Button 
+	        android:id="@+id/undo_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentLeft="true"
+	        android:text="@string/undo_button"/>	
 	    
         <FrameLayout android:id="@+id/adLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content" 
+        android:layout_toRightOf="@+id/undo_button">
 	        <ImageView android:id="@+id/image"
 	            android:layout_width="wrap_content"
 				android:contentDescription="@string/gammon_table"
@@ -36,22 +35,13 @@
 		        android:layout_height="wrap_content"
 		        googleads:adSize="BANNER"
 		        googleads:adUnitId="@string/admob_id"/>
-    	</FrameLayout>
-	    
-	  
-	    <Button 
-	        android:id="@+id/undo_button"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:gravity="center"
-	        android:layout_alignParentRight="true"
-	        android:text="@string/undo_button"/>	    
+    	</FrameLayout>    
 
 	    <Button
 	        android:id="@+id/action_button"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_toLeftOf="@id/undo_button"
+	        android:layout_toRightOf="@+id/adLayout"
 	        android:gravity="center"/>
 	    
 	</RelativeLayout>
@@ -59,8 +49,7 @@
      <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
-		android:orientation="vertical" >
-    
+		android:orientation="vertical" >    
 
 		<com.RotN.aceydeucey.GammonBoard
 			android:id="@+id/gammonBoard"
@@ -71,4 +60,3 @@
 	</LinearLayout>
 
 </LinearLayout>
-</FrameLayout>
