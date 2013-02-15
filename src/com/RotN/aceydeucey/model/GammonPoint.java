@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.RotN.aceydeucey.logic.CheckerContainer;
 import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
+import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
+import com.RotN.aceydeucey.logic.TheGameImpl;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,6 +14,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 
 public class GammonPoint {
 	//private static final String TAG = GammonPoint.class.getSimpleName();
@@ -52,28 +55,56 @@ public class GammonPoint {
 		return wasTouched;
 	}
 	
-	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY) {
+	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY, int mouseAction, TheGameImpl gammon) {
 		int leftCheck = pointRect.left;
 		int rightCheck = pointRect.right;
 		int topCheck = pointRect.top;
 		int bottomCheck = pointRect.bottom;
+		boolean botherChecking = true;
 		
-		if (isPossibleMove) {
-			leftCheck = pointRect.left - pointRect.width() / 2;
-			rightCheck = pointRect.right + pointRect.width() /2;
-			topCheck = pointRect.top - pointRect.height() / 2;
-			bottomCheck = pointRect.bottom + pointRect.height() / 2;
-		}
-		
-	
-		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
-			if (eventY >= topCheck && (eventY <= bottomCheck)) {
-				double xDistance = eventX - pointRect.exactCenterX();
-				double yDistance = eventY - pointRect.exactCenterY();
-				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
-				pointDistances.put(pointPos, distance);
+		if (MotionEvent.ACTION_UP == mouseAction) {
+			if (isPossibleMove) {
+				leftCheck = (int) (pointRect.left - pointRect.width());
+				rightCheck = (int) (pointRect.right + pointRect.width());
+				topCheck = (int) (pointRect.top - pointRect.width());
+				bottomCheck = (int) (pointRect.bottom + pointRect.width());
+			} else {
+				botherChecking = false;
 			}
 		}
+		
+		
+		if (MotionEvent.ACTION_DOWN == mouseAction)  { //only check the mouse down if they is a movable piece
+			if ( (gammon.getTurn() == GameColor.BLACK && gammon.getContainer(pointPos).getBlackCheckerCount() > 0) ||
+					(gammon.getTurn() == GameColor.WHITE && gammon.getContainer(pointPos).getWhiteCheckerCount() > 0) ) {
+				leftCheck = (int) (pointRect.left - pointRect.width());
+				rightCheck = (int) (pointRect.right + pointRect.width());
+				topCheck = (int) (pointRect.top - pointRect.width());
+				bottomCheck = (int) (pointRect.bottom + pointRect.width());	
+				
+				if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+					if (eventY >= topCheck && (eventY <= bottomCheck)) {
+						double xDistance = eventX - pointRect.exactCenterX();
+						double yDistance = eventY - pointRect.exactCenterY();
+						double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+						pointDistances.put(pointPos, distance);
+					}
+				}
+			} else {
+				botherChecking = false;
+			}
+		} 
+		
+		if (botherChecking || this.isSelected) { //we may not even care
+			if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+				if (eventY >= topCheck && (eventY <= bottomCheck)) {
+					double xDistance = eventX - pointRect.exactCenterX();
+					double yDistance = eventY - pointRect.exactCenterY();
+					double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+					pointDistances.put(pointPos, distance);
+				}
+			}
+		}		
 	}
 	
 	public void setSelected(boolean selected) {

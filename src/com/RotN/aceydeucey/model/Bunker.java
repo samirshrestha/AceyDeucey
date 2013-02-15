@@ -1,5 +1,8 @@
 package com.RotN.aceydeucey.model;
 
+import java.util.Map;
+
+import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
 import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
 
 import android.graphics.Bitmap;
@@ -18,6 +21,7 @@ public class Bunker {
 	
 	private boolean isSelected; 
 	private boolean isPossibleMove;
+	private BoardPositions boardPos;
 	
 	public void setPossibleMove(boolean isPossibleMove) {
 		this.isPossibleMove = isPossibleMove;
@@ -33,11 +37,13 @@ public class Bunker {
 				(int)(boardRect.height() * 0.0390), 
 				(int)(boardRect.width() * 0.0878), 
 				(int)(boardRect.height() * 0.4166));
+			boardPos = BoardPositions.WHITE_BUNKER;
 		} else {
 			bunkerRect = new Rect((int)(boardRect.width() * 0.0292), 
 					(int)(boardRect.height() * 0.5833), 
 					(int)(boardRect.width() * 0.0878), 
 					(int)(boardRect.height() * 0.9609));
+			boardPos = BoardPositions.BLACK_BUNKER;
 		}
 		
 	}	
@@ -45,10 +51,10 @@ public class Bunker {
 	public boolean wasTouched(float eventX, float eventY) {
 		boolean wasTouched = false;
 		int xLeftBound, xRightBound, yTopBound, yLowerBound;
-		xLeftBound = bunkerRect.left - bitmap.getWidth() / 4;
-		xRightBound = bunkerRect.right + bitmap.getWidth() /4;
-		yLowerBound = bunkerRect.top - bitmap.getHeight() / 4;
-		yTopBound = bunkerRect.bottom + bitmap.getHeight() / 4;
+		xLeftBound = bunkerRect.left - bitmap.getWidth() / 5;
+		xRightBound = bunkerRect.right + bitmap.getWidth() /5;
+		yLowerBound = bunkerRect.top - bitmap.getHeight() / 5;
+		yTopBound = bunkerRect.bottom + bitmap.getHeight() / 5;
 		if ((eventX >= xLeftBound) && (eventX <= xRightBound)) {
 			if (eventY >= yLowerBound && (eventY <= yTopBound)) {
 				Log.d(TAG, "Bunker clicked");
@@ -57,6 +63,30 @@ public class Bunker {
 		}
 		
 		return wasTouched;
+	}
+	
+	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY) {
+		int leftCheck = bunkerRect.left;
+		int rightCheck = bunkerRect.right;
+		int topCheck = bunkerRect.top;
+		int bottomCheck = bunkerRect.bottom;
+		
+		if (isPossibleMove) {
+			leftCheck = bunkerRect.left - bunkerRect.width() / 2;
+			rightCheck = bunkerRect.right + bunkerRect.width() /2;
+			topCheck = bunkerRect.top - bunkerRect.height() / 2;
+			bottomCheck = bunkerRect.bottom + bunkerRect.height() / 2;
+		}
+		
+	
+		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+			if (eventY >= topCheck && (eventY <= bottomCheck)) {	
+				double xDistance = eventX - bunkerRect.exactCenterX();
+				double yDistance = eventY - bunkerRect.exactCenterY();
+				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+				pointDistances.put(boardPos, distance);
+			}
+		}
 	}
 	
 	public void setSelected(boolean selected) {

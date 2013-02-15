@@ -98,7 +98,8 @@ SurfaceHolder.Callback {
 		float scale = (float) options.outHeight/ (float) getHeight();
 		createPieceBitmapArray(scale);
 		createBoardPoints(getWidth(), getHeight());
-		dice = new Dice(createDiceBitmapArray(scale));
+		float diceScale = (float) (scale / 1.5);
+		dice = new Dice(createDiceBitmapArray(diceScale));
 		Rect boardRect = new Rect(0,0, getWidth(), getHeight());
 		
 		//create the bunkers
@@ -177,25 +178,28 @@ SurfaceHolder.Callback {
 			floatingPiece.setTouched(false);
 			
 			if (selectedPosition != BoardPositions.NONE) {
-			Log.d(TAG, "Up Event, selected position: " + selectedPosition);
-				if (whiteBunker.wasTouched(event.getX(), event.getY())) {
-					beerGammon.movePiece(selectedPosition, BoardPositions.WHITE_BUNKER);
-				} else if (blackBunker.wasTouched(event.getX(), event.getY())) {
-					beerGammon.movePiece(selectedPosition, BoardPositions.BLACK_BUNKER);
-				} else {					
-					Log.d(TAG, "We are checking points");
-					Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
-					Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
-					while (it.hasNext()) {
-						Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
-						if (m.getValue().wasTouched(event.getX(), event.getY())) {
-						   	beerGammon.movePiece(selectedPosition, m.getValue().getPointPos());
-						   	break;
-						}
-					}
-					
+
+				Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
+				Log.d(TAG, "Up Event, selected position: " + selectedPosition);
+				
+				whiteBunker.wasTouched(containerDistances, event.getX(), event.getY());
+				
+				blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
+				
+				Log.d(TAG, "We are checking points");
+				Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
+				Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
+				while (it.hasNext()) {
+					Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
+					m.getValue().wasTouched(containerDistances, event.getX(), event.getY(), MotionEvent.ACTION_UP, beerGammon);
+				}
+				
+				BoardPositions upContainer = findTheClosestContainer(containerDistances);
+				if (upContainer != BoardPositions.NONE) {
+					beerGammon.movePiece(selectedPosition, upContainer);
 				}
 			}
+			
 			selectedPosition = BoardPositions.NONE;
 			clearSelectedSpot();
 			clearPossibleMoves();
@@ -205,24 +209,62 @@ SurfaceHolder.Callback {
 		return true;
 	}
 	
+	private BoardPositions findTheClosestContainer(Map<BoardPositions, Double> pointDistances) {
+		BoardPositions closestBoardPosition = BoardPositions.NONE;
+		double xDistance = 0;
+		Set<Entry<BoardPositions, Double>> set = pointDistances.entrySet();
+		Iterator<Entry<BoardPositions, Double>> it = set.iterator();
+		while (it.hasNext()) {
+			Map.Entry<BoardPositions, Double> m = (Map.Entry<BoardPositions, Double>)it.next();
+			if (closestBoardPosition == BoardPositions.NONE) {
+				closestBoardPosition = m.getKey();
+				xDistance = m.getValue();
+			} else if (m.getValue() < xDistance) {
+				closestBoardPosition = m.getKey();
+				xDistance = m.getValue();
+			}
+		}
+		
+		return closestBoardPosition;
+	}
+	
 	private void boardTouchDown(MotionEvent event) {
 		floatingPiece.setX((int)event.getX());
 		floatingPiece.setY((int)event.getY());
-		if (whiteBunker.wasTouched(event.getX(), event.getY())) {
+		
+		Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
+		
+		whiteBunker.wasTouched(containerDistances, event.getX(), event.getY());
+		
+		blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
+		
+		pokey.wasTouched(containerDistances, event.getX(), event.getY());
+		
+		Log.d(TAG, "We are checking points");
+		Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
+		Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
+		while (it.hasNext()) {
+			Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
+			m.getValue().wasTouched(containerDistances, event.getX(), event.getY(), MotionEvent.ACTION_DOWN, beerGammon);
+		}
+		
+		BoardPositions downContainer = findTheClosestContainer(containerDistances);
+		
+		if (downContainer == BoardPositions.WHITE_BUNKER) {
 			whiteBunker.setSelected(true);
 			selectedPosition = BoardPositions.WHITE_BUNKER;
 			if (whiteBunker.getBunkerCount() > 0) {
 				floatingPiece.setColor(GameColor.WHITE);
 				floatingPiece.setTouched(true);
 			}
-		} else if (blackBunker.wasTouched(event.getX(), event.getY())){
+		} else if (BoardPositions.BLACK_BUNKER == downContainer){
 			blackBunker.setSelected(true);
 			selectedPosition = BoardPositions.BLACK_BUNKER;
 			if (blackBunker.getBunkerCount() > 0) {
 				floatingPiece.setColor(GameColor.BLACK);
 				floatingPiece.setTouched(true);
 			}
-		} else if (pokey.wasTouched(event.getX(), event.getY())) {
+		} else if (BoardPositions.POKEY == downContainer) {
 			selectedPosition = BoardPositions.POKEY;
 			pokey.setSelected(true);
 			CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
@@ -233,24 +275,16 @@ SurfaceHolder.Callback {
 				floatingPiece.setColor(GameColor.WHITE);
 				floatingPiece.setTouched(true);
 			}
-		} else {
-			Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
-			Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
-			while (it.hasNext()) {
-				Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
-				if (m.getValue().wasTouched(event.getX(), event.getY())) {
-					m.getValue().setSelected(true);
-					selectedPosition = m.getValue().getPointPos();
-					CheckerContainer pointData = beerGammon.getContainer(selectedPosition);
-					if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
-						floatingPiece.setColor(GameColor.BLACK);
-						floatingPiece.setTouched(true);
-					} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
-						floatingPiece.setColor(GameColor.WHITE);
-						floatingPiece.setTouched(true);
-					}
-				   break;
-			   }
+		} else if (BoardPositions.NONE != downContainer){
+			boardPoints.get(downContainer).setSelected(true);
+			selectedPosition = downContainer;
+			CheckerContainer pointData = beerGammon.getContainer(selectedPosition);
+			if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
+				floatingPiece.setColor(GameColor.BLACK);
+				floatingPiece.setTouched(true);
+			} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
+				floatingPiece.setColor(GameColor.WHITE);
+				floatingPiece.setTouched(true);
 			}
 		}
 		
@@ -267,25 +301,14 @@ SurfaceHolder.Callback {
 		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
 		blackBunker.draw(canvas);
 		whiteBunker.draw(canvas);
-		dice.draw(canvas, beerGammon);
-		floatingPiece.draw(canvas);
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
 		pokey.draw(canvas, pokeyData);
 						
-		Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
-		Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
-
-		while (it.hasNext()) {
-			Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
-			CheckerContainer container = beerGammon.getContainer(m.getKey());
-
-			if (container.getWhiteCheckerCount() > 0) {
-				m.getValue().draw(canvas, pieceWhiteBitmaps, container);				
-			}
-			else {
-				m.getValue().draw(canvas, pieceBlackBitmaps, container);
-			}
-		}
+		renderHighBoardPoints(canvas);
+		dice.draw(canvas, beerGammon);
+		renderLowBoardPoints(canvas);
+		
+		floatingPiece.draw(canvas);
 		
 		if (canvas != null) {
 			getHolder().unlockCanvasAndPost(canvas);
@@ -522,6 +545,50 @@ SurfaceHolder.Callback {
 			return Bitmap.createScaledBitmap(bitmap, reqWidth, reqHeight, false);
 		} else {
 			return bitmap;
+		}
+	}
+	
+	public TheGameImpl getTheGame() {
+		return beerGammon;
+	}
+	
+	private void renderHighBoardPoints(Canvas canvas) {
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_24));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_23));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_22));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_21));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_20));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_19));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_18));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_17));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_16));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_15));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_14));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_13));		
+	}
+	
+	private void renderLowBoardPoints(Canvas canvas) {
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_12));
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_11));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_10));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_9));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_8));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_7));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_6));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_5));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_4));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_3));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_2));	
+		renderBoardPoint(canvas, boardPoints.get(BoardPositions.POINT_1));		}
+	
+	private void renderBoardPoint(Canvas canvas, GammonPoint point) {
+		CheckerContainer container = beerGammon.getContainer(point.getPointPos());
+		
+		if (container.getWhiteCheckerCount() > 0) {
+			point.draw(canvas, pieceWhiteBitmaps, container);				
+		}
+		else {
+			point.draw(canvas, pieceBlackBitmaps, container);
 		}
 	}
 }

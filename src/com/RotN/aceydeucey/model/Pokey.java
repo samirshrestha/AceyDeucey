@@ -1,5 +1,7 @@
 package com.RotN.aceydeucey.model;
 
+import java.util.Map;
+
 import com.RotN.aceydeucey.logic.CheckerContainer;
 import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
 import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
@@ -59,6 +61,22 @@ public class Pokey {
 		}
 		
 		return wasTouched;
+	}
+	
+	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY) {
+		int leftCheck = pokeyRect.left;
+		int rightCheck = pokeyRect.right;
+		int topCheck = pokeyRect.top;
+		int bottomCheck = pokeyRect.bottom;		
+	
+		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+			if (eventY >= topCheck && (eventY <= bottomCheck)) {
+				double xDistance = eventX - pokeyRect.exactCenterX();
+				double yDistance = eventY - pokeyRect.exactCenterY();
+				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+				pointDistances.put(pointPos, distance);
+			}
+		}
 	}
 	
 	// the draw method which draws the corresponding frame

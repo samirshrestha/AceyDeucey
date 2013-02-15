@@ -5,6 +5,7 @@ import com.RotN.aceydeucey.logic.TheGameImpl;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.SparseArray;
 
 public class Dice {
@@ -20,35 +21,63 @@ public class Dice {
 		
 		Bitmap die = diceBitmaps.get(getBlackResourceId(game.getB1DieValue()));
 		if (die != null) {
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.2), (float)((canvas.getHeight() * 0.45) ), null);
+			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.2), (float)((canvas.getHeight() * 0.43) ), null);
 		} else {
 			die = diceBitmaps.get(getBlackResourceId(2));
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.035), (float)(canvas.getHeight() * 0.43), null);
+			//canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.035), (float)(canvas.getHeight() * 0.43), null);
+			double scale = .75;
+			int left = (int)(canvas.getWidth() * 0.035);
+			int top = (int)(canvas.getHeight() * 0.425);
+			int right = left + (int)(die.getWidth() * scale);
+			int bottom = top + (int)(die.getHeight() * scale);
+			Rect dest = new Rect(left, top, right, bottom);
+			canvas.drawBitmap(die, null, dest, null);
 		}
 		
 		die = diceBitmaps.get(getBlackResourceId(game.getB2DieValue()));
 		if (die != null) {
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.3), (float)((canvas.getHeight() * 0.45) ), null);
+			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.3), (float)((canvas.getHeight() * 0.43) ), null);
 			
 		} else {
 			die = diceBitmaps.get(getBlackResourceId(1));
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.035), (float)(canvas.getHeight() * 0.51), null);
+			//canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.035), (float)(canvas.getHeight() * 0.51), null);
+			double scale = .75;
+			int left = (int)(canvas.getWidth() * 0.035);
+			int top = (int)(canvas.getHeight() * 0.505);
+			int right = left + (int)(die.getWidth() * scale);
+			int bottom = top + (int)(die.getHeight() * scale);
+			Rect dest = new Rect(left, top, right, bottom);
+			canvas.drawBitmap(die, null, dest, null);
 		}
 		
 		die = diceBitmaps.get(getWhiteResourceId(game.getW1DieValue()));
 		if (die != null) {
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * .65), (float)(canvas.getHeight() * 0.45), null);
+			canvas.drawBitmap(die, (float)(canvas.getWidth() * .65), (float)(canvas.getHeight() * 0.43), null);
 		} else {
 			die = diceBitmaps.get(getWhiteResourceId(2));
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.915), (float)(canvas.getHeight() * 0.43), null);
+			//canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.915), (float)(canvas.getHeight() * 0.43), null);
+			double scale = .75;
+			int left = (int)(canvas.getWidth() * 0.915);
+			int top = (int)(canvas.getHeight() * 0.425);
+			int right = left + (int)(die.getWidth() * scale);
+			int bottom = top + (int)(die.getHeight() * scale);
+			Rect dest = new Rect(left, top, right, bottom);
+			canvas.drawBitmap(die, null, dest, null);
 		}
 		
 		die = diceBitmaps.get(getWhiteResourceId(game.getW2DieValue()));
 		if (die != null) {
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * .75), (float)(canvas.getHeight() * 0.45), null);
+			canvas.drawBitmap(die, (float)(canvas.getWidth() * .75), (float)(canvas.getHeight() * 0.43), null);
 		} else {
 			die = diceBitmaps.get(getWhiteResourceId(1));
-			canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.915), (float)(canvas.getHeight() * 0.51), null);
+			//canvas.drawBitmap(die, (float)(canvas.getWidth() * 0.915), (float)(canvas.getHeight() * 0.51), null);
+			double scale = .75;
+			int left = (int)(canvas.getWidth() * 0.915);
+			int top = (int)(canvas.getHeight() * 0.505);
+			int right = left + (int)(die.getWidth() * scale);
+			int bottom = top + (int)(die.getHeight() * scale);
+			Rect dest = new Rect(left, top, right, bottom);
+			canvas.drawBitmap(die, null, dest, null);
 		}
 	}
 	
