@@ -126,28 +126,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	    }
 	}
 
-	@Override
-	public void onDataChange(String key, String value) {
-		if (key == "turn") {
-			//tvTurn.setText(value);	
-		}	
-		else if (key == "button") {
-			actionButton.setText(value);
-			if (beerGammon.getButtonState() != ButtonState.TURN_FINISHED) {
-				actionButton.setEnabled(true);
-			}
-		}
-	}
-
-	@Override
-	public void onUndoChange(boolean undoEnabled) {		
-		undoButton.setEnabled(undoEnabled);
-
-        if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
-        	actionButton.setEnabled(beerGammon.canMove() == false);
-        }
-	}
-
 	private void closeItDown() {
 		board.saveGame();
 		beerGammon.removeListener(this);
@@ -155,8 +133,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	private void startItUp() {
 		// set our GammonBoard as the View		
-		
-		beerGammon = new TheGameImpl();
 
         setContentView(R.layout.activity_ac_dc);
         
@@ -164,12 +140,11 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         mAdView = (AdView) this.findViewById(R.id.ad);
         mAdView.setAdListener(this);
         AdRequest adRequest = new AdRequest();
-        adRequest.addKeyword("beer");
         mAdView.loadAd(adRequest);
         
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
-        board.setBeerGammon(beerGammon);
         board.loadGame();
+        beerGammon = board.getTheGame();
         beerGammon.addListener(this);
         Log.d(TAG, "View added");
         
@@ -196,6 +171,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 }
             }
         });    
+	    
+
+        onBoardUpdate();
 	}
 	
 	@Override
@@ -273,8 +251,15 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		  public void run() {
 		    // Load an ad with an ad request.
 			  AdRequest adRequest = new AdRequest();
-		      adRequest.addKeyword("beer");
 		      mAdView.loadAd(adRequest);
 		  }
 		}
+
+	@Override
+	public void onBoardUpdate() {
+		actionButton.setText(beerGammon.getButtonText());
+		actionButton.setEnabled(beerGammon.canMove() == false);
+		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
+		
+	}
 }

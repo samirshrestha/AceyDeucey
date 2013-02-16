@@ -39,14 +39,19 @@ public class TheGameImpl {
 	private static final String TAG = TheGameImpl.class.getSimpleName();
 
 	public interface GammonEventHandler{
-		void onDataChange(String key, String value);
-		void onUndoChange(boolean undoEnabled);
+		void onBoardUpdate();
 	};
 	
 	private List<GammonEventHandler> handlers = new ArrayList<GammonEventHandler>(); 
 	
 	public void addListener(GammonEventHandler handler) {
 		handlers.add(handler);
+	}
+	
+	private void onBoardUpdate(){
+		for (GammonEventHandler listener : handlers) {
+			listener.onBoardUpdate();
+		}
 	}
 	
 	public void removeListener(GammonEventHandler handler) {
@@ -88,9 +93,7 @@ public class TheGameImpl {
 				
 		gammon.buttonState = ButtonState.ROLL_FOR_TURN;
 		
-		updateButtonDisplay();
-		
-		updateTurnDisplay();
+		this.onBoardUpdate();
 	}
 	
 	private int rollDie() {
@@ -126,13 +129,10 @@ public class TheGameImpl {
 			} else {
 				gammon.buttonState = ButtonState.RED_ROLL;
 			}
-			
-			updateButtonDisplay();
 			gammon.savedStatesCount = 0;
 		}
 		
-		updateUndoEnabled();
-		updateTurnDisplay();
+		this.onBoardUpdate();
 	}
 	
 	private void rollForTurn() {
@@ -159,8 +159,7 @@ public class TheGameImpl {
 		} else {
 			gammon.buttonState = ButtonState.RED_ROLL;
 		}
-		updateButtonDisplay();
-		updateTurnDisplay();
+		this.onBoardUpdate();
 	}
 	
 	private boolean haveRolled() {
@@ -535,7 +534,6 @@ public class TheGameImpl {
 			
 			updateMovingIn();
 			checkForWin();
-			updateUndoEnabled();
 			
 			int diceTotal = 0;
 			if (gammon.turn == GameColor.BLACK) {
@@ -553,6 +551,8 @@ public class TheGameImpl {
 				gammon.movesRemaining.add(2);
 				gammon.movesRemaining.add(1);
 			}
+			
+			this.onBoardUpdate();
 		}
 		
 		return pieceMoved;
@@ -636,8 +636,8 @@ public class TheGameImpl {
 				e.printStackTrace();
 			}
 			//Log.d(TAG, "SavedStatesCount: " + gammon.savedStatesCount);
-			updateUndoEnabled();
 		}
+		this.onBoardUpdate();
 		
 	}
 	
@@ -764,7 +764,7 @@ public class TheGameImpl {
 			}
 		}
 		gammon.buttonState = ButtonState.TURN_FINISHED;
-		updateButtonDisplay();
+		this.onBoardUpdate();
 	}
 	
 	private ArrayList<Integer> aceyDeuceyChosen(int adMoveLength, ArrayList<Integer> movesAvailable) {
@@ -872,7 +872,7 @@ public class TheGameImpl {
 			gammon.whiteDie1 = 0;
 			gammon.whiteDie2 = 0;
 		}
-		updateButtonDisplay();
+		this.onBoardUpdate();
 	}
 	
 	public Map<Integer, CheckerContainer> getContainers() {
@@ -881,12 +881,6 @@ public class TheGameImpl {
 
 	public GameColor getTurn() {
 		return gammon.turn;
-	}
-
-	public void setTurn(GameColor turn) {
-		gammon.turn = turn;
-		Log.d(TAG, "Should say turn: " + turn);
-		updateTurnDisplay();
 	}
 
 	public int getWhiteDie1() {
@@ -952,33 +946,6 @@ public class TheGameImpl {
 	public void setAllWhitePiecesOut(boolean allWhitePiecesOut) {
 		gammon.allWhitePiecesOut = allWhitePiecesOut;
 	}
-	
-	private void updateTurnDisplay(){
-		for (GammonEventHandler listener : handlers) {
-			String turn;
-			if (gammon.turn == GameColor.NEITHER) {
-				turn = "Start Game";
-			} else if (gammon.turn == GameColor.BLACK){
-				turn = "Red Turn";
-			} else {
-				turn = "White Turn";
-			}
-			listener.onDataChange("turn", turn.toString());
-		}
-	}
-	
-	private void updateButtonDisplay(){
-		for (GammonEventHandler listener : handlers) {
-			listener.onDataChange("button", gammon.buttonState.getText());
-		}
-	}
-	
-	private void updateUndoEnabled(){
-		for (GammonEventHandler listener : handlers) {
-			boolean undoEnabled = (gammon.savedStatesCount > 0);
-			listener.onUndoChange(undoEnabled);
-		}
-	}	
 	
 	public ButtonState getButtonState(){
 		return gammon.buttonState;

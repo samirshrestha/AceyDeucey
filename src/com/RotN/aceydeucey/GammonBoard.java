@@ -79,6 +79,9 @@ SurfaceHolder.Callback {
 		
 		// make the GamePanel focusable so it can handle events
 		setFocusable(true);
+		
+		beerGammon = new TheGameImpl();
+		beerGammon.setFileContext(fileContext);
 	}
 	
 	private static final String TAG = GammonBoard.class.getSimpleName();

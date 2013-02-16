@@ -1,6 +1,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AppTheme" parent="android:Theme" />
+    <style name="AppTheme" parent="android:Theme.Holo" />
+    
+    <style name="AppBaseTheme" parent="android:Theme.Holo">
+        <!-- API 11 theme customizations can go here. -->
+    </style>
     
     <style name ="headerText">
         <item name="android:textStyle">bold</item>
