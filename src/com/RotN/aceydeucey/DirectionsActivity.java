@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.text.SpannableString;
 import android.text.style.BulletSpan;
 import android.view.Gravity;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,6 +17,22 @@ public class DirectionsActivity extends Activity {
 		
 		setContentView(R.layout.activity_directions);
 		LinearLayout ll = (LinearLayout) findViewById(R.id.directionsLayout);
+		
+		TextView gameOverview = new TextView(this);
+		gameOverview.setText("The American version of Acey-Deucey has been a favorite game of the U.S. Navy, Marine Corps, and Merchant Marine since the First World War.");
+		
+		TextView setupLabel = new TextView(this);
+		setupLabel.setText("Setup");
+		setupLabel.setGravity(Gravity.CENTER);
+		setupLabel.setTextAppearance(this, R.style.headerText);
+		setupLabel.setPadding(0, 15, 0, 0);
+		
+		TextView setupObject = new TextView(this);
+		setupObject.setText("Each player starts with fifteen checkers off the board. The players enter their checkers in the opponent's home board, then bring them around the board as shown in the diagram below.");
+		
+		ImageView setupImage = new ImageView(this);
+		setupImage.setBackgroundResource(R.drawable.acdc);
+		//setupImage.
 		
 		TextView objectLabel = new TextView(this);
 		objectLabel.setText("Object");
@@ -138,6 +155,10 @@ public class DirectionsActivity extends Activity {
 		TextView scoring = new TextView(this);
 		scoring.setText(getText(R.string.scoring_description));
 		
+		ll.addView(gameOverview);
+		ll.addView(setupLabel);
+		ll.addView(setupObject);
+		ll.addView(setupImage);
 		ll.addView(objectLabel);
 		ll.addView(gameObject);
 		ll.addView(rfnLabel);
