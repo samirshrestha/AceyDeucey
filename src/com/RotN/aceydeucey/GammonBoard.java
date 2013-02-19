@@ -241,7 +241,7 @@ SurfaceHolder.Callback {
 		
 		blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
 		
-		pokey.wasTouched(containerDistances, event.getX(), event.getY());
+		pokey.wasTouched(containerDistances, event.getX(), event.getY(), beerGammon.onPokey());
 		
 		Log.d(TAG, "We are checking points");
 		Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
@@ -301,6 +301,9 @@ SurfaceHolder.Callback {
 		pokey.setTurn(beerGammon.getTurn());
 		
 		Canvas canvas = getHolder().lockCanvas();
+		if (null == board) {
+			board = decodeSampledBitmapFromResource(getResources(), R.drawable.background, getWidth(), getHeight());
+		}
 		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
 		blackBunker.draw(canvas);
 		whiteBunker.draw(canvas);

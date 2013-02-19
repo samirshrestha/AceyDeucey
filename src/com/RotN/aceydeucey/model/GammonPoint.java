@@ -75,20 +75,24 @@ public class GammonPoint {
 		
 		
 		if (MotionEvent.ACTION_DOWN == mouseAction)  { //only check the mouse down if they is a movable piece
-			if ( (gammon.getTurn() == GameColor.BLACK && gammon.getContainer(pointPos).getBlackCheckerCount() > 0) ||
-					(gammon.getTurn() == GameColor.WHITE && gammon.getContainer(pointPos).getWhiteCheckerCount() > 0) ) {
-				leftCheck = (int) (pointRect.left - pointRect.width());
-				rightCheck = (int) (pointRect.right + pointRect.width());
-				topCheck = (int) (pointRect.top - pointRect.width());
-				bottomCheck = (int) (pointRect.bottom + pointRect.width());	
-				
-				if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
-					if (eventY >= topCheck && (eventY <= bottomCheck)) {
-						double xDistance = eventX - pointRect.exactCenterX();
-						double yDistance = eventY - pointRect.exactCenterY();
-						double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
-						pointDistances.put(pointPos, distance);
+			if (false == gammon.onPokey()) {
+				if ( (gammon.getTurn() == GameColor.BLACK && gammon.getContainer(pointPos).getBlackCheckerCount() > 0) ||
+						(gammon.getTurn() == GameColor.WHITE && gammon.getContainer(pointPos).getWhiteCheckerCount() > 0) ) {
+					leftCheck = (int) (pointRect.left - pointRect.width());
+					rightCheck = (int) (pointRect.right + pointRect.width());
+					topCheck = (int) (pointRect.top - pointRect.width());
+					bottomCheck = (int) (pointRect.bottom + pointRect.width());	
+					
+					if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+						if (eventY >= topCheck && (eventY <= bottomCheck)) {
+							double xDistance = eventX - pointRect.exactCenterX();
+							double yDistance = eventY - pointRect.exactCenterY();
+							double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+							pointDistances.put(pointPos, distance);
+						}
 					}
+				} else {
+					botherChecking = false;
 				}
 			} else {
 				botherChecking = false;

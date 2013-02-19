@@ -63,18 +63,20 @@ public class Pokey {
 		return wasTouched;
 	}
 	
-	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY) {
-		int leftCheck = pokeyRect.left;
-		int rightCheck = pokeyRect.right;
-		int topCheck = pokeyRect.top;
-		int bottomCheck = pokeyRect.bottom;		
+	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY, boolean onPokey) {
+		int leftCheck = pokeyRect.left - pokeyRect.width();
+		int rightCheck = pokeyRect.right + pokeyRect.width();
+		int topCheck = pokeyRect.top - pokeyRect.width();
+		int bottomCheck = pokeyRect.bottom + pokeyRect.width();		
 	
-		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
-			if (eventY >= topCheck && (eventY <= bottomCheck)) {
-				double xDistance = eventX - pokeyRect.exactCenterX();
-				double yDistance = eventY - pokeyRect.exactCenterY();
-				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
-				pointDistances.put(pointPos, distance);
+		if (onPokey) {
+			if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+				if (eventY >= topCheck && (eventY <= bottomCheck)) {
+					double xDistance = eventX - pokeyRect.exactCenterX();
+					double yDistance = eventY - pokeyRect.exactCenterY();
+					double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+					pointDistances.put(pointPos, distance);
+				}
 			}
 		}
 	}

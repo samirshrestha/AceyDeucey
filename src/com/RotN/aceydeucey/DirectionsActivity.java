@@ -2,9 +2,12 @@ package com.RotN.aceydeucey;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.text.Html;
 import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.text.style.BulletSpan;
 import android.view.Gravity;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,7 +35,10 @@ public class DirectionsActivity extends Activity {
 		
 		ImageView setupImage = new ImageView(this);
 		setupImage.setBackgroundResource(R.drawable.acdc);
-		//setupImage.
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.gravity = Gravity.CENTER;
+		setupImage.setLayoutParams(params);
+		setupImage.setPadding(0, 10, 0, 0);
 		
 		TextView objectLabel = new TextView(this);
 		objectLabel.setText("Object");
@@ -43,16 +49,6 @@ public class DirectionsActivity extends Activity {
 		TextView gameObject = new TextView(this);
 		gameObject.setText("The object of the game is to move all of your checkers around the board to your own home table and then bear them off. The first player to bear off all of his checkers wins the game.");
 		
-		TextView rfnLabel = new TextView(this);
-		rfnLabel.setText("Roll For Number");
-		rfnLabel.setGravity(Gravity.CENTER);
-		rfnLabel.setTextAppearance(this, R.style.headerText);
-		rfnLabel.setPadding(0, 15, 0, 0);
-		
-		TextView rollForNumber = new TextView(this);
-		rollForNumber.setText("Each player has a number that can deal them a drink if rolled. The players start by rolling for their number."
-				+ " Anytime your oppenent rolls their number it is your job to call them on it and they drink. If you fail to do so you are awarded the drink.");
-		
 		TextView startLabel = new TextView(this);
 		startLabel.setText("To Start");
 		startLabel.setGravity(Gravity.CENTER);
@@ -60,7 +56,7 @@ public class DirectionsActivity extends Activity {
 		startLabel.setPadding(0, 15, 0, 0);
 		
 		TextView rollForTurn = new TextView(this);
-		rollForTurn.setText("Each player rolls one die and the higher number goes first. That player then moves according to the values on the dice.");
+		rollForTurn.setText(" Each player rolls one die and the higher number goes first. That player then rolls both dice again to begin his first turn.");
 		
 		TextView enteringLabel = new TextView(this);
 		enteringLabel.setText("Entering Checkers");
@@ -69,7 +65,7 @@ public class DirectionsActivity extends Activity {
 		enteringLabel.setPadding(0, 15, 0, 0);
 		
 		TextView entering = new TextView(this);
-		entering.setText("You enter a checker by placing it on a point in the  board corresponding to a number rolled. For example, if you roll 6-3, then you enter one checker on the six-point and one checker on the three-point. Once you have entered one or more checkers, you may use subsequent rolls to move those checkers forward, to enter more checkers, or both.");
+		entering.setText("You enter a checker by placing it on a point in the opponent's home board corresponding to a number rolled. For example, if you roll 6-3, then you enter one checker on the opponent's six-point and one checker on his three-point. Once you have entered one or more checkers, you may use subsequent rolls to move those checkers forward, to enter more checkers, or both.");
 		
 		TextView moveLabel = new TextView(this);
 		moveLabel.setText("Movement");
@@ -96,7 +92,7 @@ public class DirectionsActivity extends Activity {
 		s3.setSpan(new BulletSpan(15), 0, t3.length(), 0);
 		bullet3.setText(s3);
 		TextView bullet4 = new TextView(this);
-		CharSequence t4 = "You must use both numbers of a roll if possible, or all four numbers in the case of doubles.";
+		CharSequence t4 = "You must use both numbers of a roll if possible, or all four numbers in the case of doubles. If you can play one number but not both, you must play the higher one.";
 		SpannableString s4 = new SpannableString(t4);
 		s4.setSpan(new BulletSpan(15), 0, t4.length(), 0);
 		bullet4.setText(s4);
@@ -110,32 +106,48 @@ public class DirectionsActivity extends Activity {
 		TextView acdc1 = new TextView(this);
 		acdc1.setText(getText(R.string.acdc1));
 		
-		TextView doublesLabel = new TextView(this);
-		doublesLabel.setText(getText(R.string.doubles_label));
-		doublesLabel.setGravity(Gravity.CENTER);
-		doublesLabel.setTextAppearance(this, R.style.headerText);
-		doublesLabel.setPadding(0, 15, 0, 0);
+		TextView acdcBullet1 = new TextView(this);
+		CharSequence acdcT1 = "First you play the 1 and 2 in the normal way.";
+		SpannableString acdcS1 = new SpannableString(acdcT1);
+		acdcS1.setSpan(new BulletSpan(15), 0, acdcT1.length(), 0);
+		acdcBullet1.setText(acdcS1);
+		TextView acdcBullet2 = new TextView(this);
+		CharSequence acdcT2 = "Then you name any roll of doubles you wish and play it accordingly.";
+		SpannableString acdcS2 = new SpannableString(acdcT2);
+		acdcS2.setSpan(new BulletSpan(15), 0, acdcT2.length(), 0);
+		acdcBullet2.setText(acdcS2);
+		TextView acdcBullet3 = new TextView(this);
+		CharSequence acdcT3 = "Then you roll again and play the roll as usual.";
+		SpannableString acdcS3 = new SpannableString(acdcT3);
+		acdcS3.setSpan(new BulletSpan(15), 0, acdcT3.length(), 0);
+		acdcBullet3.setText(acdcS3);		
+		TextView acdcBullet4 = new TextView(this);
+		CharSequence acdcT4 = "If the number rolled is another 1-2, you keep going—naming and playing a double of your choice, and then rolling again.";
+		SpannableString acdcS4 = new SpannableString(acdcT4);
+		acdcS4.setSpan(new BulletSpan(15), 0, acdcT4.length(), 0);
+		acdcBullet4.setText(acdcS4);	
 		
-		TextView doubles = new TextView(this);
-		doubles.setText(getText(R.string.doubles_move));
+		TextView acdc2 = new TextView(this);
+		acdc2.setText(getText(R.string.acdc2));
+		acdc2.setPadding(0,  10,  0,  0);
 		
-		TextView pokeyingLabel = new TextView(this);
-		pokeyingLabel.setText(getText(R.string.pokeying_label));
-		pokeyingLabel.setGravity(Gravity.CENTER);
-		pokeyingLabel.setTextAppearance(this, R.style.headerText);
-		pokeyingLabel.setPadding(0, 15, 0, 0);
+		TextView hittingLabel = new TextView(this);
+		hittingLabel.setText(getText(R.string.hitting_label));
+		hittingLabel.setGravity(Gravity.CENTER);
+		hittingLabel.setTextAppearance(this, R.style.headerText);
+		hittingLabel.setPadding(0, 15, 0, 0);
 		
-		TextView pokeyMove = new TextView(this);
-		pokeyMove.setText(getText(R.string.pokeying_move));
+		TextView hitting = new TextView(this);
+		hitting.setText(getText(R.string.hitting));
 		
-		TextView gettingOffLabel = new TextView(this);
-		gettingOffLabel.setText(getText(R.string.getting_off_label));
-		gettingOffLabel.setGravity(Gravity.CENTER);
-		gettingOffLabel.setTextAppearance(this, R.style.headerText);
-		gettingOffLabel.setPadding(0, 15, 0, 0);
+		TextView barLabel = new TextView(this);
+		barLabel.setText(getText(R.string.entering_label));
+		barLabel.setGravity(Gravity.CENTER);
+		barLabel.setTextAppearance(this, R.style.headerText);
+		barLabel.setPadding(0, 15, 0, 0);
 		
-		TextView gettingOff = new TextView(this);
-		gettingOff.setText(getText(R.string.getting_off_move));
+		TextView bar = new TextView(this);
+		bar.setText(getText(R.string.entering));
 		
 		TextView bearingOffLabel = new TextView(this);
 		bearingOffLabel.setText(getText(R.string.bearing_off_label));
@@ -143,8 +155,8 @@ public class DirectionsActivity extends Activity {
 		bearingOffLabel.setTextAppearance(this, R.style.headerText);
 		bearingOffLabel.setPadding(0, 15, 0, 0);
 		
-		TextView bearingOff = new TextView(this);
-		bearingOff.setText(getText(R.string.bearing_off_move));
+		TextView bearingOff1 = new TextView(this);
+		bearingOff1.setText(getText(R.string.bearing_off1));
 		
 		TextView scoringLabel = new TextView(this);
 		scoringLabel.setText(getText(R.string.scoring_label));
@@ -153,7 +165,28 @@ public class DirectionsActivity extends Activity {
 		scoringLabel.setPadding(0, 15, 0, 0);
 		
 		TextView scoring = new TextView(this);
-		scoring.setText(getText(R.string.scoring_description));
+		scoring.setText(getText(R.string.scoring));
+		
+		TextView strategyLabel = new TextView(this);
+		strategyLabel.setText(getText(R.string.strategy_label));
+		strategyLabel.setGravity(Gravity.CENTER);
+		strategyLabel.setTextAppearance(this, R.style.headerText);
+		strategyLabel.setPadding(0, 15, 0, 0);
+		
+		TextView strategy = new TextView(this);
+		strategy.setText(getText(R.string.strategy));
+		
+		TextView infoLabel = new TextView(this);
+		infoLabel.setText("More info");
+		infoLabel.setGravity(Gravity.CENTER);
+		infoLabel.setTextAppearance(this, R.style.headerText);
+		infoLabel.setPadding(0, 15, 0, 0);
+		
+		TextView info = new TextView(this);
+		info.setText(Html.fromHtml(
+	            "For more info, please visit " +
+	                    "<a href=\"http://www.bkgm.com\">Backgammon Galore</a> "));
+		info.setMovementMethod(LinkMovementMethod.getInstance());
 		
 		ll.addView(gameOverview);
 		ll.addView(setupLabel);
@@ -161,8 +194,6 @@ public class DirectionsActivity extends Activity {
 		ll.addView(setupImage);
 		ll.addView(objectLabel);
 		ll.addView(gameObject);
-		ll.addView(rfnLabel);
-		ll.addView(rollForNumber);
 		ll.addView(startLabel);
 		ll.addView(rollForTurn);
 		ll.addView(enteringLabel);
@@ -175,15 +206,22 @@ public class DirectionsActivity extends Activity {
 		ll.addView(bullet4);
 		ll.addView(acdcLabel);
 		ll.addView(acdc1);
-		ll.addView(doublesLabel);
-		ll.addView(doubles);
-		ll.addView(pokeyingLabel);
-		ll.addView(pokeyMove);
-		ll.addView(gettingOffLabel);
-		ll.addView(gettingOff);
+		ll.addView(acdcBullet1);
+		ll.addView(acdcBullet2);
+		ll.addView(acdcBullet3);
+		ll.addView(acdcBullet4);
+		ll.addView(acdc2);
+		ll.addView(hittingLabel);
+		ll.addView(hitting);
+		ll.addView(barLabel);
+		ll.addView(bar);
 		ll.addView(bearingOffLabel);
-		ll.addView(bearingOff);
+		ll.addView(bearingOff1);
 		ll.addView(scoringLabel);
 		ll.addView(scoring);
+		ll.addView(strategyLabel);
+		ll.addView(strategy);
+		ll.addView(infoLabel);
+		ll.addView(info);
 	}
 }

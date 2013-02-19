@@ -21,16 +21,17 @@
     <string name="directions_button">Directions</string>
     <string name="object_label">Object</string>
     <string name="acdc_label">Acey-deucey</string>
-    <string name="acdc1">The roll of 1 and 2 (acey-deucey) is especially valuable. When you roll 1-2, you name any roll of doubles you wish and play it accordingly.</string>
-    <string name="doubles_label">Doubles</string>
-    <string name="doubles_move">After taking your 4 moves with doubles, the player rolls again.</string>
-    <string name="pokeying_label">Pokeying</string>
-    <string name="pokeying_move">A checker sitting alone on a point is called a blot. If an opposing checker lands on a blot, the blot is hit and placed on pokey.</string>
-    <string name="getting_off_label">Getting Off Pokey</string>
-    <string name="getting_off_move">Any time you have one or more checkers on pokey, you have to reenter them on the board before moving any other pieces. You reenter a checker by rolling doubles and moving it to an open point corresponding to one of the numbers on the rolled dice.</string>
-    <string name="bearing_off_label">Bearing Off/Moving In</string>
-    <string name="bearing_off_move">Once you have moved all fifteen of your checkers into your opponent\'s home board, you may begin bearing off. You bear off a checker by rolling a number that corresponds to the point on which it resides, then removing the checker from the board.</string>
+    <string name="acdc1">The roll of 1 and 2 (acey&#8211;deucey) is especially valuable. When you roll 1&#8211;2, this is what happens:</string>
+    <string name="acdc2">Note, however, if you are unable to use any part of your roll, you forfeit the rest of your turn. For example, if you can move your 2 but cannot use the 1, you may not name a double and you may not roll again.\n\nIt is permissible to name a double even if only part of it can be used. For example, after moving 1 and 2, you can name 6&#8211;6 as your double even if only three of the 6s can be played. You would then lose the fourth 6, and you would not get to roll again.</string>
+    <string name="hitting_label">Hitting</string>
+    <string name="hitting">A checker sitting alone on a point is called a blot. If an opposing checker lands on a blot, the blot is hit and placed on the bar.</string>
+    <string name="entering_label">Entering from the bar</string>
+    <string name="entering">Any time you have one or more checkers on the bar, your first obligation is to reenter those checker(s) into the opponent\'s home board. You reenter a checker by moving it to an open point corresponding to one of the numbers on the rolled dice. If you are able to enter some but not all of your checkers on the bar, you must enter as many as you can then give up the remainder of your turn.</string>
+    <string name="bearing_off_label">Bearing Off</string>
+    <string name="bearing_off1">Once you have moved all fifteen of your checkers into your home board, you may begin bearing off. You bear off a checker by rolling a number that corresponds to the point on which it resides, then removing the checker from the board.\n\nIf there is no checker on the point indicated by the roll, you must make a legal move using a checker on a higher-numbered point. If there are no checkers on higher-numbered points, you must remove a checker from the highest point that has a checker.</string>
     <string name="scoring_label">Scoring</string>
-    <string name="scoring_description">The loser drinks one for each of his checkers still on the board (or yet to be entered). Gammons and backgammons do not count extra.</string>
+    <string name="scoring">The loser pays one point for each of his checkers still on the board (or yet to be entered). Gammons and backgammons do not count extra.\n\nThe doubling cube is not used in acey-deucey.</string>
+    <string name="strategy_label">Strategy</string>
+    <string name="strategy">Because the roll of 1-2 is so powerful, luck plays a greater part in acey-deucey than in regular backgammon. You are never completely out of a game. On the other hand, since you start with fifteen men back, there is some added opportunity for skill in placing your checkers to block the opponent.\n\nTypical strategy is to get at least half your checkers on the board as quickly as possible and form them into a blockade.</string>    
 
 </resources>

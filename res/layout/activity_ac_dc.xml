@@ -7,23 +7,14 @@
     <RelativeLayout
 	    xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/game_panel"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:orientation="horizontal" >	    
-	  
-	    <Button 
-	        android:id="@+id/undo_button"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:gravity="center"
-	        android:layout_alignParentLeft="true"
-	        android:text="@string/undo_button"/>	
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content">	  
 	    
         <FrameLayout android:id="@+id/adLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
-        android:layout_toRightOf="@+id/undo_button">
-	        <ImageView android:id="@+id/image"
+	    android:layout_centerHorizontal="true">
+		    <ImageView android:id="@+id/image"
 	            android:layout_width="wrap_content"
 				android:contentDescription="@string/gammon_table"
 	            android:layout_height="wrap_content"
@@ -35,7 +26,15 @@
 		        android:layout_height="wrap_content"
 		        googleads:adSize="BANNER"
 		        googleads:adUnitId="@string/admob_id"/>
-    	</FrameLayout>    
+    	</FrameLayout>   
+    	
+	    <Button 
+	        android:id="@+id/undo_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:text="@string/undo_button"
+	        android:layout_toLeftOf="@+id/adLayout"/>
 
 	    <Button
 	        android:id="@+id/action_button"
