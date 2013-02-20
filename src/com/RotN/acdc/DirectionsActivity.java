@@ -1,4 +1,4 @@
-package com.RotN.aceydeucey;
+package com.RotN.acdc;
 
 import android.os.Bundle;
 import android.app.Activity;

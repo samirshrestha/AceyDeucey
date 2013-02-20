@@ -1,4 +1,4 @@
-package com.RotN.aceydeucey.logic;
+package com.RotN.acdc.logic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.annotation.SuppressLint;
-import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
-import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 public class TheGame implements Serializable {
 	/**

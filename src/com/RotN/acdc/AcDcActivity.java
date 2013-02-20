@@ -1,7 +1,7 @@
-package com.RotN.aceydeucey;
+package com.RotN.acdc;
 
-import com.RotN.aceydeucey.logic.TheGameImpl;
-import com.RotN.aceydeucey.logic.TheGame.ButtonState;
+import com.RotN.acdc.logic.TheGameImpl;
+import com.RotN.acdc.logic.TheGame.ButtonState;
 import com.google.ads.Ad;
 import com.google.ads.AdListener;
 import com.google.ads.AdRequest;

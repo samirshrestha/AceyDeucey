@@ -1,4 +1,4 @@
-package com.RotN.aceydeucey.logic;
+package com.RotN.acdc.logic;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,9 +16,9 @@ import java.util.Map.Entry;
 import android.content.Context;
 import android.util.Log;
 
-import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
-import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
-import com.RotN.aceydeucey.logic.TheGame.ButtonState;
+import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.TheGame.ButtonState;
 
 public class TheGameImpl {
 	Context fileContext;	

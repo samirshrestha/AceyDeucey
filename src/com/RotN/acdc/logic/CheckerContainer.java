@@ -1,4 +1,4 @@
-package com.RotN.aceydeucey.logic;
+package com.RotN.acdc.logic;
 
 import java.io.Serializable;
 

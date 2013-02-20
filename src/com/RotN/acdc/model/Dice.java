@@ -1,7 +1,7 @@
-package com.RotN.aceydeucey.model;
+package com.RotN.acdc.model;
 
-import com.RotN.aceydeucey.R;
-import com.RotN.aceydeucey.logic.TheGameImpl;
+import com.RotN.acdc.R;
+import com.RotN.acdc.logic.TheGameImpl;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

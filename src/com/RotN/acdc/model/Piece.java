@@ -1,6 +1,6 @@
-package com.RotN.aceydeucey.model;
+package com.RotN.acdc.model;
 
-import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

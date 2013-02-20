@@ -1,11 +1,11 @@
-package com.RotN.aceydeucey.model;
+package com.RotN.acdc.model;
 
 import java.util.Map;
 
-import com.RotN.aceydeucey.logic.CheckerContainer;
-import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
-import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
-import com.RotN.aceydeucey.logic.TheGameImpl;
+import com.RotN.acdc.logic.CheckerContainer;
+import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.TheGameImpl;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

@@ -1,4 +1,4 @@
-package com.RotN.aceydeucey;
+package com.RotN.acdc;
 
 import java.io.*;
 import java.util.HashMap;
@@ -8,16 +8,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 
-import com.RotN.aceydeucey.logic.CheckerContainer;
-import com.RotN.aceydeucey.logic.CheckerContainer.BoardPositions;
-import com.RotN.aceydeucey.logic.CheckerContainer.GameColor;
-import com.RotN.aceydeucey.logic.TheGame;
-import com.RotN.aceydeucey.logic.TheGameImpl;
-import com.RotN.aceydeucey.model.Bunker;
-import com.RotN.aceydeucey.model.Dice;
-import com.RotN.aceydeucey.model.GammonPoint;
-import com.RotN.aceydeucey.model.Piece;
-import com.RotN.aceydeucey.model.Pokey;
+import com.RotN.acdc.logic.CheckerContainer;
+import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.TheGame;
+import com.RotN.acdc.logic.TheGameImpl;
+import com.RotN.acdc.model.Bunker;
+import com.RotN.acdc.model.Dice;
+import com.RotN.acdc.model.GammonPoint;
+import com.RotN.acdc.model.Piece;
+import com.RotN.acdc.model.Pokey;
 
 import android.content.Context;
 import android.content.res.Resources;
