@@ -22,6 +22,8 @@ public class GammonPoint {
 	private boolean isSelected; 
 	private boolean isPossibleMove;
 	private boolean isHovering;
+	private boolean isAIOrigMove;
+	private boolean isAINextMove;
 	private Rect pointRect;
 	private CheckerContainer.BoardPositions pointPos;
 	
@@ -30,6 +32,8 @@ public class GammonPoint {
 		this.isPossibleMove = false;
 		this.pointPos = pointPos;
 		this.isHovering = false;
+		this.isAINextMove = false;
+		this.isAIOrigMove = false;
 		
 		SetPointRect(boardRect);
 	}	
@@ -113,6 +117,14 @@ public class GammonPoint {
 	
 	public void setSelected(boolean selected) {
 		isSelected = selected;
+	}
+	
+	public void setAIOrigMove(boolean origMove) {
+		isAIOrigMove = origMove;
+	}
+	
+	public void setAINextMove(boolean nextMove) {
+		isAINextMove = nextMove;
 	}
 	
 	public void setPossibleMove(boolean possibleMove) {
@@ -445,9 +457,15 @@ public class GammonPoint {
 	}
 	
 	private void drawTriangleShading(Canvas canvas) {
-		if (this.isPossibleMove || this.isSelected || this.isHovering) {
+		if (this.isPossibleMove || this.isSelected || this.isHovering ||
+				this.isAINextMove || this.isAIOrigMove) {
 			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			if (this.isSelected) {				
+			if (this.isAINextMove) {
+				paint.setARGB(200, 0, 0, 0);
+			} else if (this.isAIOrigMove) {
+				paint.setARGB(200, 0, 255, 0);
+			}
+			else if (this.isSelected) {				
 				paint.setARGB(200, 255, 255, 255);
 			}
 			else if (this.isPossibleMove){

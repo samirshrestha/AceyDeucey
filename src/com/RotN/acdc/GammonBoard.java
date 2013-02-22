@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 
+import com.RotN.acdc.logic.AcDcAI;
+import com.RotN.acdc.logic.AcDcAI.AIMoves;
 import com.RotN.acdc.logic.CheckerContainer;
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
@@ -24,6 +26,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -48,6 +53,16 @@ SurfaceHolder.Callback {
 	private BoardPositions selectedPosition;
 	private Piece floatingPiece;
 	Context fileContext;
+	private String blackValue;
+	private String whiteValue;
+
+	public String getWhiteValue() {
+		return whiteValue;
+	}
+
+	public String getBlackValue() {
+		return blackValue;
+	}
 
 	public GammonBoard(Context context) {
 		super(context);
@@ -309,12 +324,21 @@ SurfaceHolder.Callback {
 		whiteBunker.draw(canvas);
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
 		pokey.draw(canvas, pokeyData);
-						
+		
+		AcDcAI ai = new AcDcAI();
+		//AIMoves aiMoves = ai.GetNextMove(beerGammon.getGammonData());
+		
+		blackValue = ai.evaluateBoardBlackPerspective(beerGammon.getGammonData()).toString();
+		whiteValue = ai.evaluateBoardWhitePerspective(beerGammon.getGammonData()).toString();
+		
+		//boardPoints.get(aiMove.origSpot).setAIOrigMove(true);
+		//boardPoints.get(aiMove.nextSpot).setAINextMove(true);
+								
 		renderHighBoardPoints(canvas);
 		dice.draw(canvas, beerGammon);
 		renderLowBoardPoints(canvas);
 		
-		floatingPiece.draw(canvas);
+		floatingPiece.draw(canvas);	
 		
 		if (canvas != null) {
 			getHolder().unlockCanvasAndPost(canvas);

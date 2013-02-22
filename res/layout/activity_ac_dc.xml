@@ -42,6 +42,13 @@
 	        android:layout_height="wrap_content"
 	        android:layout_toRightOf="@+id/adLayout"
 	        android:gravity="center"/>
+    	
+        <TextView 
+            android:id="@+id/blackValue"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_toLeftOf="@+id/undo_button"/>
 	    
 	</RelativeLayout>
 	
@@ -50,7 +57,7 @@
 	    android:layout_height="match_parent"
 		android:orientation="vertical" >    
 
-		<com.RotN.aceydeucey.GammonBoard
+		<com.RotN.acdc.GammonBoard
 			android:id="@+id/gammonBoard"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
