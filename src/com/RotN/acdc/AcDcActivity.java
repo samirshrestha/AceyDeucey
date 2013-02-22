@@ -156,11 +156,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             public void onClick(View v) {
                 beerGammon.buttonPushed();
                 board.render();
-                TextView bv = (TextView)findViewById(R.id.blackValue);
-                if (bv != null) {
-                	String display = "Red: " + board.getBlackValue() + "\nWhite: " + board.getWhiteValue();
-                	bv.setText(display);
-                }
                 if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
                 }
@@ -268,5 +263,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		actionButton.setEnabled(beerGammon.canMove() == false);
 		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
 		
+		TextView bv = (TextView)findViewById(R.id.blackValue);
+        if (bv != null) {
+        	String display = "Red: " + board.getBlackValue() + "\nWhite: " + board.getWhiteValue();
+        	bv.setText(display);
+        }		
 	}
 }

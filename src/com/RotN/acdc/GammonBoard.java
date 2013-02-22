@@ -53,15 +53,15 @@ SurfaceHolder.Callback {
 	private BoardPositions selectedPosition;
 	private Piece floatingPiece;
 	Context fileContext;
-	private String blackValue;
-	private String whiteValue;
 
 	public String getWhiteValue() {
-		return whiteValue;
+		AcDcAI ai = new AcDcAI();
+		return ai.evaluateBoardWhitePerspective(beerGammon.getGammonData()).toString();
 	}
 
 	public String getBlackValue() {
-		return blackValue;
+		AcDcAI ai = new AcDcAI();
+		return ai.evaluateBoardBlackPerspective(beerGammon.getGammonData()).toString();
 	}
 
 	public GammonBoard(Context context) {
@@ -325,15 +325,6 @@ SurfaceHolder.Callback {
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
 		pokey.draw(canvas, pokeyData);
 		
-		AcDcAI ai = new AcDcAI();
-		//AIMoves aiMoves = ai.GetNextMove(beerGammon.getGammonData());
-		
-		blackValue = ai.evaluateBoardBlackPerspective(beerGammon.getGammonData()).toString();
-		whiteValue = ai.evaluateBoardWhitePerspective(beerGammon.getGammonData()).toString();
-		
-		//boardPoints.get(aiMove.origSpot).setAIOrigMove(true);
-		//boardPoints.get(aiMove.nextSpot).setAINextMove(true);
-								
 		renderHighBoardPoints(canvas);
 		dice.draw(canvas, beerGammon);
 		renderLowBoardPoints(canvas);
