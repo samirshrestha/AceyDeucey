@@ -9,11 +9,11 @@ import android.annotation.SuppressLint;
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
-public class TheGame implements Serializable {
+public class TheGame implements Serializable, Cloneable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	
 	public enum ButtonState {
 		ROLL_FOR_NUMBER("Roll For Numbers"), ROLL_FOR_TURN("Roll For Turn"), RED_ROLL("Red Roll"), WHITE_ROLL("White Roll"), TURN_FINISHED("Clear Dice"), 
@@ -41,6 +41,17 @@ public class TheGame implements Serializable {
 	public boolean whiteMovingIn, blackMovingIn, allBlackPiecesOut, allWhitePiecesOut;
 	public ButtonState buttonState;
 	public int savedStatesCount;
+	
+	@Override
+	public TheGame clone() {
+		try {
+			return (TheGame)super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {

@@ -25,17 +25,10 @@ public class AcDcAI {
 		placeHolder.origSpot = BoardPositions.POINT_1;
 		placeHolder.newSpot = BoardPositions.POINT_3;
 		aiMove.moves.add(placeHolder);
+		
+		TheGame acdcCopy = acdc.clone();
+		
 		return aiMove;
-	}
-	
-	private Integer evaluateBoard(TheGame acdc) {
-		Integer boardValue = 0;
-		
-		if (acdc.turn == GameColor.BLACK) {
-			boardValue = evaluateBoardBlackPerspective(acdc);
-		}
-		
-		return boardValue;
 	}
 	
 	public Integer evaluateBoardBlackPerspective(TheGame acdc) {
