@@ -82,7 +82,7 @@ public class Pokey {
 	}
 	
 	// the draw method which draws the corresponding frame
-	public void draw(Canvas canvas, CheckerContainer pokeyData) {				
+	public void draw(Canvas canvas, CheckerContainer pokeyData, boolean floatingPiece) {				
 		SparseArray<Bitmap> pieceBitmaps;
 		int count = 0;
 		SparseArray<Bitmap> pieceMinorBitmaps;
@@ -90,7 +90,7 @@ public class Pokey {
 		
 		int blackFloatingDecrement = 0, whiteFloatingDecrement = 0;
 		
-		if (isSelected) {
+		if (isSelected && floatingPiece) {
 			if (turn == GameColor.WHITE) {
 				whiteFloatingDecrement = 1;
 			} else if (turn == GameColor.BLACK) {

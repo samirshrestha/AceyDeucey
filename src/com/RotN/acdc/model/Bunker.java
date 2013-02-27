@@ -107,11 +107,11 @@ public class Bunker {
 	}
 	
 	// the draw method which draws the corresponding frame
-	public void draw(Canvas canvas) {
+	public void draw(Canvas canvas, boolean floatingPiece) {
 		// where to draw the bunker
 		int startPos = bunkerRect.top;
 		int count = bunkerCount;
-		if (isSelected) {
+		if (isSelected && floatingPiece) {
 			count--;
 		}
 		

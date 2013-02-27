@@ -213,14 +213,15 @@ SurfaceHolder.Callback {
 				}
 				
 				BoardPositions upContainer = findTheClosestContainer(containerDistances);
-				if (upContainer != BoardPositions.NONE) {
+				if (upContainer == selectedPosition) {
+					//do nothing
+				} else if (upContainer != BoardPositions.NONE) {
 					beerGammon.movePiece(selectedPosition, upContainer);
+					selectedPosition = BoardPositions.NONE;
+					clearSelectedSpot();
+					clearPossibleMoves();
 				}
 			}
-			
-			selectedPosition = BoardPositions.NONE;
-			clearSelectedSpot();
-			clearPossibleMoves();
 		}
 		render();
 		
@@ -268,41 +269,50 @@ SurfaceHolder.Callback {
 		
 		BoardPositions downContainer = findTheClosestContainer(containerDistances);
 		
-		if (downContainer == BoardPositions.WHITE_BUNKER) {
-			whiteBunker.setSelected(true);
-			selectedPosition = BoardPositions.WHITE_BUNKER;
-			if (whiteBunker.getBunkerCount() > 0) {
-				floatingPiece.setColor(GameColor.WHITE);
-				floatingPiece.setTouched(true);
-			}
-		} else if (BoardPositions.BLACK_BUNKER == downContainer){
-			blackBunker.setSelected(true);
-			selectedPosition = BoardPositions.BLACK_BUNKER;
-			if (blackBunker.getBunkerCount() > 0) {
-				floatingPiece.setColor(GameColor.BLACK);
-				floatingPiece.setTouched(true);
-			}
-		} else if (BoardPositions.POKEY == downContainer) {
-			selectedPosition = BoardPositions.POKEY;
-			pokey.setSelected(true);
-			CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
-			if (beerGammon.getTurn() == GameColor.BLACK && pokeyData.getBlackCheckerCount() > 0) {
-				floatingPiece.setColor(GameColor.BLACK);
-				floatingPiece.setTouched(true);
-			} else if (beerGammon.getTurn() == GameColor.WHITE && pokeyData.getWhiteCheckerCount() > 0) {
-				floatingPiece.setColor(GameColor.WHITE);
-				floatingPiece.setTouched(true);
-			}
-		} else if (BoardPositions.NONE != downContainer){
-			boardPoints.get(downContainer).setSelected(true);
-			selectedPosition = downContainer;
-			CheckerContainer pointData = beerGammon.getContainer(selectedPosition);
-			if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
-				floatingPiece.setColor(GameColor.BLACK);
-				floatingPiece.setTouched(true);
-			} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
-				floatingPiece.setColor(GameColor.WHITE);
-				floatingPiece.setTouched(true);
+		if (downContainer == selectedPosition) {
+			selectedPosition = BoardPositions.NONE;
+			clearSelectedSpot();
+			clearPossibleMoves();
+		} else if (selectedPosition != BoardPositions.NONE) {
+			//don't set anything, we already have a selected position
+		} else {
+		
+			if (downContainer == BoardPositions.WHITE_BUNKER) {
+				whiteBunker.setSelected(true);
+				selectedPosition = BoardPositions.WHITE_BUNKER;
+				if (whiteBunker.getBunkerCount() > 0) {
+					floatingPiece.setColor(GameColor.WHITE);
+					floatingPiece.setTouched(true);
+				}
+			} else if (BoardPositions.BLACK_BUNKER == downContainer){
+				blackBunker.setSelected(true);
+				selectedPosition = BoardPositions.BLACK_BUNKER;
+				if (blackBunker.getBunkerCount() > 0) {
+					floatingPiece.setColor(GameColor.BLACK);
+					floatingPiece.setTouched(true);
+				}
+			} else if (BoardPositions.POKEY == downContainer) {
+				selectedPosition = BoardPositions.POKEY;
+				pokey.setSelected(true);
+				CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
+				if (beerGammon.getTurn() == GameColor.BLACK && pokeyData.getBlackCheckerCount() > 0) {
+					floatingPiece.setColor(GameColor.BLACK);
+					floatingPiece.setTouched(true);
+				} else if (beerGammon.getTurn() == GameColor.WHITE && pokeyData.getWhiteCheckerCount() > 0) {
+					floatingPiece.setColor(GameColor.WHITE);
+					floatingPiece.setTouched(true);
+				}
+			} else if (BoardPositions.NONE != downContainer){
+				boardPoints.get(downContainer).setSelected(true);
+				selectedPosition = downContainer;
+				CheckerContainer pointData = beerGammon.getContainer(selectedPosition);
+				if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
+					floatingPiece.setColor(GameColor.BLACK);
+					floatingPiece.setTouched(true);
+				} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
+					floatingPiece.setColor(GameColor.WHITE);
+					floatingPiece.setTouched(true);
+				}
 			}
 		}
 		
@@ -320,16 +330,16 @@ SurfaceHolder.Callback {
 			board = decodeSampledBitmapFromResource(getResources(), R.drawable.background, getWidth(), getHeight());
 		}
 		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
-		blackBunker.draw(canvas);
-		whiteBunker.draw(canvas);
+		blackBunker.draw(canvas, floatingPiece.isTouched());
+		whiteBunker.draw(canvas, floatingPiece.isTouched());
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
-		pokey.draw(canvas, pokeyData);
-		
+		pokey.draw(canvas, pokeyData, floatingPiece.isTouched());
+						
 		renderHighBoardPoints(canvas);
 		dice.draw(canvas, beerGammon);
 		renderLowBoardPoints(canvas);
 		
-		floatingPiece.draw(canvas);	
+		floatingPiece.draw(canvas);
 		
 		if (canvas != null) {
 			getHolder().unlockCanvasAndPost(canvas);
@@ -606,10 +616,10 @@ SurfaceHolder.Callback {
 		CheckerContainer container = beerGammon.getContainer(point.getPointPos());
 		
 		if (container.getWhiteCheckerCount() > 0) {
-			point.draw(canvas, pieceWhiteBitmaps, container);				
+			point.draw(canvas, pieceWhiteBitmaps, container, floatingPiece.isTouched());				
 		}
 		else {
-			point.draw(canvas, pieceBlackBitmaps, container);
+			point.draw(canvas, pieceBlackBitmaps, container, floatingPiece.isTouched());
 		}
 	}
 }

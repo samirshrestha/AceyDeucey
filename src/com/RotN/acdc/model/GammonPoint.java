@@ -132,7 +132,7 @@ public class GammonPoint {
 	}
 	
 	// the draw method which draws the corresponding frame
-	public void draw(Canvas canvas, SparseArray<Bitmap> pieceBitmaps, CheckerContainer pointData) {	
+	public void draw(Canvas canvas, SparseArray<Bitmap> pieceBitmaps, CheckerContainer pointData, boolean floatingPiece) {	
 		
 		int pointWidth = pointRect.right - pointRect.left;
 		int bitmapWidth = pieceBitmaps.get(1).getWidth();
@@ -146,7 +146,7 @@ public class GammonPoint {
 			count = pointData.getWhiteCheckerCount();
 		}
 		
-		if (isSelected) {
+		if (isSelected && floatingPiece) {
 			count--;
 		}
 		
