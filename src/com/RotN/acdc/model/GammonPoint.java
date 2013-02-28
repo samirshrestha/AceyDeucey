@@ -21,7 +21,6 @@ public class GammonPoint {
 
 	private boolean isSelected; 
 	private boolean isPossibleMove;
-	private boolean isHovering;
 	private boolean isAIOrigMove;
 	private boolean isAINextMove;
 	private Rect pointRect;
@@ -31,7 +30,6 @@ public class GammonPoint {
 		this.isSelected = false;
 		this.isPossibleMove = false;
 		this.pointPos = pointPos;
-		this.isHovering = false;
 		this.isAINextMove = false;
 		this.isAIOrigMove = false;
 		
@@ -64,7 +62,6 @@ public class GammonPoint {
 		int rightCheck = pointRect.right;
 		int topCheck = pointRect.top;
 		int bottomCheck = pointRect.bottom;
-		boolean botherChecking = true;
 		
 		if (MotionEvent.ACTION_UP == mouseAction) {
 			if (isPossibleMove) {
@@ -72,8 +69,6 @@ public class GammonPoint {
 				rightCheck = (int) (pointRect.right + pointRect.width());
 				topCheck = (int) (pointRect.top - pointRect.width());
 				bottomCheck = (int) (pointRect.bottom + pointRect.width());
-			} else {
-				botherChecking = false;
 			}
 		}
 		
@@ -87,32 +82,18 @@ public class GammonPoint {
 					topCheck = (int) (pointRect.top - pointRect.width());
 					bottomCheck = (int) (pointRect.bottom + pointRect.width());	
 					
-					if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
-						if (eventY >= topCheck && (eventY <= bottomCheck)) {
-							double xDistance = eventX - pointRect.exactCenterX();
-							double yDistance = eventY - pointRect.exactCenterY();
-							double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
-							pointDistances.put(pointPos, distance);
-						}
-					}
-				} else {
-					botherChecking = false;
-				}
-			} else {
-				botherChecking = false;
-			}
+				} 
+			} 
 		} 
 		
-		if (botherChecking || this.isSelected) { //we may not even care
-			if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
-				if (eventY >= topCheck && (eventY <= bottomCheck)) {
-					double xDistance = eventX - pointRect.exactCenterX();
-					double yDistance = eventY - pointRect.exactCenterY();
-					double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
-					pointDistances.put(pointPos, distance);
-				}
+		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+			if (eventY >= topCheck && (eventY <= bottomCheck)) {
+				double xDistance = eventX - pointRect.exactCenterX();
+				double yDistance = eventY - pointRect.exactCenterY();
+				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+				pointDistances.put(pointPos, distance);
 			}
-		}		
+		}	
 	}
 	
 	public void setSelected(boolean selected) {
@@ -457,7 +438,7 @@ public class GammonPoint {
 	}
 	
 	private void drawTriangleShading(Canvas canvas) {
-		if (this.isPossibleMove || this.isSelected || this.isHovering ||
+		if (this.isPossibleMove || this.isSelected || 
 				this.isAINextMove || this.isAIOrigMove) {
 			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			if (this.isAINextMove) {
@@ -470,9 +451,6 @@ public class GammonPoint {
 			}
 			else if (this.isPossibleMove){
 				int transparent = 200;
-				if (this.isHovering) {
-					transparent = 225;
-				}
 				if (pointPos.getIndex() % 2 == 0) {
 					paint.setARGB(transparent, 255, 0, 0);
 				} else {
@@ -540,9 +518,5 @@ public class GammonPoint {
 		    canvas.drawLine(point2_draw.x, point2_draw.y, point3_draw.x, point3_draw.y, borderPaint);
 		    canvas.drawLine(point1_draw.x, point1_draw.y, point3_draw.x, point3_draw.y, borderPaint);
 		}
-	}
-
-	public void setHovering(boolean isHovering) {
-		this.isHovering = isHovering;
 	}
 }

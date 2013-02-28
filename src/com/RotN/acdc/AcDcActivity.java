@@ -35,7 +35,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	//static TextView tvTurn;	
 	private Button undoButton;
 	GammonBoard board;
-    private AdView mAdView;
+    //private AdView mAdView;
     
     private boolean firstAdReceived = false;private 
 	final Handler refreshHandler = new Handler();
@@ -138,11 +138,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 
         setContentView(R.layout.activity_ac_dc);
         
-
-        mAdView = (AdView) this.findViewById(R.id.ad);
+        /*mAdView = (AdView) this.findViewById(R.id.ad);
         mAdView.setAdListener(this);
         AdRequest adRequest = new AdRequest();
-        mAdView.loadAd(adRequest);
+        mAdView.loadAd(adRequest);*/
         
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
         board.loadGame();
@@ -182,7 +181,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	public void onReceiveAd(Ad ad) {
 	  firstAdReceived = true;
 	  // Hide the custom image and show the AdView.
-	  mAdView.setVisibility(View.VISIBLE);
+	  //mAdView.setVisibility(View.VISIBLE);
 	}
 
 	@Override
@@ -190,7 +189,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		if (!firstAdReceived) {
 			// Hide the AdView and show the custom image.
 			Log.d(TAG, "We Got Here");
-			mAdView.setVisibility(View.GONE);
+			//mAdView.setVisibility(View.GONE);
 
 			refreshHandler.removeCallbacks(refreshRunnable);
 			refreshHandler.postDelayed(refreshRunnable, 60 * 1000);
@@ -229,7 +228,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	@Override
     public void onDestroy() {
 		Log.d(TAG, "Destroying...");
-		mAdView.destroy();
+		//mAdView.destroy();
         super.onDestroy();
     }
 
@@ -252,8 +251,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		  @Override
 		  public void run() {
 		    // Load an ad with an ad request.
-			  AdRequest adRequest = new AdRequest();
-		      mAdView.loadAd(adRequest);
+			  //AdRequest adRequest = new AdRequest();
+		      //mAdView.loadAd(adRequest);
 		  }
 		}
 
@@ -262,11 +261,5 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		actionButton.setText(beerGammon.getButtonText());
 		actionButton.setEnabled(beerGammon.canMove() == false);
 		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
-		
-		TextView bv = (TextView)findViewById(R.id.blackValue);
-        if (bv != null) {
-        	String display = "Red: " + board.getBlackValue() + "\nWhite: " + board.getWhiteValue();
-        	bv.setText(display);
-        }		
 	}
 }
