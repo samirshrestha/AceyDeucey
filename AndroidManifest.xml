@@ -39,9 +39,4 @@
     
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
 
-    <!-- Mobile ad networks typically require these permissions in order to fetch contents -->
-    <!-- over the network. -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
 </manifest>
