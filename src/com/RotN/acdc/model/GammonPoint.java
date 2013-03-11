@@ -26,6 +26,12 @@ public class GammonPoint {
 	private boolean isAINextMove;
 	private Rect pointRect;
 	private CheckerContainer.BoardPositions pointPos;
+	private Point animateStart;
+	private Point animateStop;
+	
+	int pointWidth;
+	int bitmapWidth;	
+	int left;
 	
 	public GammonPoint(CheckerContainer.BoardPositions pointPos, Rect boardRect) {
 		this.isSelected = false;
@@ -134,10 +140,10 @@ public class GammonPoint {
 	// the draw method which draws the corresponding frame
 	public void draw(Canvas canvas, SparseArray<Bitmap> pieceBitmaps, CheckerContainer pointData, boolean floatingPiece) {	
 		
-		int pointWidth = pointRect.right - pointRect.left;
-		int bitmapWidth = pieceBitmaps.get(1).getWidth();
+		pointWidth = pointRect.right - pointRect.left;
+		bitmapWidth = pieceBitmaps.get(1).getWidth();
 		
-		int left = pointRect.left + (pointWidth - bitmapWidth) / 2;
+		left = pointRect.left + (pointWidth - bitmapWidth) / 2;
 
 		int count = 0;
 		if (pointData.getBlackCheckerCount() > 0) {
@@ -230,6 +236,8 @@ public class GammonPoint {
 				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
 				startPos = startPos + pieceBitmaps.get(1).getHeight();
 			}
+			
+			calculateAnimatePoints(count, true);
 		}
 		else {
 			int startPos = pointRect.bottom;
@@ -298,7 +306,22 @@ public class GammonPoint {
 				startPos = startPos - pieceBitmaps.get(1).getHeight();
 				canvas.drawBitmap(pieceBitmaps.get(1), left, startPos, null);
 			}
+			
+			calculateAnimatePoints(count, false);
 		}		
+	}
+	
+	private void calculateAnimatePoints(int count, boolean upperPoints) {
+		if (upperPoints) {
+			switch (count) {
+			case 0:
+			case 5:
+			case 10:
+				animateStop.x = left;
+				animateStop.y = pointRect.top;
+				break;
+			}
+		}
 	}
 	
 	private void SetPointRect(Rect boardRect) //pass in the board rect
