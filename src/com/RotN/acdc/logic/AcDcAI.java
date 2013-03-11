@@ -10,11 +10,7 @@ import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 public class AcDcAI {
-	public class Move {
-		GameColor color;
-		public BoardPositions origSpot;
-		public BoardPositions newSpot;
-	}
+
 	public class AIMoves {
 		ArrayList<Move> moves = new ArrayList<Move>();
 	}
