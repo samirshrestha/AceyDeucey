@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.Map.Entry;
 
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
@@ -13,16 +14,29 @@ public class AcDcAI {
 
 	public class AIMoves {
 		ArrayList<Move> moves = new ArrayList<Move>();
+		Integer value = 0;
 	}
 	
-	public AIMoves GetNextMove(TheGame acdc) {
+	//TODO a lot of work here...
+	public AIMoves GetNextMove(TheGameImpl acdc, ArrayList<Move> moves) {
 		AIMoves aiMove = new AIMoves();
-		Move placeHolder = new Move();
-		placeHolder.origSpot = BoardPositions.POINT_1;
-		placeHolder.newSpot = BoardPositions.POINT_3;
-		aiMove.moves.add(placeHolder);
-		
-		TheGame acdcCopy = acdc.clone();
+				
+		TheGame acdcState = acdc.getGammonData();		
+		Set<Entry<Integer, CheckerContainer>> set = acdcState.containers.entrySet();
+		Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
+		while (it.hasNext()) {
+			Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
+			CheckerContainer orig = m.getValue();
+			Vector<BoardPositions> options = acdc.getPossibleMoves(orig.getPosition());
+			
+			for (BoardPositions move : options) {
+				TheGameImpl acdcTemp = acdc.clone();
+				//ArrayList<Move> moves = acdcTemp.movePiece(orig.getPosition(), move);
+				//if (acdcTemp.getGammonData().movesRemaining.size() > 0) {
+				//	GetNextMove(acdcTemp, moves)
+				//}
+			}
+		}
 		
 		return aiMove;
 	}

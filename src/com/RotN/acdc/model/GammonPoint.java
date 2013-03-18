@@ -312,18 +312,58 @@ public class GammonPoint {
 	}
 	
 	private void calculateAnimatePoints(int count, boolean upperPoints) {
-		if (upperPoints) {
-			switch (count) {
-			case 0:
-			case 5:
-			case 10:
-				animateStop.x = left;
-				animateStop.y = pointRect.top;
-				break;
-			}
+		int offset = pointWidth;
+		int startY = pointRect.top;
+		if (false == upperPoints) {
+			offset *= -1;
+			startY = pointRect.bottom - pointWidth;
+		}
+		animateStop.x = left;
+		animateStart.x = left;
+		switch (count) {
+		case 5:
+		case 10:
+		case 15:
+			animateStop.y = startY;
+			animateStart.y = startY + offset * 4;
+		case 0:
+			animateStop.y = startY;
+			break;
+		case 1:
+		case 6:
+		case 11:
+			animateStart.y = startY;
+			animateStop.y = startY + offset;
+			break;
+		case 2:
+		case 7:
+		case 12:
+			animateStart.y = startY + offset;
+			animateStop.y = startY + offset * 2;
+			break;
+		case 3:
+		case 8:
+		case 13:
+			animateStart.y = startY + offset * 2;
+			animateStop.y = startY + offset * 3;
+			break;
+		case 4:
+		case 9:
+		case 14:
+			animateStart.y = startY + offset * 3;
+			animateStop.y = startY + offset * 4;
+			break;
 		}
 	}
 	
+	public Point getAnimateStart() {
+		return animateStart;
+	}
+
+	public Point getAnimateStop() {
+		return animateStop;
+	}
+
 	private void SetPointRect(Rect boardRect) //pass in the board rect
 	{
 		int left = 0, top = 0, right = 0, bottom = 0;

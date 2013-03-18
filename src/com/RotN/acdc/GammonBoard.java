@@ -1,6 +1,7 @@
 package com.RotN.acdc;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -9,10 +10,10 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.RotN.acdc.logic.AcDcAI;
-import com.RotN.acdc.logic.AcDcAI.AIMoves;
 import com.RotN.acdc.logic.CheckerContainer;
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGame;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.model.Bunker;
@@ -26,9 +27,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -52,6 +50,7 @@ SurfaceHolder.Callback {
 	private SparseArray<Bitmap> pieceBlackBitmaps;
 	private BoardPositions selectedPosition;
 	private Piece floatingPiece;
+	private boolean clickToMove = false;
 	Context fileContext;
 
 	public String getWhiteValue() {
@@ -214,12 +213,18 @@ SurfaceHolder.Callback {
 				
 				BoardPositions upContainer = findTheClosestContainer(containerDistances);
 				if (upContainer == selectedPosition) {
-					//do nothing
+					this.clickToMove = true;
 				} else if (upContainer != BoardPositions.NONE) {
-					beerGammon.movePiece(selectedPosition, upContainer);
+					ArrayList<Move> moves = beerGammon.movePiece(selectedPosition, upContainer);
+					
+					if (this.clickToMove){
+						animateMoves(moves);
+					}
+					
 					selectedPosition = BoardPositions.NONE;
 					clearSelectedSpot();
 					clearPossibleMoves();
+					this.clickToMove = false;
 				}
 			}
 		}
@@ -621,5 +626,9 @@ SurfaceHolder.Callback {
 		else {
 			point.draw(canvas, pieceBlackBitmaps, container, floatingPiece.isTouched());
 		}
+	}
+	
+	private void animateMoves(ArrayList<Move> moves) {
+		
 	}
 }

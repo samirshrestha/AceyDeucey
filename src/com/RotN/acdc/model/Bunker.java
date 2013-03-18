@@ -8,6 +8,7 @@ import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -137,5 +138,13 @@ public class Bunker {
 			paint.setARGB(200, 0, 0, 255);
 			canvas.drawRect(bunkerRect.left, bunkerRect.top, bunkerRect.right, bunkerRect.bottom,  paint);
 		}
+	}
+	
+	public Point getAnimateStart() {
+		return new Point(bunkerRect.left, bunkerRect.top);
+	}
+
+	public Point getAnimateStop() {
+		return new Point(bunkerRect.left, bunkerRect.top);
 	}
 }

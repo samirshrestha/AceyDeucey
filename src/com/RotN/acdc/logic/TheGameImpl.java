@@ -20,12 +20,23 @@ import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
-public class TheGameImpl {
+public class TheGameImpl implements Cloneable{
 	Context fileContext;	
 	private TheGame gammon = new TheGame();	
 			
 	public void setFileContext(Context fileContext) {
 		this.fileContext = fileContext;
+	}
+	
+	@Override
+	public TheGameImpl clone() {
+		try {
+			return (TheGameImpl)super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public TheGame getGammonData() {
@@ -470,8 +481,8 @@ public class TheGameImpl {
 		return gammon.containers.get(index);
 	}
 	
-	public boolean movePiece(BoardPositions origPos, BoardPositions newPos) {
-		boolean pieceMoved = false;
+	public ArrayList<Move> movePiece(BoardPositions origPos, BoardPositions newPos) {
+		ArrayList<Move> moves = new ArrayList<Move>();
 		
 		// make sure they picked something legit
 		boolean canMove = false;
@@ -522,7 +533,7 @@ public class TheGameImpl {
 			}
 			
 			if (newPos != BoardPositions.WHITE_BUNKER && newPos != BoardPositions.BLACK_BUNKER) {
-				pokeyThem(startIndex, howWeGotThere);
+				moves = pokeyThem(startIndex, howWeGotThere);
 			}
 			
 			//decrement old container
@@ -555,46 +566,74 @@ public class TheGameImpl {
 			this.onBoardUpdate();
 		}
 		
-		return pieceMoved;
+		return moves;
 	}
 	
-	private void pokeyThem(Integer origIndex, ArrayList<Integer> howWeGotThere) {
+	private ArrayList<Move> pokeyThem(Integer origIndex, ArrayList<Integer> howWeGotThere) {
 		boolean gotEm = false;
+		ArrayList<Move> moves = new ArrayList<Move>();
 		int tempIndex = origIndex;
 		for (int index = 0; index < howWeGotThere.size(); index++) {
 			int moveIndex = 0;
 			int moveLength = howWeGotThere.get(index);
+			GameColor pokeyPieceColor = GameColor.NEITHER;
 			if (gammon.turn == GameColor.WHITE){
+				pokeyPieceColor = GameColor.BLACK;
 				moveIndex = tempIndex + moveLength;
 			} else {
 				//black pieces go backwards. This moves us this direction from the bunker
 				moveIndex = tempIndex - moveLength;
+				pokeyPieceColor = GameColor.WHITE;
 			}
 			CheckerContainer newContainer;
 			newContainer = gammon.containers.get(moveIndex);
-			tempIndex = newContainer.getPosition().getIndex();
 
 			gotEm = movePieceToPokey(newContainer);
+			
+			// record the move
+			if (gotEm) {
+				Move pokeyMove = new Move(newContainer.getPosition(), BoardPositions.POKEY, pokeyPieceColor);
+				moves.add(pokeyMove);
+			}
+			Move pokeyMove = new Move(gammon.containers.get(tempIndex).getPosition(), newContainer.getPosition(), gammon.turn);
+			moves.add(pokeyMove);			
+
+			tempIndex = newContainer.getPosition().getIndex();
 		}
 		
 		if (gotEm == false) { // missed them the first time, lets try again.
+			moves.clear();
 			tempIndex = origIndex;
 			for (int index = howWeGotThere.size() - 1; index >= 0; index--) {
 				int moveIndex = 0;
 				int moveLength = howWeGotThere.get(index);
+				GameColor pokeyPieceColor = GameColor.NEITHER;
 				if (gammon.turn == GameColor.WHITE){
+					pokeyPieceColor = GameColor.BLACK;
 					moveIndex = tempIndex + moveLength;
 				} else {
 					//black pieces go backwards. This moves us this direction from the bunker
 					moveIndex = tempIndex - moveLength;
+					pokeyPieceColor = GameColor.WHITE;
 				}
 				CheckerContainer newContainer;
 				newContainer = gammon.containers.get(moveIndex);
-				tempIndex = newContainer.getPosition().getIndex();
 
 				gotEm = movePieceToPokey(newContainer);
+				
+				// record the move
+				if (gotEm) {
+					Move pokeyMove = new Move(newContainer.getPosition(), BoardPositions.POKEY, pokeyPieceColor);
+					moves.add(pokeyMove);
+				}
+				Move pokeyMove = new Move(gammon.containers.get(tempIndex).getPosition(), newContainer.getPosition(), gammon.turn);
+				moves.add(pokeyMove);			
+
+				tempIndex = newContainer.getPosition().getIndex();
 			}
 		}
+		
+		return moves;
 	}
 	
 	private boolean movePieceToPokey(CheckerContainer newContainer) {

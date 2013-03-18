@@ -8,6 +8,7 @@ import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.SparseArray;
@@ -213,5 +214,11 @@ public class Pokey {
 		}
 	}
 	
-	
+	public Point getAnimateStart() {
+		return new Point(pokeyRect.left, pokeyRect.top);
+	}
+
+	public Point getAnimateStop() {
+		return new Point(pokeyRect.left, pokeyRect.top);
+	}
 }
