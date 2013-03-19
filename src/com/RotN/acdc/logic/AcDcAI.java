@@ -12,33 +12,70 @@ import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 public class AcDcAI {
 
-	public class AIMoves {
+	public class AIMoves implements Cloneable {
 		ArrayList<Move> moves = new ArrayList<Move>();
-		Integer value = 0;
+		Integer value = -9000;
+		
+		@Override
+		public AIMoves clone() {
+			try {
+				return (AIMoves)super.clone();
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 	
 	//TODO a lot of work here...
-	public AIMoves GetNextMove(TheGameImpl acdc, ArrayList<Move> moves) {
+	public AIMoves GetNextMove(TheGameImpl acdc, AIMoves movesUsed) {
 		AIMoves aiMove = new AIMoves();
 				
-		TheGame acdcState = acdc.getGammonData();		
-		Set<Entry<Integer, CheckerContainer>> set = acdcState.containers.entrySet();
+		// next 3 lines iterate through all of the containers
+		Set<Entry<Integer, CheckerContainer>> set = acdc.getGammonData().containers.entrySet();
 		Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
 		while (it.hasNext()) {
 			Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
 			CheckerContainer orig = m.getValue();
+			// this gives me the possible moves for a given container
 			Vector<BoardPositions> options = acdc.getPossibleMoves(orig.getPosition());
 			
+			//loops through the move options
 			for (BoardPositions move : options) {
 				TheGameImpl acdcTemp = acdc.clone();
-				//ArrayList<Move> moves = acdcTemp.movePiece(orig.getPosition(), move);
-				//if (acdcTemp.getGammonData().movesRemaining.size() > 0) {
-				//	GetNextMove(acdcTemp, moves)
-				//}
+				//moves the piece on our game clone and returns everything done (important in case something went to pokey)
+				ArrayList<Move> moves = acdcTemp.movePiece(orig.getPosition(), move);
+				//make a copy of moves used to this point
+				AIMoves possible = movesUsed.clone();
+				//add the moves that we just did
+				possible.moves.addAll(moves);
+				// if there are no more moves remaining time to check our score
+				if (acdcTemp.getGammonData().movesRemaining.size() > 0) {
+					possible = GetNextMove(acdcTemp, possible);
+				} else {
+					// returns a board value based on piece position
+					possible.value = evaluateBoard(acdcTemp.getGammonData());
+					if (possible.value > aiMove.value) {
+						aiMove = possible;
+					}
+				}
 			}
 		}
 		
 		return aiMove;
+	}
+	
+	private Integer evaluateBoard(TheGame acdc) {
+		int boardValue = 0;
+		
+		if (acdc.turn == GameColor.BLACK) {
+			boardValue = evaluateBoardBlackPerspective(acdc);
+		} else {
+			boardValue = evaluateBoardWhitePerspective(acdc);
+		}
+		
+		return boardValue;
 	}
 	
 	public Integer evaluateBoardBlackPerspective(TheGame acdc) {

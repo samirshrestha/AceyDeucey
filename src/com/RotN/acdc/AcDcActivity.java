@@ -2,11 +2,6 @@ package com.RotN.acdc;
 
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
-import com.google.ads.Ad;
-import com.google.ads.AdListener;
-import com.google.ads.AdRequest;
-import com.google.ads.AdRequest.ErrorCode;
-import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,9 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.TextView;
 
-public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler, AdListener{
+public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler {
 
 	/** Called when the activity is first created. */
 	
@@ -177,25 +171,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	}
 	
 	@Override
-	public void onReceiveAd(Ad ad) {
-	  firstAdReceived = true;
-	  // Hide the custom image and show the AdView.
-	  //mAdView.setVisibility(View.VISIBLE);
-	}
-
-	@Override
-	public void onFailedToReceiveAd(Ad ad, ErrorCode code) {
-		if (!firstAdReceived) {
-			// Hide the AdView and show the custom image.
-			Log.d(TAG, "We Got Here");
-			//mAdView.setVisibility(View.GONE);
-
-			refreshHandler.removeCallbacks(refreshRunnable);
-			refreshHandler.postDelayed(refreshRunnable, 60 * 1000);
-	  }
-	}
-	
-	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && undoButton.isEnabled()) {
         	beerGammon.undoMove();
@@ -230,21 +205,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		//mAdView.destroy();
         super.onDestroy();
     }
-
-	@Override
-	public void onDismissScreen(Ad arg0) {
-		
-	}
-
-	@Override
-	public void onLeaveApplication(Ad arg0) {
-		
-	}
-
-	@Override
-	public void onPresentScreen(Ad arg0) {
-		
-	}
 	
 	private class RefreshRunnable implements Runnable {
 		  @Override
