@@ -1,5 +1,7 @@
 package com.RotN.acdc;
 
+import com.RotN.acdc.logic.AcDcAI;
+import com.RotN.acdc.logic.AIMoves;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
@@ -150,6 +152,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 board.render();
                 if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
+                	AcDcAI ai = new AcDcAI();
+                	AIMoves aiMove = new AIMoves();
+                	aiMove = ai.GetNextMove(beerGammon.getGammonData(), aiMove);
+                	ai.logAIMove("The Move", aiMove);
                 }
             }
         });            
@@ -175,28 +181,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		if (keyCode == KeyEvent.KEYCODE_BACK && undoButton.isEnabled()) {
         	beerGammon.undoMove();
         	board.render();
-        	return true;
-		} else if (keyCode == KeyEvent.KEYCODE_BACK) {
-			//Ask the user if they want to quit
-			new AlertDialog.Builder(this)
-				.setIcon(android.R.drawable.ic_dialog_alert)
-				.setTitle("Exit")
-				.setMessage("Are you sure you want to leave?")
-				.setNegativeButton(android.R.string.cancel, null)
-				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which){
-						// Exit the activity
-						AcDcActivity.this.finish();
-					}
-				})
-				.show();
-				// Say that we've consumed the event
-			return true;
-		}
+		} 
 		
-		return super.onKeyDown(keyCode, event);
-				
+		return true;		
 	}
 	
 	@Override

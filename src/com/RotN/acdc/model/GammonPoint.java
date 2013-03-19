@@ -25,8 +25,8 @@ public class GammonPoint {
 	private boolean isAINextMove;
 	private Rect pointRect;
 	private CheckerContainer.BoardPositions pointPos;
-	private Point animateStart;
-	private Point animateStop;
+	private Point animateStart = new Point();
+	private Point animateStop = new Point();
 	
 	int pointWidth;
 	int bitmapWidth;	

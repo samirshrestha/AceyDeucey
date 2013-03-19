@@ -681,6 +681,10 @@ public class TheGameImpl implements Cloneable{
 	}
 	
 	public void storeState() {
+		//just moving pieces for the AI
+		if (fileContext == null) {
+			return;
+		}
 		String FILENAME = "move" + gammon.savedStatesCount;
 		try {
 			FileOutputStream stream = fileContext.openFileOutput(FILENAME, Context.MODE_PRIVATE);
