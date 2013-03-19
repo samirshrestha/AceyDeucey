@@ -19,13 +19,6 @@
 				android:contentDescription="@string/gammon_table"
 	            android:layout_height="wrap_content"
 	            android:src="@drawable/ad_filler" />
-	        <com.google.ads.AdView
-		        xmlns:googleads="http://schemas.android.com/apk/lib/com.google.ads"
-		        android:id="@+id/ad"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        googleads:adSize="BANNER"
-		        googleads:adUnitId="@string/admob_id"/>
     	</FrameLayout>   
     	
 	    <Button 
@@ -42,13 +35,6 @@
 	        android:layout_height="wrap_content"
 	        android:layout_toRightOf="@+id/adLayout"
 	        android:gravity="center"/>
-    	
-        <TextView 
-            android:id="@+id/blackValue"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:gravity="center"
-	        android:layout_toLeftOf="@+id/undo_button"/>
 	    
 	</RelativeLayout>
 	

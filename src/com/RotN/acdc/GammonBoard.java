@@ -180,17 +180,6 @@ SurfaceHolder.Callback {
 				floatingPiece.setY((int)event.getY());
 			}			
 			
-			Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
-			Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
-			while (it.hasNext()) {
-				Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
-				if (m.getValue().wasTouched(event.getX(), event.getY())) {
-					m.getValue().setHovering(true);
-			    }
-				else {
-					m.getValue().setHovering(false);
-				}
-			}
 		} if (event.getAction() == MotionEvent.ACTION_UP) {	
 			floatingPiece.setTouched(false);
 			
@@ -464,7 +453,6 @@ SurfaceHolder.Callback {
 			Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
 			
 			m.getValue().setSelected(false);
-			m.getValue().setHovering(false);
 		}
 	}
 	
