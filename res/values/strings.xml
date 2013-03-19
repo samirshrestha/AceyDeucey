@@ -19,7 +19,6 @@
     <string name="title_activity_directions">Directions</string>
     <string name="rules">AceyDeucey Rules</string>
     <string name="directions_button">Directions</string>
-    <string name="object_label">Object</string>
     <string name="acdc_label">Acey-deucey</string>
     <string name="acdc1">The roll of 1 and 2 (acey&#8211;deucey) is especially valuable. When you roll 1&#8211;2, this is what happens:</string>
     <string name="acdc2">Note, however, if you are unable to use any part of your roll, you forfeit the rest of your turn. For example, if you can move your 2 but cannot use the 1, you may not name a double and you may not roll again.\n\nIt is permissible to name a double even if only part of it can be used. For example, after moving 1 and 2, you can name 6&#8211;6 as your double even if only three of the 6s can be played. You would then lose the fourth 6, and you would not get to roll again.</string>
@@ -30,8 +29,29 @@
     <string name="bearing_off_label">Bearing Off</string>
     <string name="bearing_off1">Once you have moved all fifteen of your checkers into your home board, you may begin bearing off. You bear off a checker by rolling a number that corresponds to the point on which it resides, then removing the checker from the board.\n\nIf there is no checker on the point indicated by the roll, you must make a legal move using a checker on a higher-numbered point. If there are no checkers on higher-numbered points, you must remove a checker from the highest point that has a checker.</string>
     <string name="scoring_label">Scoring</string>
-    <string name="scoring">The loser pays one point for each of his checkers still on the board (or yet to be entered). Gammons and backgammons do not count extra.\n\nThe doubling cube is not used in acey-deucey.</string>
+    <string name="scoring">The loser pays one point for each of his checkers still on the board (or yet to be entered). Gammons and backgammons do not count extra.\n\nThe doubling cube is not used in acey&#8211;deucey.</string>
     <string name="strategy_label">Strategy</string>
-    <string name="strategy">Because the roll of 1-2 is so powerful, luck plays a greater part in acey-deucey than in regular backgammon. You are never completely out of a game. On the other hand, since you start with fifteen men back, there is some added opportunity for skill in placing your checkers to block the opponent.\n\nTypical strategy is to get at least half your checkers on the board as quickly as possible and form them into a blockade.</string>    
+    <string name="strategy">Because the roll of 1&#8211;2 is so powerful, luck plays a greater part in acey&#8211;deucey than in regular backgammon. You are never completely out of a game. On the other hand, since you start with fifteen men back, there is some added opportunity for skill in placing your checkers to block the opponent.\n\nTypical strategy is to get at least half your checkers on the board as quickly as possible and form them into a blockade.</string>
+    <string name="overview">The American version of Acey-Deucey has been a favorite game of the U.S. Navy, Marine Corps, and Merchant Marine since the First World War.</string>
+    <string name="setup_label">Setup</string>
+    <string name="setup">Each player starts with fifteen checkers off the board. The players enter their checkers in the opponent\'s home board, then bring them around the board as shown in the diagram below.</string> 
+    <string name="object_label">Object</string>
+    <string name="object">The object of the game is to move all of your checkers around the board to your own home table and then bear them off. The first player to bear off all of his checkers wins the game.</string>
+    <string name="start_label">To Start</string>
+    <string name="start">Each player rolls one die and the higher number goes first. That player then rolls both dice again to begin his first turn.</string>
+    <string name="bunker_entering_label">Entering Checkers</string>
+    <string name="bunker_entering">You enter a checker by placing it on a point in the opponent\'s home board corresponding to a number rolled. For example, if you roll 6&#8211;3, then you enter one checker on the opponent\'s six-point and one checker on his three-point. Once you have entered one or more checkers, you may use subsequent rolls to move those checkers forward, to enter more checkers, or both.</string>
+    <string name="movement_label">Entering Checkers</string>
+    <string name="movement">The roll of the dice indicates how many points, or pips, the player is to move his checkers. The following rules apply:</string>
+    <string name="movement1">A checker may be moved only to an open point, one that is not occupied by two or more opposing checkers.</string>
+    <string name="movement2">The numbers on the two dice constitute separate moves. For example, if you roll 5 and 3, you may move one checker five spaces to an open point and another checker three spaces to an open point, or you may move the one checker a total of eight spaces to an open point, but only if the intermediate point (either three or five spaces from the starting point) is also open.</string>
+    <string name="movement3">Doubles are played twice. For example, a roll of 6&#8211;6 means you have four sixes to use.</string>
+    <string name="movement4">You must use both numbers of a roll if possible, or all four numbers in the case of doubles. If you can play one number but not both, you must play the higher one.</string>
+    <string name="acdcb1">First you play the 1 and 2 in the normal way.</string>
+    <string name="acdcb2">Then you name any roll of doubles you wish and play it accordingly.</string>
+    <string name="acdcb3">Then you roll again and play the roll as usual.</string>
+    <string name="acdcb4">If the number rolled is another 1&#8211;2, you keep going&#8211;naming and playing a double of your choice, and then rolling again.</string>
+    <string name="more_info_label">More info</string>
+    <string name="more_info">For more info, please visit</string>
 
 </resources>

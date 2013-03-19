@@ -22,16 +22,16 @@ public class DirectionsActivity extends Activity {
 		LinearLayout ll = (LinearLayout) findViewById(R.id.directionsLayout);
 		
 		TextView gameOverview = new TextView(this);
-		gameOverview.setText("The American version of Acey-Deucey has been a favorite game of the U.S. Navy, Marine Corps, and Merchant Marine since the First World War.");
+		gameOverview.setText(getText(R.string.overview));
 		
 		TextView setupLabel = new TextView(this);
-		setupLabel.setText("Setup");
+		setupLabel.setText(getText(R.string.setup_label));
 		setupLabel.setGravity(Gravity.CENTER);
 		setupLabel.setTextAppearance(this, R.style.headerText);
 		setupLabel.setPadding(0, 15, 0, 0);
 		
 		TextView setupObject = new TextView(this);
-		setupObject.setText("Each player starts with fifteen checkers off the board. The players enter their checkers in the opponent's home board, then bring them around the board as shown in the diagram below.");
+		setupObject.setText(getText(R.string.setup));
 		
 		ImageView setupImage = new ImageView(this);
 		setupImage.setBackgroundResource(R.drawable.acdc);
@@ -41,58 +41,58 @@ public class DirectionsActivity extends Activity {
 		setupImage.setPadding(0, 10, 0, 0);
 		
 		TextView objectLabel = new TextView(this);
-		objectLabel.setText("Object");
+		objectLabel.setText(getText(R.string.object_label));
 		objectLabel.setGravity(Gravity.CENTER);
 		objectLabel.setTextAppearance(this, R.style.headerText);
 		objectLabel.setPadding(0, 15, 0, 0);
 		
 		TextView gameObject = new TextView(this);
-		gameObject.setText("The object of the game is to move all of your checkers around the board to your own home table and then bear them off. The first player to bear off all of his checkers wins the game.");
+		gameObject.setText(getText(R.string.object));
 		
 		TextView startLabel = new TextView(this);
-		startLabel.setText("To Start");
+		startLabel.setText(getText(R.string.start_label));
 		startLabel.setGravity(Gravity.CENTER);
 		startLabel.setTextAppearance(this, R.style.headerText);
 		startLabel.setPadding(0, 15, 0, 0);
 		
 		TextView rollForTurn = new TextView(this);
-		rollForTurn.setText(" Each player rolls one die and the higher number goes first. That player then rolls both dice again to begin his first turn.");
+		rollForTurn.setText(getText(R.string.start));
 		
 		TextView enteringLabel = new TextView(this);
-		enteringLabel.setText("Entering Checkers");
+		enteringLabel.setText(getText(R.string.bunker_entering_label));
 		enteringLabel.setGravity(Gravity.CENTER);
 		enteringLabel.setTextAppearance(this, R.style.headerText);
 		enteringLabel.setPadding(0, 15, 0, 0);
 		
 		TextView entering = new TextView(this);
-		entering.setText("You enter a checker by placing it on a point in the opponent's home board corresponding to a number rolled. For example, if you roll 6-3, then you enter one checker on the opponent's six-point and one checker on his three-point. Once you have entered one or more checkers, you may use subsequent rolls to move those checkers forward, to enter more checkers, or both.");
+		entering.setText(getText(R.string.bunker_entering));
 		
 		TextView moveLabel = new TextView(this);
-		moveLabel.setText("Movement");
+		moveLabel.setText(getText(R.string.movement_label));
 		moveLabel.setGravity(Gravity.CENTER);
 		moveLabel.setTextAppearance(this, R.style.headerText);
 		moveLabel.setPadding(0, 15, 0, 0);
 		
 		TextView movement = new TextView(this);
-		movement.setText("The roll of the dice indicates how many points, or pips, the player is to move his checkers. The following rules apply:");
+		movement.setText(getText(R.string.movement));
 		
 		TextView bullet1 = new TextView(this);
-		CharSequence t1 = "A checker may be moved only to an open point, one that is not occupied by two or more opposing checkers.";
+		CharSequence t1 = getText(R.string.movement1);
 		SpannableString s1 = new SpannableString(t1);
 		s1.setSpan(new BulletSpan(15), 0, t1.length(), 0);
 		bullet1.setText(s1);
 		TextView bullet2 = new TextView(this);
-		CharSequence t2 = "The numbers on the two dice constitute separate moves. For example, if you roll 5 and 3, you may move one checker five spaces to an open point and another checker three spaces to an open point, or you may move the one checker a total of eight spaces to an open point, but only if the intermediate point (either three or five spaces from the starting point) is also open.";
+		CharSequence t2 = getText(R.string.movement2);
 		SpannableString s2 = new SpannableString(t2);
 		s2.setSpan(new BulletSpan(15), 0, t2.length(), 0);
 		bullet2.setText(s2);
 		TextView bullet3 = new TextView(this);
-		CharSequence t3 = "Doubles are played twice. For example, a roll of 6-6 means you have four sixes to use.";
+		CharSequence t3 = getText(R.string.movement3);
 		SpannableString s3 = new SpannableString(t3);
 		s3.setSpan(new BulletSpan(15), 0, t3.length(), 0);
 		bullet3.setText(s3);
 		TextView bullet4 = new TextView(this);
-		CharSequence t4 = "You must use both numbers of a roll if possible, or all four numbers in the case of doubles. If you can play one number but not both, you must play the higher one.";
+		CharSequence t4 = getText(R.string.movement4);
 		SpannableString s4 = new SpannableString(t4);
 		s4.setSpan(new BulletSpan(15), 0, t4.length(), 0);
 		bullet4.setText(s4);
@@ -107,22 +107,22 @@ public class DirectionsActivity extends Activity {
 		acdc1.setText(getText(R.string.acdc1));
 		
 		TextView acdcBullet1 = new TextView(this);
-		CharSequence acdcT1 = "First you play the 1 and 2 in the normal way.";
+		CharSequence acdcT1 = getText(R.string.acdcb1);
 		SpannableString acdcS1 = new SpannableString(acdcT1);
 		acdcS1.setSpan(new BulletSpan(15), 0, acdcT1.length(), 0);
 		acdcBullet1.setText(acdcS1);
 		TextView acdcBullet2 = new TextView(this);
-		CharSequence acdcT2 = "Then you name any roll of doubles you wish and play it accordingly.";
+		CharSequence acdcT2 = getText(R.string.acdcb2);
 		SpannableString acdcS2 = new SpannableString(acdcT2);
 		acdcS2.setSpan(new BulletSpan(15), 0, acdcT2.length(), 0);
 		acdcBullet2.setText(acdcS2);
 		TextView acdcBullet3 = new TextView(this);
-		CharSequence acdcT3 = "Then you roll again and play the roll as usual.";
+		CharSequence acdcT3 = getText(R.string.acdcb3);
 		SpannableString acdcS3 = new SpannableString(acdcT3);
 		acdcS3.setSpan(new BulletSpan(15), 0, acdcT3.length(), 0);
 		acdcBullet3.setText(acdcS3);		
 		TextView acdcBullet4 = new TextView(this);
-		CharSequence acdcT4 = "If the number rolled is another 1-2, you keep going—naming and playing a double of your choice, and then rolling again.";
+		CharSequence acdcT4 = getText(R.string.acdcb4);
 		SpannableString acdcS4 = new SpannableString(acdcT4);
 		acdcS4.setSpan(new BulletSpan(15), 0, acdcT4.length(), 0);
 		acdcBullet4.setText(acdcS4);	
@@ -177,14 +177,14 @@ public class DirectionsActivity extends Activity {
 		strategy.setText(getText(R.string.strategy));
 		
 		TextView infoLabel = new TextView(this);
-		infoLabel.setText("More info");
+		infoLabel.setText(getText(R.string.more_info_label));
 		infoLabel.setGravity(Gravity.CENTER);
 		infoLabel.setTextAppearance(this, R.style.headerText);
 		infoLabel.setPadding(0, 15, 0, 0);
 		
 		TextView info = new TextView(this);
 		info.setText(Html.fromHtml(
-	            "For more info, please visit " +
+	            getText(R.string.more_info) + " " +
 	                    "<a href=\"http://www.bkgm.com\">Backgammon Galore</a> "));
 		info.setMovementMethod(LinkMovementMethod.getInstance());
 		
