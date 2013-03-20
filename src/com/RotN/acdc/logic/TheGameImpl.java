@@ -806,7 +806,7 @@ public class TheGameImpl {
 			}
 		} else {
 			gammon.whiteDie1 = rollDie();
-			gammon.whiteDie2 = gammon.whiteDie1;//rollDie();
+			gammon.whiteDie2 = rollDie();
 			
 			// for testing
 			//gammon.whiteDie1 = 1;

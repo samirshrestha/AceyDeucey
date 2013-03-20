@@ -1,7 +1,11 @@
 package com.RotN.acdc;
 
+import java.util.ArrayList;
+
 import com.RotN.acdc.logic.AcDcAI;
+import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
 import android.app.Activity;
@@ -107,9 +111,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	            // Icon for AlertDialog
 	            alert.show();
 	            return true;
-	        case R.id.advanced_mode:
-	        	item.setChecked(!item.isChecked());
-	            return true;
 	        case R.id.undo_button:
 	        	beerGammon.undoMove();
 	        	board.render();
@@ -151,9 +152,19 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 board.render();
                 if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
+                } else if (beerGammon.getButtonState() == ButtonState.RED_ROLL) {
+                	beerGammon.buttonPushed();
+                	board.render();                	
+
                 	AcDcAI ai = new AcDcAI();
-                	//ArrayList<Move> moves = new ArrayList<Move>();
-                	ai.GetNextMove(beerGammon.getGammonData());
+                	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
+                	for (Move move : moves) {
+                		if (move.getColor() == GameColor.BLACK) {
+                			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
+                		}
+                	}
+                	
+                	board.render();
                 }
             }
         });            
