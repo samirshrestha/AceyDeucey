@@ -524,14 +524,11 @@ public class TheGameImpl {
 				newIndex = BoardPositions.BLACK_BUNKER.getIndex();
 			} 
 			
-			int startIndex = origPos.getIndex(); // we need this later to pokey them			
 			if (origPos == BoardPositions.POKEY) { // the pokey value changes the distance you went
 				if (gammon.turn == GameColor.BLACK) {
 					moveLength = BoardPositions.BLACK_BUNKER.getIndex() - newIndex;
-					startIndex = BoardPositions.BLACK_BUNKER.getIndex();
 				} else {
 					moveLength = newIndex;
-					startIndex = BoardPositions.WHITE_BUNKER.getIndex();
 				}
 			}
 			else {
@@ -549,7 +546,7 @@ public class TheGameImpl {
 			}
 			
 			if (newPos != BoardPositions.WHITE_BUNKER && newPos != BoardPositions.BLACK_BUNKER) {
-				moves = pokeyThem(startIndex, howWeGotThere);
+				moves = pokeyThem(origPos.getIndex(), howWeGotThere);
 			}
 			
 			//decrement old container
@@ -595,10 +592,18 @@ public class TheGameImpl {
 			GameColor pokeyPieceColor = GameColor.NEITHER;
 			if (gammon.turn == GameColor.WHITE){
 				pokeyPieceColor = GameColor.BLACK;
-				moveIndex = tempIndex + moveLength;
+				if (tempIndex == BoardPositions.POKEY.getIndex()) { //acount for pokey changing the length
+					moveIndex = BoardPositions.WHITE_BUNKER.getIndex() + moveLength;
+				} else {
+					moveIndex = tempIndex + moveLength;
+				}
 			} else {
 				//black pieces go backwards. This moves us this direction from the bunker
-				moveIndex = tempIndex - moveLength;
+				if (tempIndex == BoardPositions.POKEY.getIndex()) { //acount for pokey changing the length
+					moveIndex = BoardPositions.BLACK_BUNKER.getIndex() - moveLength;
+				} else {
+					moveIndex = tempIndex - moveLength;
+				}
 				pokeyPieceColor = GameColor.WHITE;
 			}
 			CheckerContainer newContainer;
@@ -626,10 +631,18 @@ public class TheGameImpl {
 				GameColor pokeyPieceColor = GameColor.NEITHER;
 				if (gammon.turn == GameColor.WHITE){
 					pokeyPieceColor = GameColor.BLACK;
-					moveIndex = tempIndex + moveLength;
+					if (tempIndex == BoardPositions.POKEY.getIndex()) { //acount for pokey changing the length
+						moveIndex = BoardPositions.WHITE_BUNKER.getIndex() + moveLength;
+					} else {
+						moveIndex = tempIndex + moveLength;
+					}
 				} else {
 					//black pieces go backwards. This moves us this direction from the bunker
-					moveIndex = tempIndex - moveLength;
+					if (tempIndex == BoardPositions.POKEY.getIndex()) { //acount for pokey changing the length
+						moveIndex = BoardPositions.BLACK_BUNKER.getIndex() - moveLength;
+					} else {
+						moveIndex = tempIndex - moveLength;
+					}
 					pokeyPieceColor = GameColor.WHITE;
 				}
 				CheckerContainer newContainer;
