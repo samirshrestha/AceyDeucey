@@ -79,8 +79,8 @@ public class TheGameImpl {
 		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(15);
 		
 		gammon.whiteMovingIn = false;
-		gammon.blackMovingIn = false;
-		gammon.allBlackPiecesOut = false;
+		gammon.blackMovingIn = true;
+		gammon.allBlackPiecesOut = true;
 		gammon.allWhitePiecesOut = false;
 		
 		gammon.aceyDeucey = false;
@@ -547,6 +547,9 @@ public class TheGameImpl {
 			
 			if (newPos != BoardPositions.WHITE_BUNKER && newPos != BoardPositions.BLACK_BUNKER) {
 				moves = pokeyThem(origPos.getIndex(), howWeGotThere);
+			} else {
+				Move bearingOff = new Move(origPos, newPos, gammon.turn);
+				moves.add(bearingOff);
 			}
 			
 			//decrement old container
