@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AceyDeucey</string>
+    <string name="title_activity_main">AceyDeucey</string>
+    <string name="new_game">New Game</string>
+    <string name="roll">Roll Dice</string>
+    <string name="undo_button">Undo</string>
+    <string name="white_drinks">White Drinks</string>
+    <string name="black_drinks">Black Drinks</string>
+    <string name="white_player">White Player</string>
+    <string name="black_player">Black Player</string>
+    <string name="title_activity_own_number">Choose Your Number</string>
+    <string name="choose_numbers">Choose New Numbers</string>
+    <string name="admob_id">efb0de5978c84cd9</string>
+    <string name="gammon_table">Our table for playing Gammon</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_directions">Directions</string>
+    <string name="rules">AceyDeucey Rules</string>
+    <string name="directions_button">Directions</string>
+    <string name="acdc_label">Acey&#8211;deucey</string>
+    <string name="acdc1">El rollo de 1 y 2 (‘acey deucey’) es especialmente valioso. Cuando ruedas 1&#8211;2, esta es que pasa:</string>
+    <string name="acdc2">Nota, sin embargo, si no puedes usar ningun parte del tu rollo, tu pierdes el resto de tu turno. Por ejemplo, si puedes mudar su 2 pero no puedes usar el 1, no puedes llamar un doble y no puedes hacer rodar otra vez.\n\nEs permissible para llamar un doble incluso si solo un parte delo puede ser utilizado. Por ejemplo, después de mudando 1 y 2, puedes llamar 6&#8211;6 como tu doble si incluso solo tres de los 6s pueden ser jugado. Entonces perderías el cuatro 6, y no pondrías para rodar otra vez.</string>
+    <string name="hitting_label">‘Hitting’</string>
+    <string name="hitting">Una ficha que está sentando sola en un punto se llama un ‘blot.’ Si un oponente ficha llega en un ‘blot’, el ‘blot’ es ‘hit’ y se coloca en el bar.</string>
+    <string name="entering_label">Entrando desde el bar</string>
+    <string name="entering">Cualquier momento que tienes uno o más fichas en el bar, tu primero obligacíon es para volver a entrar estas fichas dentro de la casa tablero del tu adversario. Puedes volver a entrar una ficha por lo mudando a un punto abierto correspondiente a un de los números en los dados enrollados. Si puedes entrar algunos pero no todos de tus fichas del bar, debes entrar tantos como puedes, y entonces pierdes el resto de tu turno.</string>
+    <string name="bearing_off_label">‘Bearing Off’</string>
+    <string name="bearing_off1">Una vez has mudado todo del quince de tus fichas dentro de tu casa tablero, puedes empezar ‘bearing off.’ ‘Bearing off’ occure cuando tu haces rodar un número que corresponde a un punto en que esta sentando, entonces quitando la ficha del tablero.\n\nSi no hay una ficha en un punto que es indicado por el rollo, debes hacer una muda legal usando una ficha de un punto que tiene un mas alto número. Si no hay fichas en los puntos que tienen unos mas altos números, debes quitar la ficha del punto mas alto que tiene una ficha.</string>
+    <string name="scoring_label">La puntuación</string>
+    <string name="scoring">El perdedor paga un punto por cada de sus fichas todavía en el tablero (que no se han entrado). ‘Gammons’ y ‘Backgammons’ no cuentan extra.\n\nEl cubo de dobles no es usado in ‘acey&#8211;deucy’.</string>
+    <string name="strategy_label">La estrategia</string>
+    <string name="strategy">Porque el rollo de 1&#8211;2 es tan poderoso, suerte es mas importante en ‘acey&#8211;deucy’ que en ‘backgammon’ regular.\n\nLa estrategia typical es para mudar por los menos medio de tus fichas en el tablero como rápidamente es possible y para formarlos dentro de un bloqueo.</string>
+    <string name="overview">El version Americano del ‘Acey&#8211;Deucey’ ha estado un juego favorito de la Marina de los Estados Unidos, la Infantería de Marina y la Marina Mercante desde la Primera Guerra Mundial.</string>
+    <string name="setup_label">La configuración</string>
+    <string name="setup">Cada jugador empieza con 15 fichas de fuera del tablero. Cada jugador entra sus fichas en el lado del su adversario. Entonces, el jugador se muda las fichas alrededor del tablero como es mostrada en el diagrama debajo. </string> 
+    <string name="object_label">Objectivo</string>
+    <string name="object">El objective del juego es mudar todo de tus fichas alrededor del tablero a su casa tablero y entonces te muda todo de tus fichas de fuera el tablero. Cuando te muda todo de tus fichas de fuera la tablero, esta se llama ‘bearing off.’ El primero jugador mudarse todo de sus fichas, o completer ‘bearing off,’ gana el juego.</string>
+    <string name="start_label">Para empezar</string>
+    <string name="start">Cada jugador hace rodar los dados y la persona con el número más alto que el otra empieza.</string>
+    <string name="bunker_entering_label">Entrando las fichas</string>
+    <string name="bunker_entering">Entras una ficha por lo poniendo en un punto en la casa tablero de tu adversario correspondiendo con el número rodaste.  Por ejemplo, si rodaste 6#8211;3, entonces entras una ficha en el seis&#8211;punto y una ficha en el tres&#8211;punto de tu adversario. Cuando tu has entrado una o más de tus fichas, puedes usar rollos subsecuentes para mudar esas fichas delantero, para entrar más fichas, o los ambos. </string>
+    <string name="movement_label">El movimiento</string>
+    <string name="movement">El rollo de los dados indica cuantos puntos, o ‘pips’, el jugador puede mudar sus fichas. El siguiente reglas aplica:</string>
+    <string name="movement1">Una ficha puede se muda solo a una punto abierta, una punto que no es occupada por dos o más fichas del adversario.</string>
+    <string name="movement2">Los números en los dos dados constituien movimientos separados. Por ejemplo, si rueda 5 y 3, puedes mudar una ficha cinco espacios a un punto abierto y un otro ficha tres espacios a una punto abierto, o puedes mudar el una ficha ocho espacios en total a una punto abierto, pero solo si el punto intermedio (tres o cinco espacios del punto de partida) es tambien abierto.</string>
+    <string name="movement3">Los dobles son juegan dos veces. Por ejemplo, una tirade de 6&#8211;6, significa que tienes cuatros ‘seís&#8211;es’ para usar.</string>
+    <string name="movement4">Debes usar los ambos del números de un rollo si es possible, o todo del cuatro números en el caso de los dobles. Si puedes jugar un número pero no los ambos, debes jugar el número mayor.</string>
+    <string name="acdcb1">Primero, juegas el 1 y 2 en la forma normal.</string>
+    <string name="acdcb2">Entonces, llamas cualquier rollo de dobles tu desea y jugarlo en consecuencia.</string>
+    <string name="acdcb3">Entonces, tu ruedas otra vez y juegas el rollo como normal.</string>
+    <string name="acdcb4">Si el número es un otro 1&#8211;2,  continuas—llamando y jugando una doble de su elección, y entonces rodando otra vez.</string>
+    <string name="more_info_label">Más información</string>
+    <string name="more_info">Para obtener más información, por favor visite</string>
+
+</resources>

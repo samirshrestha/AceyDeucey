@@ -4,7 +4,6 @@
     <string name="app_name">AceyDeucey</string>
     <string name="title_activity_main">AceyDeucey</string>
     <string name="new_game">New Game</string>
-    <string name="advanced_mode">Advanced Mode</string>
     <string name="roll">Roll Dice</string>
     <string name="undo_button">Undo</string>
     <string name="white_drinks">White Drinks</string>
@@ -41,7 +40,7 @@
     <string name="start">Each player rolls one die and the higher number goes first. That player then rolls both dice again to begin his first turn.</string>
     <string name="bunker_entering_label">Entering Checkers</string>
     <string name="bunker_entering">You enter a checker by placing it on a point in the opponent\'s home board corresponding to a number rolled. For example, if you roll 6&#8211;3, then you enter one checker on the opponent\'s six-point and one checker on his three-point. Once you have entered one or more checkers, you may use subsequent rolls to move those checkers forward, to enter more checkers, or both.</string>
-    <string name="movement_label">Entering Checkers</string>
+    <string name="movement_label">Movement</string>
     <string name="movement">The roll of the dice indicates how many points, or pips, the player is to move his checkers. The following rules apply:</string>
     <string name="movement1">A checker may be moved only to an open point, one that is not occupied by two or more opposing checkers.</string>
     <string name="movement2">The numbers on the two dice constitute separate moves. For example, if you roll 5 and 3, you may move one checker five spaces to an open point and another checker three spaces to an open point, or you may move the one checker a total of eight spaces to an open point, but only if the intermediate point (either three or five spaces from the starting point) is also open.</string>
