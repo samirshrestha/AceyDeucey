@@ -2,7 +2,7 @@ package com.RotN.acdc.logic;
 
 import java.io.Serializable;
 
-public class CheckerContainer implements Cloneable, Serializable{
+public class CheckerContainer implements Serializable{
 	/**
 	 * 
 	 */
@@ -44,15 +44,10 @@ public class CheckerContainer implements Cloneable, Serializable{
 		blackCheckerCount = 0;
 	}
 	
-	@Override
-	public CheckerContainer clone() {
-		try {
-			return (CheckerContainer)super.clone();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	public CheckerContainer(CheckerContainer rhs) {
+		this.position = rhs.position;
+		this.whiteCheckerCount = rhs.whiteCheckerCount;
+		this.blackCheckerCount = rhs.blackCheckerCount;
 	}
 
 	public int getWhiteCheckerCount() {

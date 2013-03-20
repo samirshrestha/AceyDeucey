@@ -20,23 +20,12 @@ import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
-public class TheGameImpl implements Cloneable{
+public class TheGameImpl {
 	Context fileContext;	
 	private TheGame gammon = new TheGame();	
 			
 	public void setFileContext(Context fileContext) {
 		this.fileContext = fileContext;
-	}
-	
-	@Override
-	public TheGameImpl clone() {
-		try {
-			return (TheGameImpl)super.clone();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	public TheGame getGammonData() {

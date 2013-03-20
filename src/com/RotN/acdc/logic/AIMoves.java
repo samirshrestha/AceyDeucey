@@ -2,17 +2,19 @@ package com.RotN.acdc.logic;
 
 import java.util.ArrayList;
 
-public class AIMoves implements Cloneable {
+public class AIMoves {
 	ArrayList<Move> moves = new ArrayList<Move>();
 	Integer value = -9000;
 	
-	@Override
-	public AIMoves clone() {
-		try {
-			return (AIMoves)super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
+	public AIMoves() {
+		
+	}
+	
+	public AIMoves(AIMoves rhs) {
+		for (Move move: rhs.moves) {
+			this.moves.add(new Move(move));
 		}
-		return null;
+		
+		this.value = rhs.value;
 	}
 }

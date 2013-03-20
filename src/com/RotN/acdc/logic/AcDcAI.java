@@ -13,40 +13,41 @@ import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 public class AcDcAI {
+	
+	public ArrayList<Move> GetNextMove(TheGame acdc) {
+		AIMoves aiMoves = new AIMoves();
+		aiMoves = GetNextMove(acdc, aiMoves);
+		
+		logAIMove("The Move", aiMoves);
+		
+		return aiMoves.moves;
+	}
 
-	public AIMoves GetNextMove(TheGame acdc, AIMoves movesUsed) {
-		Log.d("MOVES", "Entering our favorite method");
+	private AIMoves GetNextMove(TheGame acdc, AIMoves movesUsed) {
 		AIMoves aiMove = new AIMoves();
-		TheGame acdcClone = acdc.clone();
+		TheGame acdcCopy = new TheGame(acdc);
 				
 		// next 3 lines iterate through all of the containers
-		Set<Entry<Integer, CheckerContainer>> set = acdcClone.containers.entrySet();
+		Set<Entry<Integer, CheckerContainer>> set = acdcCopy.containers.entrySet();
 		Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
 		while (it.hasNext()) {
 			Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
 			CheckerContainer orig = m.getValue();
 			// this gives me the possible moves for a given container
 			TheGameImpl tempImpl = new TheGameImpl();
-			tempImpl.setGammonData(acdcClone);
+			tempImpl.setGammonData(acdcCopy);
 			Vector<BoardPositions> options = tempImpl.getPossibleMoves(orig.getPosition());
 			
-			for (BoardPositions whatever: options) {
-				Log.d("MOVES", "Orig: " + orig.getPosition().toString() + " TO: " + whatever.toString());
-			}
-			
-			int count = 0;
 			//loops through the move options
 			for (BoardPositions move : options) {
-				count++;
-				Log.d("MOVES", "Loop iteration: " + count);
 				//create a copy to move pieces on
-				TheGame acdcToPlayOn = acdcClone.clone();
+				TheGame acdcToPlayOn = new TheGame(acdcCopy);
 				TheGameImpl acdcImplToPlayOn = new TheGameImpl();
 				acdcImplToPlayOn.setGammonData(acdcToPlayOn);
 				//moves the piece on our game clone and returns everything done (important in case something went to pokey)
 				ArrayList<Move> moves = acdcImplToPlayOn.movePiece(orig.getPosition(), move);
 				//make a copy of moves used to this point
-				AIMoves possible = movesUsed.clone();
+				AIMoves possible = new AIMoves(movesUsed);
 				//add the moves that we just did
 				possible.moves.addAll(moves);
 				// if there are no more moves remaining time to check our score
@@ -55,10 +56,10 @@ public class AcDcAI {
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcImplToPlayOn.getGammonData());
-					logAIMove("Possible", possible);
-					if (possible.value > aiMove.value) {
-						aiMove = possible;
-					}
+				}
+				
+				if (possible.value > aiMove.value) {
+					aiMove = possible;
 				}
 			}
 		}

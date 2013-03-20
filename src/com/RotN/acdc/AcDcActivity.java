@@ -1,7 +1,6 @@
 package com.RotN.acdc;
 
 import com.RotN.acdc.logic.AcDcAI;
-import com.RotN.acdc.logic.AIMoves;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
@@ -153,9 +152,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
                 	AcDcAI ai = new AcDcAI();
-                	AIMoves aiMove = new AIMoves();
-                	aiMove = ai.GetNextMove(beerGammon.getGammonData(), aiMove);
-                	ai.logAIMove("The Move", aiMove);
+                	//ArrayList<Move> moves = new ArrayList<Move>();
+                	ai.GetNextMove(beerGammon.getGammonData());
                 }
             }
         });            

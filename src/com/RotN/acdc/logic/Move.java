@@ -13,6 +13,12 @@ public class Move {
 		this.origSpot = origSpot;
 		this.newSpot = newSpot;
 	}
+	
+	public Move(Move rhs) {
+		this.color = rhs.color;
+		this.origSpot = rhs.origSpot;
+		this.newSpot = rhs.newSpot;
+	}
 
 	public GameColor getColor() {
 		return color;
