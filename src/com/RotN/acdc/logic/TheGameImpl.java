@@ -323,7 +323,11 @@ public class TheGameImpl {
 						} else if (newMovesAvailable.contains(moveLength)) {						
 							newMovesAvailable.remove((Object)moveLength);
 						}
-						checkPointMove(destMove, moves, newMovesAvailable, false);
+
+						//fileContext is only null when looking for AI moves. Leave the recursive out in this case
+						if (fileContext != null) {
+							checkPointMove(destMove, moves, newMovesAvailable, false);
+						}
 					}
 				}
 			}
@@ -357,7 +361,11 @@ public class TheGameImpl {
 						} else if (newMovesAvailable.contains(moveLength)) {						
 							newMovesAvailable.remove((Object)moveLength);
 						}
-						checkPointMove(destMove, moves, newMovesAvailable, false);
+
+						//fileContext is only null when looking for AI moves. Leave the recursive out in this case
+						if (fileContext != null) {
+							checkPointMove(destMove, moves, newMovesAvailable, false);
+						}
 					}				
 				}
 			}

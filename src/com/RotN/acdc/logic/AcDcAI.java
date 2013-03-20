@@ -44,6 +44,10 @@ public class AcDcAI {
 				TheGame acdcToPlayOn = new TheGame(acdcCopy);
 				TheGameImpl acdcImplToPlayOn = new TheGameImpl();
 				acdcImplToPlayOn.setGammonData(acdcToPlayOn);
+				boolean doubles = false;
+				if (acdcImplToPlayOn.getGammonData().movesRemaining.size() == 4) {
+					doubles = true;
+				}
 				//moves the piece on our game clone and returns everything done (important in case something went to pokey)
 				ArrayList<Move> moves = acdcImplToPlayOn.movePiece(orig.getPosition(), move);
 				//make a copy of moves used to this point
@@ -60,6 +64,11 @@ public class AcDcAI {
 				
 				if (possible.value > aiMove.value) {
 					aiMove = possible;
+					this.logAIMove("Possible ", aiMove);
+				}
+				
+				if (doubles) {
+					break;
 				}
 			}
 		}
