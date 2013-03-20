@@ -79,8 +79,8 @@ public class TheGameImpl {
 		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(15);
 		
 		gammon.whiteMovingIn = false;
-		gammon.blackMovingIn = true;
-		gammon.allBlackPiecesOut = true;
+		gammon.blackMovingIn = false;
+		gammon.allBlackPiecesOut = false;
 		gammon.allWhitePiecesOut = false;
 		
 		gammon.aceyDeucey = false;
@@ -769,7 +769,7 @@ public class TheGameImpl {
 	
 	private ArrayList<Integer> moveUsed(int moveLength) {
 		ArrayList<Integer> howWeGotThere = new ArrayList<Integer>();
-		Log.d(TAG, "Move used: " + moveLength);
+		//Log.d(TAG, "Move used: " + moveLength);
 		if (gammon.movesRemaining.contains(moveLength)) {
 			howWeGotThere.add(moveLength);
 			gammon.movesRemaining.remove((Object)moveLength);
@@ -795,7 +795,7 @@ public class TheGameImpl {
 			}
 		}
 				
-		Log.d(TAG, "Moves remaining: " + gammon.movesRemaining.size());
+		//Log.d(TAG, "Moves remaining: " + gammon.movesRemaining.size());
 		return howWeGotThere;
 	}
 	

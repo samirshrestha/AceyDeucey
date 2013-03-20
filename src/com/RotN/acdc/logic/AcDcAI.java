@@ -24,7 +24,7 @@ public class AcDcAI {
 	}
 
 	private AIMoves GetNextMove(TheGame acdc, AIMoves movesUsed, int depth) {
-		String bDepth = "[" + depth + "]";
+		//String bDepth = "[" + depth + "]";
 		AIMoves aiMove = new AIMoves();
 		TheGame acdcCopy = new TheGame(acdc);
 				
@@ -39,7 +39,7 @@ public class AcDcAI {
 			tempImpl.setGammonData(acdcCopy);
 			Vector<BoardPositions> options = tempImpl.getPossibleMoves(orig.getPosition(), false);
 			
-			Log.d("AI", bDepth + "Checking container: " + orig.getPosition().toString() + " it has " + options + " possible moves");
+			//Log.d("AI", bDepth + "Checking container: " + orig.getPosition().toString() + " it has " + options + " possible moves");
 			
 			//loops through the move options
 			for (BoardPositions move : options) {
@@ -52,7 +52,7 @@ public class AcDcAI {
 				
 				//moves the piece on our game clone and returns everything done (important in case something went to pokey)
 				ArrayList<Move> moves = acdcImplToPlayOn.movePiece(orig.getPosition(), move);
-				Log.d("AI", bDepth + " Using move " + move.toString());
+				//Log.d("AI", bDepth + " Using move " + move.toString());
 				//make a copy of moves used to this point
 				AIMoves possible = new AIMoves(movesUsed);
 				//add the moves that we just did
@@ -63,11 +63,11 @@ public class AcDcAI {
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcImplToPlayOn.getGammonData());
-					this.logAIMove("Possible ", possible);
+					//this.logAIMove("Possible ", possible);
 				}
 				
 				if (possible.value > aiMove.value) {
-					Log.d("AI", bDepth + " New best value " + possible.value + " > " + aiMove.value);
+					//Log.d("AI", bDepth + " New best value " + possible.value + " > " + aiMove.value);
 					aiMove = possible;
 				}
 				
