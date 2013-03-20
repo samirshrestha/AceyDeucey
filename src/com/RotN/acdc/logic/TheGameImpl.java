@@ -168,26 +168,26 @@ public class TheGameImpl {
 				(gammon.blackDie1 != 0 && gammon.whiteDie1 != 0);
 	}
 	
-	public Vector<BoardPositions> getPossibleMoves(BoardPositions pieceLocation) {
+	public Vector<BoardPositions> getPossibleMoves(BoardPositions pieceLocation, boolean recursion) {
 		Vector<BoardPositions> moves = new Vector<BoardPositions>();		
 		
 		if (hasAChecker(pieceLocation)) {
 			if (haveRolled() == true && onPokey() == false) {
 				if (pieceLocation == CheckerContainer.BoardPositions.WHITE_BUNKER) {
-					checkWhiteBunker(moves);
+					checkWhiteBunker(moves, recursion);
 				}
 				else if (pieceLocation == CheckerContainer.BoardPositions.BLACK_BUNKER) {
-					checkBlackBunker(moves);
+					checkBlackBunker(moves, recursion);
 				}
 				else {
-					checkPointMove(pieceLocation, moves, gammon.movesRemaining, gammon.aceyDeucey);
+					checkPointMove(pieceLocation, moves, gammon.movesRemaining, gammon.aceyDeucey, recursion);
 				}
 			} else if (haveRolled() == true && onPokey() == true && pieceLocation == BoardPositions.POKEY) {
 				if (gammon.turn == GameColor.WHITE) {
-					checkWhiteBunker(moves);
+					checkWhiteBunker(moves, recursion);
 				}
 				else if (gammon.turn == GameColor.BLACK){
-					checkBlackBunker(moves);
+					checkBlackBunker(moves, recursion);
 				}
 			}
 		}
@@ -216,7 +216,7 @@ public class TheGameImpl {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void checkWhiteBunker(Vector<CheckerContainer.BoardPositions> moves) {
+	private void checkWhiteBunker(Vector<CheckerContainer.BoardPositions> moves, boolean recursion) {
 		//check that it is white
 		if (gammon.turn == GameColor.WHITE  && 
 				//needs pieces in the bunker/still moving out or something on pokey
@@ -233,7 +233,10 @@ public class TheGameImpl {
 				if (false == (possibleMove.getBlackCheckerCount() > 1) ) 
 				{
 					destMove = possibleMove.getPosition();
-					moves.add(destMove);
+					// only add it if we don't already have it
+					if (false == moves.contains(destMove)) {
+						moves.add(destMove);
+					}					
 				}
 				
 				if (destMove != BoardPositions.NONE) {
@@ -243,14 +246,17 @@ public class TheGameImpl {
 					} else if (newMovesAvailable.contains(moveLength)) {						
 						newMovesAvailable.remove((Object)moveLength);
 					}
-					checkPointMove(destMove, moves, newMovesAvailable, false);
+					
+					if (recursion) {
+						checkPointMove(destMove, moves, newMovesAvailable, false, recursion);
+					}
 				}
 			}
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void checkBlackBunker(Vector<CheckerContainer.BoardPositions> moves) {
+	private void checkBlackBunker(Vector<CheckerContainer.BoardPositions> moves, boolean recursion) {
 		//check that it is black
 		if (gammon.turn == GameColor.BLACK && 
 				// have to have pieces in the bunker or on pokey for this move
@@ -269,7 +275,11 @@ public class TheGameImpl {
 				if (false == (possibleMove.getWhiteCheckerCount() > 1) )
 				{
 					destMove = possibleMove.getPosition();
-					moves.add(destMove);
+
+					// only add it if we don't already have it
+					if (false == moves.contains(destMove)) {
+						moves.add(destMove);
+					}		
 				}
 				
 				if (destMove != BoardPositions.NONE) {
@@ -279,14 +289,17 @@ public class TheGameImpl {
 					} else if (newMovesAvailable.contains(moveLength)) {						
 						newMovesAvailable.remove((Object)moveLength);
 					}
-					checkPointMove(destMove, moves, newMovesAvailable, false);					
+					
+					if (recursion) {
+						checkPointMove(destMove, moves, newMovesAvailable, false, recursion);
+					}
 				}
 			}
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void checkPointMove(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable, boolean acdc) {
+	private void checkPointMove(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable, boolean acdc, boolean recursion) {
 		ArrayList<Integer> newMovesAvailable = (ArrayList<Integer>) movesAvailable.clone();
 		
 		if (onPokey()) {
@@ -313,7 +326,11 @@ public class TheGameImpl {
 						if (false == (possibleMove.getWhiteCheckerCount() > 1) )
 						{
 							destMove = gammon.containers.get(moveIndex).getPosition();
-							moves.add(destMove);
+
+							// only add it if we don't already have it
+							if (false == moves.contains(destMove)) {
+								moves.add(destMove);
+							}		
 						}
 					}
 					
@@ -324,9 +341,8 @@ public class TheGameImpl {
 							newMovesAvailable.remove((Object)moveLength);
 						}
 
-						//fileContext is only null when looking for AI moves. Leave the recursive out in this case
-						if (fileContext != null) {
-							checkPointMove(destMove, moves, newMovesAvailable, false);
+						if (recursion) {
+							checkPointMove(destMove, moves, newMovesAvailable, false, recursion);
 						}
 					}
 				}
@@ -351,7 +367,11 @@ public class TheGameImpl {
 						if (false == (possibleMove.getBlackCheckerCount() > 1) )
 						{
 							destMove = gammon.containers.get(moveIndex).getPosition();
-							moves.add(destMove);
+
+							// only add it if we don't already have it
+							if (false == moves.contains(destMove)) {
+								moves.add(destMove);
+							}		
 						}
 					}
 					
@@ -362,9 +382,8 @@ public class TheGameImpl {
 							newMovesAvailable.remove((Object)moveLength);
 						}
 
-						//fileContext is only null when looking for AI moves. Leave the recursive out in this case
-						if (fileContext != null) {
-							checkPointMove(destMove, moves, newMovesAvailable, false);
+						if (recursion) {
+							checkPointMove(destMove, moves, newMovesAvailable, false, recursion);
 						}
 					}				
 				}
@@ -483,7 +502,7 @@ public class TheGameImpl {
 		
 		// make sure they picked something legit
 		boolean canMove = false;
-		Vector<BoardPositions> possibleMoves = getPossibleMoves(origPos);		
+		Vector<BoardPositions> possibleMoves = getPossibleMoves(origPos, true);		
 		Iterator<BoardPositions> itr = possibleMoves.iterator();
 		while (itr.hasNext()) {
 			BoardPositions openMove = itr.next();
@@ -787,7 +806,7 @@ public class TheGameImpl {
 			}
 		} else {
 			gammon.whiteDie1 = rollDie();
-			gammon.whiteDie2 = rollDie();
+			gammon.whiteDie2 = gammon.whiteDie1;//rollDie();
 			
 			// for testing
 			//gammon.whiteDie1 = 1;
@@ -850,7 +869,7 @@ public class TheGameImpl {
 			while (it.hasNext()) {
 				Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
 				CheckerContainer orig = m.getValue();
-				Vector<BoardPositions> options = getPossibleMoves(orig.getPosition());
+				Vector<BoardPositions> options = getPossibleMoves(orig.getPosition(), false);
 				if (options.size() != 0) {
 					canMove = true;
 					break;

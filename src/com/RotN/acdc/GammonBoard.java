@@ -343,7 +343,7 @@ SurfaceHolder.Callback {
 	private void updatePossibleMoves() {
 		clearPossibleMoves();
 		if (selectedPosition != BoardPositions.NONE) {
-			Vector<BoardPositions> possibleMoves = beerGammon.getPossibleMoves(selectedPosition);
+			Vector<BoardPositions> possibleMoves = beerGammon.getPossibleMoves(selectedPosition, true);
 			
 			for (int index = 0; index < possibleMoves.size(); index++) {
 				if (possibleMoves.get(index) == BoardPositions.BLACK_BUNKER)

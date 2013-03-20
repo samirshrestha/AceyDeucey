@@ -16,14 +16,15 @@ public class AcDcAI {
 	
 	public ArrayList<Move> GetNextMove(TheGame acdc) {
 		AIMoves aiMoves = new AIMoves();
-		aiMoves = GetNextMove(acdc, aiMoves);
+		aiMoves = GetNextMove(acdc, aiMoves, 1);
 		
 		logAIMove("The Move", aiMoves);
 		
 		return aiMoves.moves;
 	}
 
-	private AIMoves GetNextMove(TheGame acdc, AIMoves movesUsed) {
+	private AIMoves GetNextMove(TheGame acdc, AIMoves movesUsed, int depth) {
+		String bDepth = "[" + depth + "]";
 		AIMoves aiMove = new AIMoves();
 		TheGame acdcCopy = new TheGame(acdc);
 				
@@ -36,7 +37,9 @@ public class AcDcAI {
 			// this gives me the possible moves for a given container
 			TheGameImpl tempImpl = new TheGameImpl();
 			tempImpl.setGammonData(acdcCopy);
-			Vector<BoardPositions> options = tempImpl.getPossibleMoves(orig.getPosition());
+			Vector<BoardPositions> options = tempImpl.getPossibleMoves(orig.getPosition(), false);
+			
+			Log.d("AI", bDepth + "Checking container: " + orig.getPosition().toString() + " it has " + options + " possible moves");
 			
 			//loops through the move options
 			for (BoardPositions move : options) {
@@ -44,19 +47,19 @@ public class AcDcAI {
 				TheGame acdcToPlayOn = new TheGame(acdcCopy);
 				TheGameImpl acdcImplToPlayOn = new TheGameImpl();
 				acdcImplToPlayOn.setGammonData(acdcToPlayOn);
-				boolean doubles = false;
-				if (acdcImplToPlayOn.getGammonData().movesRemaining.size() == 4) {
-					doubles = true;
-				}
+				
+				boolean doubles = movingDoubles(acdcToPlayOn.movesRemaining);
+				
 				//moves the piece on our game clone and returns everything done (important in case something went to pokey)
 				ArrayList<Move> moves = acdcImplToPlayOn.movePiece(orig.getPosition(), move);
+				Log.d("AI", bDepth + " Using move " + move.toString());
 				//make a copy of moves used to this point
 				AIMoves possible = new AIMoves(movesUsed);
 				//add the moves that we just did
 				possible.moves.addAll(moves);
 				// if there are no more moves remaining time to check our score
 				if (acdcImplToPlayOn.getGammonData().movesRemaining.size() > 0) {
-					possible = GetNextMove(acdcImplToPlayOn.getGammonData(), possible);
+					possible = GetNextMove(acdcImplToPlayOn.getGammonData(), possible, depth + 1);
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcImplToPlayOn.getGammonData());
@@ -76,7 +79,23 @@ public class AcDcAI {
 		return aiMove;
 	}
 	
-	public void logAIMove(String tag, AIMoves option) {
+	private boolean movingDoubles(ArrayList<Integer> movesRemaining) {
+		boolean doubles = true;
+		int moveLength = -1;
+		
+		for (Integer move : movesRemaining) {
+			if (moveLength == -1) {
+				moveLength = move;
+			} else if (moveLength != move) {
+				doubles = false;
+				break;
+			}
+		}
+		
+		return doubles;
+	}
+	
+	private void logAIMove(String tag, AIMoves option) {
 		Log.d("AI", tag + " Value: " + option.value);
 		
 		for (Move move: option.moves) {
