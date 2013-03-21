@@ -23,11 +23,64 @@ public class AcDcAI {
 		TheGame acdcCopy = new TheGame(acdc);
 		TheGameImpl acdcImplCopy = new TheGameImpl();
 		acdcImplCopy.setGammonData(acdcCopy);
-		aiMoves = GetNextMove(acdcImplCopy, aiMoves, 1, pertinentContainers);
+		if (acdc.acdcOrigMove) {
+			//sweet jeebus AcDc takes too long. Treat it as two moves for now
+			aiMoves = HandleAcDc(acdcImplCopy, pertinentContainers);
+		} else {
+			aiMoves = GetNextMove(acdcImplCopy, aiMoves, 1, pertinentContainers);
+		}
 		
 		logAIMove("The Move", aiMoves);
 		
 		return aiMoves.moves;
+	}
+	
+	private AIMoves HandleAcDc(TheGameImpl acdc, ArrayList<BoardPositions> pertinentContainers) {
+		AIMoves aiMove = new AIMoves();
+		
+		//do the initial move
+		acdc.getGammonData().acdcOrigMove = false;
+		aiMove = GetNextMove(acdc, aiMove, 1, pertinentContainers);
+		for (Move move : aiMove.moves) {
+			if (move.color == acdc.getTurn()) {
+				acdc.movePiece(move.origSpot, move.newSpot);
+			}
+		}
+		
+		//reset the pertinent containers
+		pertinentContainers.clear();
+		for (CheckerContainer container : acdc.getGammonData().containers) {
+			
+			if ( (acdc.getTurn() == GameColor.BLACK && container.getBlackCheckerCount() > 0) ||
+					(acdc.getTurn() == GameColor.WHITE && container.getWhiteCheckerCount() > 0) ) {
+				pertinentContainers.add(container.getPosition());
+			}  
+		}
+		
+		//you only get another move if you used all your current ones
+		if (acdc.getGammonData().movesRemaining.size() == 0) {
+			AIMoves miscDoubles = null;
+			for (int i = 1; i <= 6; i++) {
+				acdc.getGammonData().movesRemaining.add(i);
+				acdc.getGammonData().movesRemaining.add(i);
+				acdc.getGammonData().movesRemaining.add(i);
+				acdc.getGammonData().movesRemaining.add(i);
+				
+				AIMoves miscDoublesTemp = new AIMoves();
+				miscDoublesTemp = GetNextMove(acdc, miscDoublesTemp, 1, pertinentContainers);
+				if (miscDoubles == null) {
+					miscDoubles = miscDoublesTemp;
+				} else if (miscDoublesTemp.value > miscDoubles.value &&
+						miscDoublesTemp.moves.size() > 0) {
+					miscDoubles = miscDoublesTemp;
+				}
+				acdc.getGammonData().movesRemaining.clear();
+			}
+			
+			aiMove.moves.addAll(miscDoubles.moves);
+		}
+		
+		return aiMove;
 	}
 
 	private AIMoves GetNextMove(TheGameImpl acdc, AIMoves movesUsed, int depth, ArrayList<BoardPositions> pertinentContainers) {
