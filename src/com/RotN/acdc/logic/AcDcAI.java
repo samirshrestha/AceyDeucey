@@ -121,7 +121,7 @@ public class AcDcAI {
 				
 				TheGame acdcData = acdc.getGammonData();
 				// if there are no more moves remaining time to check our score
-				if (acdc.getGammonData().movesRemaining.size() > 0) {
+				if (acdc.canMove(pertContainersCopy)) {
 					possible = GetNextMove(acdc, possible, depth + 1, pertContainersCopy);
 				} else {
 					// returns a board value based on piece position

@@ -880,6 +880,23 @@ public class TheGameImpl {
 		return canMove;
 	}
 	
+	public boolean canMove(ArrayList<BoardPositions> pertinentContainers) {
+		boolean canMove = false;
+		
+		if (gammon.movesRemaining.size() > 0) {
+			for (BoardPositions point : pertinentContainers) {
+				
+				Vector<BoardPositions> options = getPossibleMoves(point, false);
+				if (options.size() != 0) {
+					canMove = true;
+					break;
+				}
+			}
+		}
+		
+		return canMove;
+	}
+	
 	private void updateMovingIn() {
 		if (getBlackBunkerCount() == 0) {
 			gammon.allBlackPiecesOut = true;
