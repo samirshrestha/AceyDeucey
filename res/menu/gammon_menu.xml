@@ -6,4 +6,14 @@
     <item android:id="@+id/directions"
           android:title="@string/directions_button"
           android:showAsAction="never|withText"/>
+    <item android:id="@+id/human_white_player"
+          android:title="@string/human_white_player"
+          android:checkable="true"
+          android:checked="true"
+          android:showAsAction="never|withText"/>
+    <item android:id="@+id/human_red_player"
+          android:title="@string/human_red_player"
+          android:checkable="true"
+          android:checked="true"
+          android:showAsAction="never|withText"/>
 </menu>
