@@ -7,17 +7,24 @@ public class Move {
 	GameColor color;
 	BoardPositions origSpot;
 	BoardPositions newSpot;
+	Integer moveLength;
 	
-	public Move(BoardPositions origSpot, BoardPositions newSpot, GameColor color) {
+	public Move(BoardPositions origSpot, BoardPositions newSpot, GameColor color, Integer moveLength) {
 		this.color = color;
 		this.origSpot = origSpot;
 		this.newSpot = newSpot;
+		this.moveLength = moveLength;
 	}
 	
+	public Integer getMoveLength() {
+		return moveLength;
+	}
+
 	public Move(Move rhs) {
 		this.color = rhs.color;
 		this.origSpot = rhs.origSpot;
 		this.newSpot = rhs.newSpot;
+		this.moveLength = rhs.moveLength;
 	}
 
 	public GameColor getColor() {

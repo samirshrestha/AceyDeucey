@@ -2,8 +2,6 @@ package com.RotN.acdc.logic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import android.annotation.SuppressLint;
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
@@ -13,7 +11,7 @@ public class TheGame implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 	
 	public enum ButtonState {
 		ROLL_FOR_NUMBER("Roll For Numbers"), ROLL_FOR_TURN("Roll For Turn"), RED_ROLL("Red Roll"), WHITE_ROLL("White Roll"), TURN_FINISHED("Clear Dice"), 
@@ -29,7 +27,7 @@ public class TheGame implements Serializable {
 			return buttonText;
 		}
 	}
-	public Map<Integer, CheckerContainer> containers;
+	public ArrayList<CheckerContainer> containers;
 	public GameColor turn;
 	public int whiteDie1;
 	public int whiteDie2;
@@ -44,70 +42,70 @@ public class TheGame implements Serializable {
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {
-		containers = new HashMap<Integer, CheckerContainer>();
+		containers = new ArrayList<CheckerContainer>();
 		movesRemaining = new ArrayList<Integer>();
 		
-		containers.put(1, new CheckerContainer(BoardPositions.POINT_1));
-		containers.put(2, new CheckerContainer(BoardPositions.POINT_2));
-		containers.put(3, new CheckerContainer(BoardPositions.POINT_3));
-		containers.put(4, new CheckerContainer(BoardPositions.POINT_4));
-		containers.put(5, new CheckerContainer(BoardPositions.POINT_5));
-		containers.put(6, new CheckerContainer(BoardPositions.POINT_6));
-		containers.put(7, new CheckerContainer(BoardPositions.POINT_7));
-		containers.put(8, new CheckerContainer(BoardPositions.POINT_8));
-		containers.put(9, new CheckerContainer(BoardPositions.POINT_9));
-		containers.put(10, new CheckerContainer(BoardPositions.POINT_10));
-		containers.put(11, new CheckerContainer(BoardPositions.POINT_11));
-		containers.put(12, new CheckerContainer(BoardPositions.POINT_12));
-		containers.put(13, new CheckerContainer(BoardPositions.POINT_13));
-		containers.put(14, new CheckerContainer(BoardPositions.POINT_14));
-		containers.put(15, new CheckerContainer(BoardPositions.POINT_15));
-		containers.put(16, new CheckerContainer(BoardPositions.POINT_16));
-		containers.put(17, new CheckerContainer(BoardPositions.POINT_17));
-		containers.put(18, new CheckerContainer(BoardPositions.POINT_18));
-		containers.put(19, new CheckerContainer(BoardPositions.POINT_19));
-		containers.put(20, new CheckerContainer(BoardPositions.POINT_20));
-		containers.put(21, new CheckerContainer(BoardPositions.POINT_21));
-		containers.put(22, new CheckerContainer(BoardPositions.POINT_22));
-		containers.put(23, new CheckerContainer(BoardPositions.POINT_23));
-		containers.put(24, new CheckerContainer(BoardPositions.POINT_24));
-		containers.put(BoardPositions.BLACK_BUNKER.getIndex(), new CheckerContainer(BoardPositions.BLACK_BUNKER));
-		containers.put(BoardPositions.WHITE_BUNKER.getIndex(), new CheckerContainer(BoardPositions.WHITE_BUNKER));
-		containers.put(BoardPositions.POKEY.getIndex(), new CheckerContainer(BoardPositions.POKEY));
+		containers.add(new CheckerContainer(BoardPositions.WHITE_BUNKER));
+		containers.add(new CheckerContainer(BoardPositions.POINT_1));
+		containers.add(new CheckerContainer(BoardPositions.POINT_2));
+		containers.add(new CheckerContainer(BoardPositions.POINT_3));
+		containers.add(new CheckerContainer(BoardPositions.POINT_4));
+		containers.add(new CheckerContainer(BoardPositions.POINT_5));
+		containers.add(new CheckerContainer(BoardPositions.POINT_6));
+		containers.add(new CheckerContainer(BoardPositions.POINT_7));
+		containers.add(new CheckerContainer(BoardPositions.POINT_8));
+		containers.add(new CheckerContainer(BoardPositions.POINT_9));
+		containers.add(new CheckerContainer(BoardPositions.POINT_10));
+		containers.add(new CheckerContainer(BoardPositions.POINT_11));
+		containers.add(new CheckerContainer(BoardPositions.POINT_12));
+		containers.add(new CheckerContainer(BoardPositions.POINT_13));
+		containers.add(new CheckerContainer(BoardPositions.POINT_14));
+		containers.add(new CheckerContainer(BoardPositions.POINT_15));
+		containers.add(new CheckerContainer(BoardPositions.POINT_16));
+		containers.add(new CheckerContainer(BoardPositions.POINT_17));
+		containers.add(new CheckerContainer(BoardPositions.POINT_18));
+		containers.add(new CheckerContainer(BoardPositions.POINT_19));
+		containers.add(new CheckerContainer(BoardPositions.POINT_20));
+		containers.add(new CheckerContainer(BoardPositions.POINT_21));
+		containers.add(new CheckerContainer(BoardPositions.POINT_22));
+		containers.add(new CheckerContainer(BoardPositions.POINT_23));
+		containers.add(new CheckerContainer(BoardPositions.POINT_24));
+		containers.add(new CheckerContainer(BoardPositions.BLACK_BUNKER));
+		containers.add(new CheckerContainer(BoardPositions.POKEY));
 	}
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame(TheGame rhs) {
-		this.containers = new HashMap<Integer, CheckerContainer>();
+		this.containers = new ArrayList<CheckerContainer>();
 		this.movesRemaining = new ArrayList<Integer>();
 		
-		containers.put(1, new CheckerContainer(rhs.containers.get(1)));
-		containers.put(2, new CheckerContainer(rhs.containers.get(2)));
-		containers.put(3, new CheckerContainer(rhs.containers.get(3)));
-		containers.put(4, new CheckerContainer(rhs.containers.get(4)));
-		containers.put(5, new CheckerContainer(rhs.containers.get(5)));
-		containers.put(6, new CheckerContainer(rhs.containers.get(6)));
-		containers.put(7, new CheckerContainer(rhs.containers.get(7)));
-		containers.put(8, new CheckerContainer(rhs.containers.get(8)));
-		containers.put(9, new CheckerContainer(rhs.containers.get(9)));
-		containers.put(10, new CheckerContainer(rhs.containers.get(10)));
-		containers.put(11, new CheckerContainer(rhs.containers.get(11)));
-		containers.put(12, new CheckerContainer(rhs.containers.get(12)));
-		containers.put(13, new CheckerContainer(rhs.containers.get(13)));
-		containers.put(14, new CheckerContainer(rhs.containers.get(14)));
-		containers.put(15, new CheckerContainer(rhs.containers.get(15)));
-		containers.put(16, new CheckerContainer(rhs.containers.get(16)));
-		containers.put(17, new CheckerContainer(rhs.containers.get(17)));
-		containers.put(18, new CheckerContainer(rhs.containers.get(18)));
-		containers.put(19, new CheckerContainer(rhs.containers.get(19)));
-		containers.put(20, new CheckerContainer(rhs.containers.get(20)));
-		containers.put(21, new CheckerContainer(rhs.containers.get(21)));
-		containers.put(22, new CheckerContainer(rhs.containers.get(22)));
-		containers.put(23, new CheckerContainer(rhs.containers.get(23)));
-		containers.put(24, new CheckerContainer(rhs.containers.get(24)));
-		containers.put(BoardPositions.BLACK_BUNKER.getIndex(), new CheckerContainer(rhs.containers.get(BoardPositions.BLACK_BUNKER.getIndex())));
-		containers.put(BoardPositions.WHITE_BUNKER.getIndex(), new CheckerContainer(rhs.containers.get(BoardPositions.WHITE_BUNKER.getIndex())));
-		containers.put(BoardPositions.POKEY.getIndex(), new CheckerContainer(rhs.containers.get(BoardPositions.POKEY.getIndex())));
+		containers.add(new CheckerContainer(rhs.containers.get(BoardPositions.WHITE_BUNKER.getIndex())));
+		containers.add(new CheckerContainer(rhs.containers.get(1)));
+		containers.add(new CheckerContainer(rhs.containers.get(2)));
+		containers.add(new CheckerContainer(rhs.containers.get(3)));
+		containers.add(new CheckerContainer(rhs.containers.get(4)));
+		containers.add(new CheckerContainer(rhs.containers.get(5)));
+		containers.add(new CheckerContainer(rhs.containers.get(6)));
+		containers.add(new CheckerContainer(rhs.containers.get(7)));
+		containers.add(new CheckerContainer(rhs.containers.get(8)));
+		containers.add(new CheckerContainer(rhs.containers.get(9)));
+		containers.add(new CheckerContainer(rhs.containers.get(10)));
+		containers.add(new CheckerContainer(rhs.containers.get(11)));
+		containers.add(new CheckerContainer(rhs.containers.get(12)));
+		containers.add(new CheckerContainer(rhs.containers.get(13)));
+		containers.add(new CheckerContainer(rhs.containers.get(14)));
+		containers.add(new CheckerContainer(rhs.containers.get(15)));
+		containers.add(new CheckerContainer(rhs.containers.get(16)));
+		containers.add(new CheckerContainer(rhs.containers.get(17)));
+		containers.add(new CheckerContainer(rhs.containers.get(18)));
+		containers.add(new CheckerContainer(rhs.containers.get(19)));
+		containers.add(new CheckerContainer(rhs.containers.get(20)));
+		containers.add(new CheckerContainer(rhs.containers.get(21)));
+		containers.add(new CheckerContainer(rhs.containers.get(22)));
+		containers.add(new CheckerContainer(rhs.containers.get(23)));
+		containers.add(new CheckerContainer(rhs.containers.get(24)));
+		containers.add(new CheckerContainer(rhs.containers.get(BoardPositions.BLACK_BUNKER.getIndex())));
+		containers.add(new CheckerContainer(rhs.containers.get(BoardPositions.POKEY.getIndex())));
 		
 		for (Integer moveLength : rhs.movesRemaining) {
 			this.movesRemaining.add(moveLength);

@@ -6,12 +6,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import android.content.Context;
 import android.util.Log;
@@ -67,12 +63,10 @@ public class TheGameImpl {
 	public void initializeGame() {		
 		gammon.turn = GameColor.NEITHER;
 		
-		Set<Entry<Integer, CheckerContainer>> set = gammon.containers.entrySet();
-		Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
-		while (it.hasNext()) {
-			Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
-			m.getValue().setWhiteCheckerCount(0);
-			m.getValue().setBlackCheckerCount(0);
+		for (CheckerContainer container : gammon.containers) {
+			
+			container.setWhiteCheckerCount(0);
+			container.setBlackCheckerCount(0);
 		}
 		
 		gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(15);
@@ -298,9 +292,8 @@ public class TheGameImpl {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void checkPointMove(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable, boolean acdc, boolean recursion) {
-		ArrayList<Integer> newMovesAvailable = (ArrayList<Integer>) movesAvailable.clone();
+		ArrayList<Integer> newMovesAvailable = new ArrayList<Integer>(movesAvailable);
 		
 		if (onPokey()) {
 			return; // they still need to move pieces out. Get out of here.
@@ -419,7 +412,7 @@ public class TheGameImpl {
 					if (moveIndex <= 0) {
 						moveIntoBunker = true;
 					} else {
-						CheckerContainer possibleMove = gammon.containers.get((Object)(moveIndex));
+						CheckerContainer possibleMove = gammon.containers.get(moveIndex);
 						if (possibleMove.getWhiteCheckerCount() < 2) {
 							moves.add(possibleMove.getPosition());
 							homeBoardMove = true;
@@ -464,7 +457,7 @@ public class TheGameImpl {
 					if (moveIndex >= 25) {
 						moveIntoBunker = true;
 					} else {
-						CheckerContainer possibleMove = gammon.containers.get((Object)(moveIndex));
+						CheckerContainer possibleMove = gammon.containers.get(moveIndex);
 						if (possibleMove.getBlackCheckerCount() < 2) {
 							moves.add(possibleMove.getPosition());
 							homeBoardMove = true;
@@ -502,15 +495,9 @@ public class TheGameImpl {
 		
 		// make sure they picked something legit
 		boolean canMove = false;
-		Vector<BoardPositions> possibleMoves = getPossibleMoves(origPos, true);		
-		Iterator<BoardPositions> itr = possibleMoves.iterator();
-		while (itr.hasNext()) {
-			BoardPositions openMove = itr.next();
-			if (openMove == newPos) {
-				canMove = true;
-				break;
-			}
-		}
+		Vector<BoardPositions> possibleMoves = getPossibleMoves(origPos, true);	
+		
+		canMove = possibleMoves.contains(newPos);
 		
 		if (canMove) {	
 			//save where it was for undo purposes
@@ -548,7 +535,7 @@ public class TheGameImpl {
 			if (newPos != BoardPositions.WHITE_BUNKER && newPos != BoardPositions.BLACK_BUNKER) {
 				moves = pokeyThem(origPos.getIndex(), howWeGotThere);
 			} else {
-				Move bearingOff = new Move(origPos, newPos, gammon.turn);
+				Move bearingOff = new Move(origPos, newPos, gammon.turn, moveLength);
 				moves.add(bearingOff);
 			}
 			
@@ -616,10 +603,10 @@ public class TheGameImpl {
 			
 			// record the move
 			if (gotEm) {
-				Move pokeyMove = new Move(newContainer.getPosition(), BoardPositions.POKEY, pokeyPieceColor);
+				Move pokeyMove = new Move(newContainer.getPosition(), BoardPositions.POKEY, pokeyPieceColor, -1);
 				moves.add(pokeyMove);
 			}
-			Move pokeyMove = new Move(gammon.containers.get(tempIndex).getPosition(), newContainer.getPosition(), gammon.turn);
+			Move pokeyMove = new Move(gammon.containers.get(tempIndex).getPosition(), newContainer.getPosition(), gammon.turn, moveLength);
 			moves.add(pokeyMove);			
 
 			tempIndex = newContainer.getPosition().getIndex();
@@ -655,10 +642,10 @@ public class TheGameImpl {
 				
 				// record the move
 				if (gotEm) {
-					Move pokeyMove = new Move(newContainer.getPosition(), BoardPositions.POKEY, pokeyPieceColor);
+					Move pokeyMove = new Move(newContainer.getPosition(), BoardPositions.POKEY, pokeyPieceColor, -1);
 					moves.add(pokeyMove);
 				}
-				Move pokeyMove = new Move(gammon.containers.get(tempIndex).getPosition(), newContainer.getPosition(), gammon.turn);
+				Move pokeyMove = new Move(gammon.containers.get(tempIndex).getPosition(), newContainer.getPosition(), gammon.turn, moveLength);
 				moves.add(pokeyMove);			
 
 				tempIndex = newContainer.getPosition().getIndex();
@@ -809,8 +796,8 @@ public class TheGameImpl {
 			gammon.blackDie2 = rollDie();
 			
 			// for testing
-			//gammon.blackDie1 = 6;
-			//gammon.blackDie2 = 6;
+			//gammon.blackDie1 = 2;
+			//gammon.blackDie2 = 1;
 			
 			gammon.movesRemaining.add(gammon.blackDie1);
 			gammon.movesRemaining.add(gammon.blackDie2);
@@ -880,12 +867,9 @@ public class TheGameImpl {
 		boolean canMove = false;
 		
 		if (gammon.movesRemaining.size() > 0) {
-			Set<Entry<Integer, CheckerContainer>> set = gammon.containers.entrySet();
-			Iterator<Entry<Integer, CheckerContainer>> it = set.iterator();
-			while (it.hasNext()) {
-				Map.Entry<Integer, CheckerContainer> m = (Map.Entry<Integer, CheckerContainer>)it.next();
-				CheckerContainer orig = m.getValue();
-				Vector<BoardPositions> options = getPossibleMoves(orig.getPosition(), false);
+			for (CheckerContainer container : gammon.containers) {
+				
+				Vector<BoardPositions> options = getPossibleMoves(container.getPosition(), false);
 				if (options.size() != 0) {
 					canMove = true;
 					break;
@@ -950,7 +934,7 @@ public class TheGameImpl {
 		this.onBoardUpdate();
 	}
 	
-	public Map<Integer, CheckerContainer> getContainers() {
+	public ArrayList<CheckerContainer> getContainers() {
 		return gammon.containers;
 	}
 
@@ -1024,6 +1008,14 @@ public class TheGameImpl {
 	
 	public ButtonState getButtonState(){
 		return gammon.buttonState;
+	}
+	
+	public int getActiveTurnCheckerCount(BoardPositions container) {
+		if (gammon.turn == GameColor.BLACK) {
+			return this.getContainer(container).getBlackCheckerCount();
+		} else {
+			return this.getContainer(container).getWhiteCheckerCount();
+		}
 	}
 }
 
