@@ -25,6 +25,7 @@ public class AcDcAI {
 		acdcImplCopy.setGammonData(acdcCopy);
 		if (acdc.acdcOrigMove) {
 			//sweet jeebus AcDc takes too long. Treat it as two moves for now
+			Log.d("AI", "Apparently we are handling acdc");
 			aiMoves = HandleAcDc(acdcImplCopy, pertinentContainers);
 		} else {
 			aiMoves = GetNextMove(acdcImplCopy, aiMoves, 1, pertinentContainers);
@@ -101,6 +102,10 @@ public class AcDcAI {
 				boolean doubles = movingDoubles(acdc.getGammonData().movesRemaining);
 				
 				//moves the piece on our game clone and returns everything done (important in case something went to pokey)
+				boolean allBlackOut = acdc.getGammonData().allBlackPiecesOut;
+				boolean allWhiteOut = acdc.getGammonData().allWhitePiecesOut;
+				boolean blackMovingIn = acdc.getGammonData().blackMovingIn;
+				boolean whiteMovingIn = acdc.getGammonData().whiteMovingIn;
 				ArrayList<Move> moves = acdc.movePiece(possibleChoice, move);
 				for (Move chosenMove: moves) {
 					if (chosenMove.color == acdc.getTurn()) {
@@ -137,6 +142,10 @@ public class AcDcAI {
 						acdcData.movesRemaining.add(movesToUndo.moveLength);
 					}
 				}
+				acdc.getGammonData().allBlackPiecesOut = allBlackOut;
+				acdc.getGammonData().allWhitePiecesOut = allWhiteOut;
+				acdc.getGammonData().blackMovingIn = blackMovingIn;
+				acdc.getGammonData().whiteMovingIn = whiteMovingIn;
 				
 				if (possible.value > aiMove.value &&
 						possible.moves.size() > 0) {
