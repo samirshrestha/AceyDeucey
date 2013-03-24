@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
-import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
 import android.app.Activity;
@@ -77,6 +76,11 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.gammon_menu, menu);
+	    MenuItem redPlayer = menu.findItem(R.id.human_red_player);
+	    redPlayer.setChecked(beerGammon.getGammonData().blackHumanPlayer);
+
+	    MenuItem whitePlayer = menu.findItem(R.id.human_white_player);
+	    whitePlayer.setChecked(beerGammon.getGammonData().whiteHumanPlayer);
 	    Log.d(TAG, "Menu inflated");
 	    return true;
 	}
@@ -118,6 +122,17 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        case R.id.directions:
 	        	Intent intent = new Intent(this, DirectionsActivity.class);
 	        	startActivity(intent);
+	        	return true;
+	        case R.id.human_red_player:
+	        	item.setChecked(!item.isChecked());
+	        	board.getTheGame().getGammonData().blackHumanPlayer = item.isChecked();
+	            onBoardUpdate();
+	            return true;
+	        case R.id.human_white_player:
+	        	item.setChecked(!item.isChecked());
+	        	board.getTheGame().getGammonData().whiteHumanPlayer = item.isChecked();
+	            onBoardUpdate();
+	            return true;		        	
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -152,14 +167,17 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 board.render();
                 if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
-                } else if (beerGammon.getButtonState() == ButtonState.RED_ROLL) {
+                } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
+                		beerGammon.getGammonData().blackHumanPlayer == false) || 
+                		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
+                		false == beerGammon.getGammonData().whiteHumanPlayer)) {
                 	beerGammon.buttonPushed();
                 	board.render();                	
 
                 	AcDcAI ai = new AcDcAI();
                 	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
                 	for (Move move : moves) {
-                		if (move.getColor() == GameColor.BLACK) {
+                		if (move.getColor() == beerGammon.getTurn()) {
                 			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
                 		}
                 	}

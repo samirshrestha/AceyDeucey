@@ -39,6 +39,8 @@ public class TheGame implements Serializable {
 	public boolean whiteMovingIn, blackMovingIn, allBlackPiecesOut, allWhitePiecesOut;
 	public ButtonState buttonState;
 	public int savedStatesCount;
+	public boolean whiteHumanPlayer = true;
+	public boolean blackHumanPlayer = true;
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {
@@ -124,6 +126,8 @@ public class TheGame implements Serializable {
 		this.allWhitePiecesOut = rhs.allWhitePiecesOut;
 		this.buttonState = rhs.buttonState;
 		this.savedStatesCount = rhs.savedStatesCount;
+		this.whiteHumanPlayer = rhs.whiteHumanPlayer;
+		this.blackHumanPlayer = rhs.blackHumanPlayer;
 	}
 }
 

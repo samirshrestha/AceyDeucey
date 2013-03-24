@@ -71,7 +71,7 @@ public class TheGameImpl {
 		
 		gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(15);
 		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(15);
-		
+				
 		gammon.whiteMovingIn = false;
 		gammon.blackMovingIn = false;
 		gammon.allBlackPiecesOut = false;
@@ -86,6 +86,22 @@ public class TheGameImpl {
 		gammon.savedStatesCount = 0;
 				
 		gammon.buttonState = ButtonState.ROLL_FOR_TURN;
+		
+		gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(0);
+		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(0);		
+		gammon.containers.get(BoardPositions.POINT_22.getIndex()).setWhiteCheckerCount(6);
+		gammon.containers.get(BoardPositions.POINT_21.getIndex()).setWhiteCheckerCount(4);
+		gammon.containers.get(BoardPositions.POINT_19.getIndex()).setWhiteCheckerCount(3);
+		gammon.containers.get(BoardPositions.POINT_18.getIndex()).setWhiteCheckerCount(2);		
+		gammon.containers.get(BoardPositions.POINT_3.getIndex()).setBlackCheckerCount(2);
+		gammon.containers.get(BoardPositions.POINT_4.getIndex()).setBlackCheckerCount(6);
+		gammon.containers.get(BoardPositions.POINT_5.getIndex()).setBlackCheckerCount(1);
+		gammon.containers.get(BoardPositions.POINT_6.getIndex()).setBlackCheckerCount(4);
+		gammon.containers.get(BoardPositions.POINT_9.getIndex()).setBlackCheckerCount(1);
+		gammon.turn = GameColor.BLACK;
+		gammon.blackDie1 = 6;
+		gammon.blackDie2 = 5;
+		gammon.buttonState = ButtonState.TURN_FINISHED;
 		
 		this.onBoardUpdate();
 	}
@@ -812,8 +828,8 @@ public class TheGameImpl {
 			gammon.whiteDie2 = rollDie();
 			
 			// for testing
-			//gammon.whiteDie1 = 1;
-			//gammon.whiteDie2 = 2;
+			gammon.whiteDie1 = 1;
+			gammon.whiteDie2 = 2;
 			
 			gammon.movesRemaining.add(gammon.whiteDie1);
 			gammon.movesRemaining.add(gammon.whiteDie2);
