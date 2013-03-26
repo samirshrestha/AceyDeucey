@@ -78,6 +78,7 @@ public class TheGameImpl {
 		gammon.allWhitePiecesOut = false;
 		
 		gammon.aceyDeucey = false;
+		gammon.acdcOrigMove = false;
 		
 		gammon.blackDie1 = 0;
 		gammon.blackDie2 = 0;
@@ -620,7 +621,7 @@ public class TheGameImpl {
 			if (newPos != BoardPositions.WHITE_BUNKER && newPos != BoardPositions.BLACK_BUNKER) {
 				moves = pokeyThem(origPos.getIndex(), howWeGotThere);
 			} else {
-				Move bearingOff = new Move(origPos, newPos, gammon.turn, moveLength);
+				Move bearingOff = new Move(origPos, newPos, gammon.turn, howWeGotThere.get(0));
 				moves.add(bearingOff);
 			}
 			
@@ -853,6 +854,7 @@ public class TheGameImpl {
 					longestMoveAvailable = moveLengthAvailable;
 				}
 			}
+			howWeGotThere.add(longestMoveAvailable);
 			gammon.movesRemaining.remove((Object) longestMoveAvailable);
 			
 		} else { // we used multiple to get there
@@ -881,7 +883,7 @@ public class TheGameImpl {
 			gammon.blackDie2 = rollDie();
 			
 			// for testing
-			//gammon.blackDie1 = 2;
+			//gammon.blackDie1 = 6;
 			//gammon.blackDie2 = 1;
 			
 			gammon.movesRemaining.add(gammon.blackDie1);

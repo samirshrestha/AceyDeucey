@@ -85,14 +85,14 @@ public class AcDcAI {
 	}
 
 	private AIMoves GetNextMove(TheGameImpl acdc, AIMoves movesUsed, int depth, ArrayList<BoardPositions> pertinentContainers) {
-		//String bDepth = "[" + depth + "]";
+		String bDepth = "[" + depth + "]";
 		AIMoves aiMove = new AIMoves();
 				
 		for (BoardPositions possibleChoice : pertinentContainers) {
 			// this gives me the possible moves for a given container
 			Vector<BoardPositions> options = acdc.getPossibleMoves(possibleChoice, false);
 			
-			//Log.d("AI", bDepth + "Checking container: " + possibleChoice.toString() + " it has " + options + " possible moves");
+			Log.d("AI", bDepth + "Checking container: " + possibleChoice.toString() + " it has " + options + " possible moves");
 			
 			//loops through the move options
 			for (BoardPositions move : options) {
@@ -118,7 +118,7 @@ public class AcDcAI {
 						}
 					}
 				}
-				//Log.d("AI", bDepth + " Using move " + move.toString());
+				Log.d("AI", bDepth + " Using move " + move.toString());
 				//make a copy of moves used to this point
 				AIMoves possible = new AIMoves(movesUsed);
 				//add the moves that we just did
@@ -131,7 +131,7 @@ public class AcDcAI {
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcData);
-					//this.logAIMove("Possible ", possible);
+					this.logAIMove("Possible ", possible);
 				}
 
 				//undo what we did for the next check
@@ -242,19 +242,21 @@ public class AcDcAI {
 			} else if (container.getWhiteCheckerCount() > 1) {
 				boardValue += container.getWhiteCheckerCount() * containerValue;
 			} else if (container.getWhiteCheckerCount() == 1) {
-				//pieces that get hit farther along hurt more so lower the value of the open ones				
+				
+				//pieces that get hit farther along hurt more so lower the value of the open ones
+				int riskDetractor = 1;
 				if (containerValue > 18) {
-					containerValue = (int)(containerValue * 0.25);
+					riskDetractor = 4;
 				} else if (containerValue > 12) {
-					containerValue = (int)(containerValue * .5);
+					riskDetractor = 3;
 				} else if (containerValue > 6) {
-					containerValue = (int)(containerValue * .75);
+					riskDetractor = 2;
 				}
 				
 				if (checkForBlackPieceWithinNineSpots(acdc, container) ) {
-					boardValue += containerValue - 12;
+					boardValue += containerValue - (12 * riskDetractor);
 				} else {
-					boardValue += containerValue - 6;
+					boardValue += containerValue - (6 * riskDetractor);
 				}				
 			}
 		}
