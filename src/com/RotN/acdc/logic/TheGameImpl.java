@@ -87,22 +87,6 @@ public class TheGameImpl {
 				
 		gammon.buttonState = ButtonState.ROLL_FOR_TURN;
 		
-		gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(0);
-		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(0);		
-		gammon.containers.get(BoardPositions.POINT_22.getIndex()).setWhiteCheckerCount(6);
-		gammon.containers.get(BoardPositions.POINT_21.getIndex()).setWhiteCheckerCount(4);
-		gammon.containers.get(BoardPositions.POINT_19.getIndex()).setWhiteCheckerCount(3);
-		gammon.containers.get(BoardPositions.POINT_18.getIndex()).setWhiteCheckerCount(2);		
-		gammon.containers.get(BoardPositions.POINT_3.getIndex()).setBlackCheckerCount(2);
-		gammon.containers.get(BoardPositions.POINT_4.getIndex()).setBlackCheckerCount(6);
-		gammon.containers.get(BoardPositions.POINT_5.getIndex()).setBlackCheckerCount(1);
-		gammon.containers.get(BoardPositions.POINT_6.getIndex()).setBlackCheckerCount(4);
-		gammon.containers.get(BoardPositions.POINT_9.getIndex()).setBlackCheckerCount(1);
-		gammon.turn = GameColor.BLACK;
-		gammon.blackDie1 = 6;
-		gammon.blackDie2 = 5;
-		gammon.buttonState = ButtonState.TURN_FINISHED;
-		
 		this.onBoardUpdate();
 	}
 	
@@ -400,10 +384,50 @@ public class TheGameImpl {
 		}
 	}
 	
+	private void checkBlackHomeBoardAcdc(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
+		for (Integer moveLength : movesAvailable) {
+			if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0) {
+				// an exact move is possible do nothing
+			} else {
+				boolean higherLegalMove = false;
+				for (int i = 6; i > pieceLocation.getIndex(); i--) {
+					CheckerContainer point = gammon.containers.get(i);
+					Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
+					if (point.getBlackCheckerCount() > 0) {
+						checkBlackBearingOff(point.getPosition(), tempMoves, movesAvailable);
+					}
+					if (tempMoves.size() > 0) {
+						higherLegalMove = true;
+						break;
+					}
+				}
+				
+				boolean homeBoardMove = false;
+				boolean moveIntoBunker = false;
+				Integer moveIndex = pieceLocation.getIndex() - moveLength;
+				if (moveIndex <= 0) {
+					moveIntoBunker = true;
+				} else {
+					CheckerContainer possibleMove = gammon.containers.get(moveIndex);
+					if (possibleMove.getWhiteCheckerCount() < 2) {
+						moves.add(possibleMove.getPosition());
+						homeBoardMove = true;
+					}
+				}
+				
+				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+					moves.add(BoardPositions.BLACK_BUNKER);
+				}
+			}
+		}
+	}
+	
 	private void checkBlackBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
 		// do we even need to check?
 		if (gammon.blackMovingIn) {
-			if (movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
+			if (gammon.aceyDeucey) {
+				checkBlackHomeBoardAcdc(pieceLocation, moves, movesAvailable);
+			} else if (movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
 				moves.add(BoardPositions.BLACK_BUNKER);
 			} else {
 				for (Integer moveLength: movesAvailable) {
@@ -416,8 +440,13 @@ public class TheGameImpl {
 				boolean higherLegalMove = false;
 				for (int i = 6; i > pieceLocation.getIndex(); i--) {
 					CheckerContainer point = gammon.containers.get(i);
+					Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
 					if (point.getBlackCheckerCount() > 0) {
+						checkBlackBearingOff(point.getPosition(), tempMoves, movesAvailable);
+					}
+					if (tempMoves.size() > 0) {
 						higherLegalMove = true;
+						break;
 					}
 				}
 				
@@ -443,11 +472,47 @@ public class TheGameImpl {
 		}
 	}
 	
+	private void checkWhiteHomeBoardAcdc(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
+		for (Integer moveLength : movesAvailable) {
+			boolean higherLegalMove = false;
+			for (int i = 19; i < pieceLocation.getIndex(); i++) {
+				CheckerContainer point = gammon.containers.get(i);
+				Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
+				if (point.getWhiteCheckerCount() > 0) {
+					checkWhiteBearingOff(point.getPosition(), tempMoves, movesAvailable);
+				}
+				if (tempMoves.size() > 0) {
+					higherLegalMove = true;
+					break;
+				}
+			}
+			
+			boolean homeBoardMove = false;
+			boolean moveIntoBunker = false;
+			Integer moveIndex = pieceLocation.getIndex() + moveLength;
+			if (moveIndex >= 25) {
+				moveIntoBunker = true;
+			} else {
+				CheckerContainer possibleMove = gammon.containers.get(moveIndex);
+				if (possibleMove.getBlackCheckerCount() < 2) {
+					moves.add(possibleMove.getPosition());
+					homeBoardMove = true;
+				}
+			}
+			
+			if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+				moves.add(BoardPositions.WHITE_BUNKER);
+			}
+		}
+	}
+	
 	private void checkWhiteBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
 		// do we even need to check?
 		if (gammon.whiteMovingIn) {
 			int distanceFromBunker = 25 - pieceLocation.getIndex();
-			if (movesAvailable.contains((Object) distanceFromBunker) ) { // must make the exact move if possible
+			if (gammon.aceyDeucey) {
+				checkWhiteHomeBoardAcdc(pieceLocation, moves, movesAvailable);
+			} else if (movesAvailable.contains((Object) distanceFromBunker) ) { // must make the exact move if possible
 				moves.add(BoardPositions.WHITE_BUNKER);
 			} else {
 				for (Integer moveLength: movesAvailable) {
@@ -461,7 +526,11 @@ public class TheGameImpl {
 				boolean higherLegalMove = false;
 				for (int i = 19; i < pieceLocation.getIndex(); i++) {
 					CheckerContainer point = gammon.containers.get(i);
+					Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
 					if (point.getWhiteCheckerCount() > 0) {
+						checkWhiteBearingOff(point.getPosition(), tempMoves, movesAvailable);
+					}
+					if (tempMoves.size() > 0) {
 						higherLegalMove = true;
 					}
 				}
