@@ -897,8 +897,8 @@ public class TheGameImpl {
 			gammon.whiteDie2 = rollDie();
 			
 			// for testing
-			gammon.whiteDie1 = 1;
-			gammon.whiteDie2 = 2;
+			//gammon.whiteDie1 = 1;
+			//gammon.whiteDie2 = 2;
 			
 			gammon.movesRemaining.add(gammon.whiteDie1);
 			gammon.movesRemaining.add(gammon.whiteDie2);
