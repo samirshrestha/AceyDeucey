@@ -93,4 +93,12 @@ public class CheckerContainer implements Serializable{
 			return whiteCheckerCount--;
 		}
 	}
+	
+	public int getCount(GameColor color) {
+		if (color == GameColor.BLACK) {
+			return blackCheckerCount;
+		} else {
+			return whiteCheckerCount;
+		}
+	}
 }

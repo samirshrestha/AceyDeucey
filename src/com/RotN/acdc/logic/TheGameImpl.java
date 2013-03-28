@@ -88,6 +88,24 @@ public class TheGameImpl {
 				
 		gammon.buttonState = ButtonState.ROLL_FOR_TURN;
 		
+		//testing
+		/*gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(11);
+		gammon.containers.get(BoardPositions.WHITE_BUNKER.getIndex()).setWhiteCheckerCount(1);
+		gammon.containers.get(2).setBlackCheckerCount(1);
+		gammon.containers.get(1).setBlackCheckerCount(1);
+		gammon.containers.get(6).setBlackCheckerCount(2);
+		gammon.containers.get(20).setWhiteCheckerCount(14);
+		gammon.whiteMovingIn = true;
+		gammon.allWhitePiecesOut = true;
+		gammon.blackMovingIn = true;
+		gammon.allBlackPiecesOut = true;
+		gammon.turn = GameColor.WHITE;
+		gammon.movesRemaining.clear();
+		gammon.whiteDie1 = 5;
+		gammon.whiteDie2 = 4;
+		gammon.buttonState = ButtonState.TURN_FINISHED;*/
+		
+		
 		this.onBoardUpdate();
 	}
 	
@@ -388,7 +406,9 @@ public class TheGameImpl {
 	private void checkBlackHomeBoardAcdc(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
 		for (Integer moveLength : movesAvailable) {
 			if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0) {
-				// an exact move is possible do nothing
+				if (moveLength == pieceLocation.getIndex()) {
+					moves.add(BoardPositions.BLACK_BUNKER);
+				}
 			} else {
 				boolean higherLegalMove = false;
 				for (int i = 6; i > pieceLocation.getIndex(); i--) {
@@ -475,34 +495,41 @@ public class TheGameImpl {
 	
 	private void checkWhiteHomeBoardAcdc(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
 		for (Integer moveLength : movesAvailable) {
-			boolean higherLegalMove = false;
-			for (int i = 19; i < pieceLocation.getIndex(); i++) {
-				CheckerContainer point = gammon.containers.get(i);
-				Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
-				if (point.getWhiteCheckerCount() > 0) {
-					checkWhiteBearingOff(point.getPosition(), tempMoves, movesAvailable);
+			int reverseIndex = 25 - moveLength;
+			if (gammon.containers.get(reverseIndex).getWhiteCheckerCount() > 0) {
+				if (reverseIndex == pieceLocation.getIndex()) {
+					moves.add(BoardPositions.WHITE_BUNKER);
 				}
-				if (tempMoves.size() > 0) {
-					higherLegalMove = true;
-					break;
-				}
-			}
-			
-			boolean homeBoardMove = false;
-			boolean moveIntoBunker = false;
-			Integer moveIndex = pieceLocation.getIndex() + moveLength;
-			if (moveIndex >= 25) {
-				moveIntoBunker = true;
 			} else {
-				CheckerContainer possibleMove = gammon.containers.get(moveIndex);
-				if (possibleMove.getBlackCheckerCount() < 2) {
-					moves.add(possibleMove.getPosition());
-					homeBoardMove = true;
+				boolean higherLegalMove = false;
+				for (int i = 19; i < pieceLocation.getIndex(); i++) {
+					CheckerContainer point = gammon.containers.get(i);
+					Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
+					if (point.getWhiteCheckerCount() > 0) {
+						checkWhiteBearingOff(point.getPosition(), tempMoves, movesAvailable);
+					}
+					if (tempMoves.size() > 0) {
+						higherLegalMove = true;
+						break;
+					}
 				}
-			}
-			
-			if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
-				moves.add(BoardPositions.WHITE_BUNKER);
+				
+				boolean homeBoardMove = false;
+				boolean moveIntoBunker = false;
+				Integer moveIndex = pieceLocation.getIndex() + moveLength;
+				if (moveIndex >= 25) {
+					moveIntoBunker = true;
+				} else {
+					CheckerContainer possibleMove = gammon.containers.get(moveIndex);
+					if (possibleMove.getBlackCheckerCount() < 2) {
+						moves.add(possibleMove.getPosition());
+						homeBoardMove = true;
+					}
+				}
+				
+				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+					moves.add(BoardPositions.WHITE_BUNKER);
+				}
 			}
 		}
 	}
@@ -883,7 +910,7 @@ public class TheGameImpl {
 			gammon.blackDie2 = rollDie();
 			
 			// for testing
-			//gammon.blackDie1 = 6;
+			//gammon.blackDie1 = 2;
 			//gammon.blackDie2 = 1;
 			
 			gammon.movesRemaining.add(gammon.blackDie1);

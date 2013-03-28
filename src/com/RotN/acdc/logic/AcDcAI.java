@@ -62,6 +62,7 @@ public class AcDcAI {
 		if (acdc.getGammonData().movesRemaining.size() == 0) {
 			AIMoves miscDoubles = null;
 			for (int i = 1; i <= 6; i++) {
+				Log.d("AI", "Checking " + i + " as the AcDc double");
 				acdc.getGammonData().movesRemaining.add(i);
 				acdc.getGammonData().movesRemaining.add(i);
 				acdc.getGammonData().movesRemaining.add(i);
@@ -85,14 +86,14 @@ public class AcDcAI {
 	}
 
 	private AIMoves GetNextMove(TheGameImpl acdc, AIMoves movesUsed, int depth, ArrayList<BoardPositions> pertinentContainers) {
-		String bDepth = "[" + depth + "]";
+		//String bDepth = "[" + depth + "]";
 		AIMoves aiMove = new AIMoves();
 				
 		for (BoardPositions possibleChoice : pertinentContainers) {
 			// this gives me the possible moves for a given container
 			Vector<BoardPositions> options = acdc.getPossibleMoves(possibleChoice, false);
 			
-			Log.d("AI", bDepth + "Checking container: " + possibleChoice.toString() + " it has " + options + " possible moves");
+			//Log.d("AI", bDepth + "Checking container: " + possibleChoice.toString() + " it has " + options + " possible moves");
 			
 			//loops through the move options
 			for (BoardPositions move : options) {
@@ -118,7 +119,7 @@ public class AcDcAI {
 						}
 					}
 				}
-				Log.d("AI", bDepth + " Using move " + move.toString());
+				//Log.d("AI", bDepth + " Using move " + move.toString());
 				//make a copy of moves used to this point
 				AIMoves possible = new AIMoves(movesUsed);
 				//add the moves that we just did
@@ -131,7 +132,7 @@ public class AcDcAI {
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcData);
-					this.logAIMove("Possible ", possible);
+					//this.logAIMove("Possible ", possible);
 				}
 
 				//undo what we did for the next check
@@ -236,10 +237,14 @@ public class AcDcAI {
 		for (CheckerContainer container : acdc.containers) {
 			
 			int containerValue = container.getPosition().getIndex();
-			if (container.getPosition() == BoardPositions.WHITE_BUNKER ||
-					container.getPosition() == BoardPositions.POKEY) {
-				//don't count nothing these aren't important
+			if (container.getPosition() == BoardPositions.WHITE_BUNKER){
+				if (acdc.allWhitePiecesOut) {
+					boardValue += container.getWhiteCheckerCount() * 6;
+				}
+			} else if (container.getPosition() == BoardPositions.POKEY) {
+				boardValue += container.getBlackCheckerCount() * 6;
 			} else if (container.getWhiteCheckerCount() > 1) {
+				boardValue += blockadeBonus(container, acdc);
 				boardValue += container.getWhiteCheckerCount() * containerValue;
 			} else if (container.getWhiteCheckerCount() == 1) {
 				
@@ -262,6 +267,38 @@ public class AcDcAI {
 		}
 		
 		return boardValue;
+	}
+	
+	private int blockadeBonus(CheckerContainer container, TheGame acdc) {
+		int bonus = 0;
+		
+		//go forward
+		int index = container.getPosition().getIndex() + 1;
+		while (acdc.containers.get(index).getCount(acdc.turn) > 1) {
+			BoardPositions position = acdc.containers.get(index).getPosition();
+			if (BoardPositions.POKEY == position ||
+					BoardPositions.WHITE_BUNKER == position || 
+					BoardPositions.BLACK_BUNKER == position ) {
+				break;
+			}
+			bonus += 1;
+			index++;
+		}
+		
+		//go backward
+		index = container.getPosition().getIndex() - 1;
+		while (acdc.containers.get(index).getCount(acdc.turn) > 1) {
+			BoardPositions position = acdc.containers.get(index).getPosition();
+			if (BoardPositions.POKEY == position ||
+					BoardPositions.WHITE_BUNKER == position || 
+					BoardPositions.BLACK_BUNKER == position ) {
+				break;
+			}
+			bonus += 1;
+			index--;
+		}
+		
+		return bonus;
 	}
 	
 	private boolean checkForBlackPieceWithinNineSpots(TheGame acdc, CheckerContainer container) {
