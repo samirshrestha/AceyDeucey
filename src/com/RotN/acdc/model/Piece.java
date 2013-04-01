@@ -4,6 +4,7 @@ import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 
 public class Piece {
 	private Bitmap bitmapBlack; // the actual bitmap
@@ -11,8 +12,19 @@ public class Piece {
 	private GameColor pieceColor;
 	private int x; // the x coord
 	private int y; // the y coord
-	private boolean touched; //if droid is touched/picked up
+	private boolean touched; //if piece is touched/picked up
+
+	private Point animateStart = new Point();
+	private Point animateStop = new Point();
 	
+	public void setAnimateStart(Point animateStart) {
+		this.animateStart = animateStart;
+	}
+
+	public void setAnimateStop(Point animateStop) {
+		this.animateStop = animateStop;
+	}
+
 	public Piece(Bitmap bitmapBlack, Bitmap bitmapWhite, int x, int y){
 		this.bitmapBlack = bitmapBlack;
 		this.bitmapWhite = bitmapWhite;

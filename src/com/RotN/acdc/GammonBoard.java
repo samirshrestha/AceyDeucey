@@ -50,6 +50,8 @@ SurfaceHolder.Callback {
 	private SparseArray<Bitmap> pieceBlackBitmaps;
 	private BoardPositions selectedPosition;
 	private Piece floatingPiece;
+	private Piece animateWhite;
+	private Piece animateBlack;
 	private boolean clickToMove = false;
 	Context fileContext;
 
@@ -334,6 +336,10 @@ SurfaceHolder.Callback {
 		renderLowBoardPoints(canvas);
 		
 		floatingPiece.draw(canvas);
+		animateWhite.setTouched(animateBlack.isTouched());
+		animateBlack.setTouched(!animateWhite.isTouched());
+		animateWhite.draw(canvas);
+		animateBlack.draw(canvas);
 		
 		if (canvas != null) {
 			getHolder().unlockCanvasAndPost(canvas);
@@ -440,6 +446,11 @@ SurfaceHolder.Callback {
 		pieceWhiteBitmaps.put(3, getImageExactSize(getResources(), R.drawable.white_checker3, newWidth, newHeight));
 		
 		floatingPiece = new Piece(pieceBlackBitmaps.get(1), pieceWhiteBitmaps.get(1), 0, 0);
+		animateWhite = new Piece(pieceBlackBitmaps.get(1), pieceWhiteBitmaps.get(1), 0, 0);
+		animateWhite.setColor(GameColor.WHITE);
+		animateBlack = new Piece(pieceBlackBitmaps.get(1), pieceWhiteBitmaps.get(1), 0, 0);
+		animateBlack.setColor(GameColor.BLACK);		
+		animateBlack.setTouched(true);
 	}
 	
 	private void clearSelectedSpot(){
@@ -617,6 +628,11 @@ SurfaceHolder.Callback {
 	}
 	
 	private void animateMoves(ArrayList<Move> moves) {
+		AnimationThread draw = new AnimationThread(this, moves);
+		draw.start();
+	}
+	
+	public void updateAnimatedPieces() {
 		
 	}
 }
