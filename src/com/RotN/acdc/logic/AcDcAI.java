@@ -234,7 +234,7 @@ public class AcDcAI {
 	public Integer evaluateBoardWhitePerspective(TheGame acdc) {
 		Integer boardValue = 0;
 		
-		for (CheckerContainer container : acdc.containers) {			
+		for (CheckerContainer container : acdc.containers) {
 			
 			int containerValue = container.getPosition().getIndex();
 			if (container.getPosition() == BoardPositions.WHITE_BUNKER){
@@ -242,30 +242,63 @@ public class AcDcAI {
 					boardValue += container.getWhiteCheckerCount() * 6;
 				}
 			} else if (container.getPosition() == BoardPositions.POKEY) {
-				boardValue += container.getBlackCheckerCount() * 6;
+				boardValue += container.getBlackCheckerCount() * 10;
 			} else if (container.getWhiteCheckerCount() > 1) {
-				boardValue += container.getWhiteCheckerCount() * containerValue + 6;
+				boardValue += blockadeBonus(container, acdc);
+				boardValue += container.getWhiteCheckerCount() * containerValue;
 			} else if (container.getWhiteCheckerCount() == 1) {
 				
 				//pieces that get hit farther along hurt more so lower the value of the open ones
-				int riskDetractor = 2;
+				int riskDetractor = 1;
 				if (containerValue > 18) {
-					riskDetractor = 5;
-				} else if (containerValue > 12) {
 					riskDetractor = 4;
-				} else if (containerValue > 6) {
+				} else if (containerValue > 12) {
 					riskDetractor = 3;
+				} else if (containerValue > 6) {
+					riskDetractor = 2;
 				}
 				
 				if (checkForBlackPieceWithinNineSpots(acdc, container) ) {
 					boardValue += containerValue - (12 * riskDetractor);
 				} else {
 					boardValue += containerValue - (6 * riskDetractor);
-				}
-			} 
+				}				
+			}
 		}
 		
 		return boardValue;
+	}
+	
+	private int blockadeBonus(CheckerContainer container, TheGame acdc) {
+		int bonus = 0;
+		
+		//go forward
+		int index = container.getPosition().getIndex() + 1;
+		while (acdc.containers.get(index).getCount(acdc.turn) > 1) {
+			BoardPositions position = acdc.containers.get(index).getPosition();
+			if (BoardPositions.POKEY == position ||
+					BoardPositions.WHITE_BUNKER == position || 
+					BoardPositions.BLACK_BUNKER == position ) {
+				break;
+			}
+			bonus += 1;
+			index++;
+		}
+		
+		//go backward
+		index = container.getPosition().getIndex() - 1;
+		while (acdc.containers.get(index).getCount(acdc.turn) > 1) {
+			BoardPositions position = acdc.containers.get(index).getPosition();
+			if (BoardPositions.POKEY == position ||
+					BoardPositions.WHITE_BUNKER == position || 
+					BoardPositions.BLACK_BUNKER == position ) {
+				break;
+			}
+			bonus += 1;
+			index--;
+		}
+		
+		return bonus;
 	}
 	
 	private boolean checkForBlackPieceWithinNineSpots(TheGame acdc, CheckerContainer container) {
