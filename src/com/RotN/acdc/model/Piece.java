@@ -13,16 +13,19 @@ public class Piece {
 	private int x; // the x coord
 	private int y; // the y coord
 	private boolean touched; //if piece is touched/picked up
+	private Speed speed;
 
-	private Point animateStart = new Point();
-	private Point animateStop = new Point();
+	private Point animateStart = new Point(0,0);
+	private Point animateStop = new Point(0,0);
 	
 	public void setAnimateStart(Point animateStart) {
 		this.animateStart = animateStart;
+		calculateSpeed();
 	}
 
 	public void setAnimateStop(Point animateStop) {
 		this.animateStop = animateStop;
+		calculateSpeed();
 	}
 
 	public Piece(Bitmap bitmapBlack, Bitmap bitmapWhite, int x, int y){
@@ -32,6 +35,7 @@ public class Piece {
 		this.y = y;
 		this.pieceColor = GameColor.NEITHER;
 		this.touched = false;
+		speed = new Speed();
 	}
 
 	public void setX(int x) {
@@ -66,5 +70,27 @@ public class Piece {
 
 	public GameColor getColor() {
 		return pieceColor;
+	}
+	
+	private void calculateSpeed() {
+		//points are different, calculate speed
+		if (false == this.animateStart.equals(this.animateStop)) {
+			
+			double xDistance = Math.abs(this.animateStop.x - this.animateStart.x);
+			speed.setXv((float) (xDistance / 100));
+			if (this.animateStart.x > this.animateStop.x) {
+				speed.setxDirection(Speed.DIRECTION_RIGHT);
+			} else {
+				speed.setxDirection(Speed.DIRECTION_LEFT);
+			}
+			
+			double yDistance = Math.abs(this.animateStop.y - this.animateStart.y);
+			speed.setYv((float) (yDistance / 100));
+			if (this.animateStart.y > this.animateStop.y) {
+				speed.setyDirection(Speed.DIRECTION_DOWN);
+			} else {
+				speed.setyDirection(Speed.DIRECTION_UP);
+			}
+		}
 	}
 }

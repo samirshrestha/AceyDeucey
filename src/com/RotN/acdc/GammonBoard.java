@@ -632,7 +632,9 @@ SurfaceHolder.Callback {
 		draw.start();
 	}
 	
-	public void updateAnimatedPieces() {
+	public boolean updateAnimatedPieces() {
+		boolean animationComplete = false;
 		
+		return animationComplete;
 	}
 }

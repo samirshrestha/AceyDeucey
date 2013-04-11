@@ -37,35 +37,34 @@ public class AnimationThread extends Thread {
 		
 		sleepTime = 0;
 		
-		
-		while (running) {
-			beginTime = System.currentTimeMillis();
-			framesSkipped = 0;	// resetting the frames skipped
-			// update game state 
-			//this.gamePanel.update();
-			// render state to the screen
-			// draws the canvas on the panel
-			this.theBoard.render();			
-			// calculate how long did the cycle take
-			timeDiff = System.currentTimeMillis() - beginTime;
-			// calculate sleep time
-			sleepTime = (int)(FRAME_PERIOD - timeDiff);
-			
-			if (sleepTime > 0) {
-				// if sleepTime > 0 we're OK
-				try {
-					// send the thread to sleep for a short period
-					// very useful for battery saving
-					Thread.sleep(sleepTime);	
-				} catch (InterruptedException e) {}
-			}
-			
-			while (sleepTime < 0 && framesSkipped < MAX_FRAME_SKIPS) {
-				// we need to catch up
-				//this.gamePanel.update(); // update without rendering
-				sleepTime += FRAME_PERIOD;	// add frame period to check if in next frame
-				framesSkipped++;
-			}
-		}	// end finally
+		for (Move move : moves) {		
+			while (false == this.theBoard.updateAnimatedPieces()) {
+				beginTime = System.currentTimeMillis();
+				framesSkipped = 0;	// resetting the frames skipped
+				// render state to the screen
+				// draws the canvas on the panel
+				this.theBoard.render();			
+				// calculate how long did the cycle take
+				timeDiff = System.currentTimeMillis() - beginTime;
+				// calculate sleep time
+				sleepTime = (int)(FRAME_PERIOD - timeDiff);
+				
+				if (sleepTime > 0) {
+					// if sleepTime > 0 we're OK
+					try {
+						// send the thread to sleep for a short period
+						// very useful for battery saving
+						Thread.sleep(sleepTime);	
+					} catch (InterruptedException e) {}
+				}
+				
+				while (sleepTime < 0 && framesSkipped < MAX_FRAME_SKIPS) {
+					// we need to catch up
+					this.theBoard.updateAnimatedPieces(); // update without rendering
+					sleepTime += FRAME_PERIOD;	// add frame period to check if in next frame
+					framesSkipped++;
+				}
+			}	// end finally
+		}
 	}
 }

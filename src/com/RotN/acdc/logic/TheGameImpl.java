@@ -909,6 +909,10 @@ public class TheGameImpl {
 			gammon.blackDie1 = rollDie();
 			gammon.blackDie2 = rollDie();
 			
+			if (gammon.blackMovingIn && gammon.blackDie1 < 3) {
+				gammon.blackDie2 = 3 - gammon.blackDie1;
+			} 
+			
 			// for testing
 			//gammon.blackDie1 = 2;
 			//gammon.blackDie2 = 1;
@@ -924,6 +928,10 @@ public class TheGameImpl {
 		} else {
 			gammon.whiteDie1 = rollDie();
 			gammon.whiteDie2 = rollDie();
+			
+			if (gammon.whiteMovingIn && gammon.whiteDie1 < 3) {
+				gammon.whiteDie2 = 3 - gammon.whiteDie1;
+			} 
 			
 			// for testing
 			//gammon.whiteDie1 = 1;
