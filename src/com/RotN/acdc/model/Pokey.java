@@ -215,10 +215,10 @@ public class Pokey {
 	}
 	
 	public Point getAnimateStart() {
-		return new Point(pokeyRect.left, pokeyRect.top);
+		return new Point(pokeyRect.centerX(), pokeyRect.centerY());
 	}
 
 	public Point getAnimateStop() {
-		return new Point(pokeyRect.left, pokeyRect.top);
+		return new Point(pokeyRect.centerX(), pokeyRect.centerY());
 	}
 }

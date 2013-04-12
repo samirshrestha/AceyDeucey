@@ -177,6 +177,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 	AcDcAI ai = new AcDcAI();
                 	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
                 	for (Move move : moves) {
+                		ArrayList<Move> moveToDraw = new ArrayList<Move>();
+                		moveToDraw.add(move);
+                		board.animateMoves(moveToDraw);
                 		if (move.getColor() == beerGammon.getTurn()) {
                 			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
                 		}

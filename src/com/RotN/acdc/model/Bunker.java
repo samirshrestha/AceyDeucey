@@ -141,10 +141,10 @@ public class Bunker {
 	}
 	
 	public Point getAnimateStart() {
-		return new Point(bunkerRect.left, bunkerRect.top);
+		return new Point(bunkerRect.centerX(), bunkerRect.centerY());
 	}
 
 	public Point getAnimateStop() {
-		return new Point(bunkerRect.left, bunkerRect.top);
+		return new Point(bunkerRect.centerX(), bunkerRect.centerY());
 	}
 }

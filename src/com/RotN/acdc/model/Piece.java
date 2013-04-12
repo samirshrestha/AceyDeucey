@@ -5,6 +5,7 @@ import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.util.Log;
 
 public class Piece {
 	private Bitmap bitmapBlack; // the actual bitmap
@@ -18,12 +19,8 @@ public class Piece {
 	private Point animateStart = new Point(0,0);
 	private Point animateStop = new Point(0,0);
 	
-	public void setAnimateStart(Point animateStart) {
+	public void setAnimationPoints(Point animateStart, Point animateStop) {
 		this.animateStart = animateStart;
-		calculateSpeed();
-	}
-
-	public void setAnimateStop(Point animateStop) {
 		this.animateStop = animateStop;
 		calculateSpeed();
 	}
@@ -76,17 +73,15 @@ public class Piece {
 		//points are different, calculate speed
 		if (false == this.animateStart.equals(this.animateStop)) {
 			
-			double xDistance = Math.abs(this.animateStop.x - this.animateStart.x);
-			speed.setXv((float) (xDistance / 100));
-			if (this.animateStart.x > this.animateStop.x) {
+			speed.setXv(5);
+			if (this.animateStart.x < this.animateStop.x) {
 				speed.setxDirection(Speed.DIRECTION_RIGHT);
 			} else {
 				speed.setxDirection(Speed.DIRECTION_LEFT);
 			}
 			
-			double yDistance = Math.abs(this.animateStop.y - this.animateStart.y);
-			speed.setYv((float) (yDistance / 100));
-			if (this.animateStart.y > this.animateStop.y) {
+			speed.setYv(5);
+			if (this.animateStart.y < this.animateStop.y) {
 				speed.setyDirection(Speed.DIRECTION_DOWN);
 			} else {
 				speed.setyDirection(Speed.DIRECTION_UP);
@@ -95,7 +90,8 @@ public class Piece {
 	}
 	
 	public boolean updateAnimatePiece() {
-		boolean pieceFinished = false;
+		boolean xFinished = false;
+		boolean yFinished = false;
 		
 		if (this.touched) {
 			x += (speed.getXv() * speed.getxDirection()); 
@@ -103,33 +99,37 @@ public class Piece {
 			if (speed.getxDirection() == Speed.DIRECTION_RIGHT) {
 				if (x > animateStop.x) {
 					x = animateStop.x;
-					pieceFinished = true;
+					xFinished = true;
 				}				
 			} else {
 				if (x < animateStop.x) {
 					x = animateStop.x;
-					pieceFinished = true;
+					xFinished = true;
 				}
 			}
 			
 			if (speed.getyDirection() == Speed.DIRECTION_DOWN) {
 				if (y > animateStop.y) {
 					y = animateStop.y;
-					pieceFinished = true;
+					yFinished = true;
 				}				
 			} else {
 				if (y < animateStop.y) {
 					y = animateStop.y;
-					pieceFinished = true;
+					yFinished = true;
 				}
 			}
 		} else {
+			Log.d("Animate", "Starting the draw");
 			this.touched = true;
 			x = animateStart.x;
 			y = animateStart.y;
 		}
 		
-		if (pieceFinished) {
+		boolean pieceFinished = false;		
+		if (xFinished && yFinished) {
+			Log.d("Animate", "Stopping the draw");
+			pieceFinished = true;
 			this.touched = false;
 		}
 		

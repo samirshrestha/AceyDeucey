@@ -299,8 +299,8 @@ public class GammonPoint {
 			offset *= -1;
 			startY = pointRect.bottom - pointWidth;
 		}
-		animateStop.x = left;
-		animateStart.x = left;
+		animateStop.x = pointRect.centerX();
+		animateStart.x = pointRect.centerX();
 		switch (count) {
 		case 5:
 		case 10:

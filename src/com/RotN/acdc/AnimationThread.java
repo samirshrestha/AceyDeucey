@@ -2,6 +2,8 @@ package com.RotN.acdc;
 
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import com.RotN.acdc.logic.Move;
 
 public class AnimationThread extends Thread {
@@ -36,10 +38,12 @@ public class AnimationThread extends Thread {
 		int framesSkipped;	// number of frames being skipped 
 		
 		sleepTime = 0;
-		
-		for (Move move : moves) {		
+
+		Log.d("Animate", "We have " + moves.size() + " moves to draw");
+		for (Move move : moves) {	
+			Log.d("Animate", "Moving a piece");
 			this.theBoard.setAnimatePiece(move);
-			while (false == this.theBoard.updateAnimatedPieces()) {
+			while (false == this.theBoard.updateAnimatedPieces(move.getColor())) {
 				beginTime = System.currentTimeMillis();
 				framesSkipped = 0;	// resetting the frames skipped
 				// render state to the screen
@@ -59,13 +63,24 @@ public class AnimationThread extends Thread {
 					} catch (InterruptedException e) {}
 				}
 				
+				boolean timeToQuitDrawing = false;
+				
 				while (sleepTime < 0 && framesSkipped < MAX_FRAME_SKIPS) {
 					// we need to catch up
-					this.theBoard.updateAnimatedPieces(); // update without rendering
+					timeToQuitDrawing = this.theBoard.updateAnimatedPieces(move.getColor()); // update without rendering
+					if (timeToQuitDrawing) {
+						break;
+					}
 					sleepTime += FRAME_PERIOD;	// add frame period to check if in next frame
 					framesSkipped++;
 				}
+				
+				if (timeToQuitDrawing) {
+					break;
+				}
 			}	// end finally
+			
+			this.theBoard.render();
 		}
 	}
 }
