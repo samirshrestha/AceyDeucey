@@ -93,4 +93,46 @@ public class Piece {
 			}
 		}
 	}
+	
+	public boolean updateAnimatePiece() {
+		boolean pieceFinished = false;
+		
+		if (this.touched) {
+			x += (speed.getXv() * speed.getxDirection()); 
+			y += (speed.getYv() * speed.getyDirection());
+			if (speed.getxDirection() == Speed.DIRECTION_RIGHT) {
+				if (x > animateStop.x) {
+					x = animateStop.x;
+					pieceFinished = true;
+				}				
+			} else {
+				if (x < animateStop.x) {
+					x = animateStop.x;
+					pieceFinished = true;
+				}
+			}
+			
+			if (speed.getyDirection() == Speed.DIRECTION_DOWN) {
+				if (y > animateStop.y) {
+					y = animateStop.y;
+					pieceFinished = true;
+				}				
+			} else {
+				if (y < animateStop.y) {
+					y = animateStop.y;
+					pieceFinished = true;
+				}
+			}
+		} else {
+			this.touched = true;
+			x = animateStart.x;
+			y = animateStart.y;
+		}
+		
+		if (pieceFinished) {
+			this.touched = false;
+		}
+		
+		return pieceFinished;
+	}
 }

@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -635,6 +636,21 @@ SurfaceHolder.Callback {
 	public boolean updateAnimatedPieces() {
 		boolean animationComplete = false;
 		
+		animationComplete = this.animateBlack.updateAnimatePiece();
+		animationComplete &= this.animateWhite.updateAnimatePiece();
+		
 		return animationComplete;
+	}
+	
+	public void setAnimatePiece(Move move) {
+		Point startPoint = boardPoints.get(move.getOrigSpot()).getAnimateStart();
+		Point endPoint = boardPoints.get(move.getNewSpot()).getAnimateStop();
+		if (move.getColor() == GameColor.BLACK) {
+			animateBlack.setAnimateStart(startPoint);
+			animateBlack.setAnimateStop(endPoint);
+		} else {
+			animateWhite.setAnimateStart(startPoint);
+			animateWhite.setAnimateStop(endPoint);
+		}
 	}
 }

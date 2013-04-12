@@ -7,7 +7,7 @@ import com.RotN.acdc.logic.Move;
 public class AnimationThread extends Thread {
 	
 	private GammonBoard theBoard;
-	private boolean running;
+	//private boolean running;
 	private ArrayList<Move> moves;
 	
 	// desired fps
@@ -18,7 +18,7 @@ public class AnimationThread extends Thread {
 	private final static int	FRAME_PERIOD = 1000 / MAX_FPS;
 	
 	public void setRunning(boolean running) {
-		this.running = running;
+		//this.running = running;
 	}
 	
 	public AnimationThread(GammonBoard theBoard, ArrayList<Move> moves) {
@@ -38,6 +38,7 @@ public class AnimationThread extends Thread {
 		sleepTime = 0;
 		
 		for (Move move : moves) {		
+			this.theBoard.setAnimatePiece(move);
 			while (false == this.theBoard.updateAnimatedPieces()) {
 				beginTime = System.currentTimeMillis();
 				framesSkipped = 0;	// resetting the frames skipped
