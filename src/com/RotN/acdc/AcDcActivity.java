@@ -183,9 +183,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 		if (move.getColor() == beerGammon.getTurn()) {
                 			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
                 		}
+            			board.clearAnimatedPieces();
+            			board.clearFloater(move.getOrigSpot());
+            			board.render();
                 	}
-                	
-                	board.render();
                 }
             }
         });            

@@ -2,8 +2,6 @@ package com.RotN.acdc;
 
 import java.util.ArrayList;
 
-import android.util.Log;
-
 import com.RotN.acdc.logic.Move;
 
 public class AnimationThread extends Thread {
@@ -39,9 +37,9 @@ public class AnimationThread extends Thread {
 		
 		sleepTime = 0;
 
-		Log.d("Animate", "We have " + moves.size() + " moves to draw");
+		//Log.d("Animate", "We have " + moves.size() + " moves to draw");
 		for (Move move : moves) {	
-			Log.d("Animate", "Moving a piece");
+			//Log.d("Animate", "Moving a piece");
 			this.theBoard.setAnimatePiece(move);
 			while (false == this.theBoard.updateAnimatedPieces(move.getColor())) {
 				beginTime = System.currentTimeMillis();

@@ -186,6 +186,8 @@ SurfaceHolder.Callback {
 		} if (event.getAction() == MotionEvent.ACTION_UP) {	
 			floatingPiece.setTouched(false);
 			
+			clearFloaters();						
+			
 			if (selectedPosition != BoardPositions.NONE) {
 
 				Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
@@ -207,7 +209,8 @@ SurfaceHolder.Callback {
 				if (upContainer == selectedPosition) {
 					//this.clickToMove = true;
 				} else if (upContainer != BoardPositions.NONE) {
-					ArrayList<Move> moves = beerGammon.movePiece(selectedPosition, upContainer);
+					//ArrayList<Move> moves = 
+					beerGammon.movePiece(selectedPosition, upContainer);
 					
 					if (this.clickToMove){
 						//animateMoves(moves);
@@ -280,6 +283,7 @@ SurfaceHolder.Callback {
 				if (whiteBunker.getBunkerCount() > 0) {
 					floatingPiece.setColor(GameColor.WHITE);
 					floatingPiece.setTouched(true);
+					whiteBunker.setFloatingPiece(true);
 				}
 			} else if (BoardPositions.BLACK_BUNKER == downContainer){
 				blackBunker.setSelected(true);
@@ -287,17 +291,19 @@ SurfaceHolder.Callback {
 				if (blackBunker.getBunkerCount() > 0) {
 					floatingPiece.setColor(GameColor.BLACK);
 					floatingPiece.setTouched(true);
+					blackBunker.setFloatingPiece(true);
 				}
 			} else if (BoardPositions.POKEY == downContainer) {
 				selectedPosition = BoardPositions.POKEY;
-				pokey.setSelected(true);
 				CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
 				if (beerGammon.getTurn() == GameColor.BLACK && pokeyData.getBlackCheckerCount() > 0) {
 					floatingPiece.setColor(GameColor.BLACK);
 					floatingPiece.setTouched(true);
+					pokey.setFloatingPiece(true);
 				} else if (beerGammon.getTurn() == GameColor.WHITE && pokeyData.getWhiteCheckerCount() > 0) {
 					floatingPiece.setColor(GameColor.WHITE);
 					floatingPiece.setTouched(true);
+					pokey.setFloatingPiece(true);
 				}
 			} else if (BoardPositions.NONE != downContainer){
 				boardPoints.get(downContainer).setSelected(true);
@@ -306,9 +312,11 @@ SurfaceHolder.Callback {
 				if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
 					floatingPiece.setColor(GameColor.BLACK);
 					floatingPiece.setTouched(true);
+					boardPoints.get(downContainer).setFloatingPiece(true);
 				} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
 					floatingPiece.setColor(GameColor.WHITE);
 					floatingPiece.setTouched(true);
+					boardPoints.get(downContainer).setFloatingPiece(true);
 				}
 			}
 		}
@@ -327,10 +335,10 @@ SurfaceHolder.Callback {
 			board = decodeSampledBitmapFromResource(getResources(), R.drawable.background, getWidth(), getHeight());
 		}
 		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
-		blackBunker.draw(canvas, floatingPiece.isTouched());
-		whiteBunker.draw(canvas, floatingPiece.isTouched());
+		blackBunker.draw(canvas);
+		whiteBunker.draw(canvas);
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
-		pokey.draw(canvas, pokeyData, floatingPiece.isTouched());
+		pokey.draw(canvas, pokeyData);
 						
 		renderHighBoardPoints(canvas);
 		dice.draw(canvas, beerGammon);
@@ -454,7 +462,6 @@ SurfaceHolder.Callback {
 	private void clearSelectedSpot(){
 		blackBunker.setSelected(false);
 		whiteBunker.setSelected(false);
-		pokey.setSelected(false);
 		
 		Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
 		Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
@@ -462,6 +469,20 @@ SurfaceHolder.Callback {
 			Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
 			
 			m.getValue().setSelected(false);
+		}
+	}
+	
+	private void clearFloaters(){
+		blackBunker.setFloatingPiece(false);
+		whiteBunker.setFloatingPiece(false);
+		pokey.setFloatingPiece(false);
+		
+		Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
+		Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
+		while (it.hasNext()) {
+			Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
+			
+			m.getValue().setFloatingPiece(false);
 		}
 	}
 	
@@ -618,10 +639,10 @@ SurfaceHolder.Callback {
 		CheckerContainer container = beerGammon.getContainer(point.getPointPos());
 		
 		if (container.getWhiteCheckerCount() > 0) {
-			point.draw(canvas, pieceWhiteBitmaps, container, floatingPiece.isTouched());				
+			point.draw(canvas, pieceWhiteBitmaps, container);				
 		}
 		else {
-			point.draw(canvas, pieceBlackBitmaps, container, floatingPiece.isTouched());
+			point.draw(canvas, pieceBlackBitmaps, container);
 		}
 	}
 	
@@ -648,12 +669,20 @@ SurfaceHolder.Callback {
 		
 		if (move.getOrigSpot() == BoardPositions.BLACK_BUNKER) {
 			startPoint = this.blackBunker.getAnimateStart();
+			blackBunker.setFloatingPiece(true);
+			Log.d("Animate", "Hiding a piece from " + move.getOrigSpot().toString());
 		} else if (move.getOrigSpot() == BoardPositions.WHITE_BUNKER) {
 			startPoint = this.whiteBunker.getAnimateStart();
+			whiteBunker.setFloatingPiece(true);
+			Log.d("Animate", "Hiding a piece from " + move.getOrigSpot().toString());
 		} else if (move.getOrigSpot() == BoardPositions.POKEY) {
 			startPoint = pokey.getAnimateStart();
+			pokey.setFloatingPiece(true);
+			Log.d("Animate", "Hiding a piece from " + move.getOrigSpot().toString());
 		} else {
 			startPoint = boardPoints.get(move.getOrigSpot()).getAnimateStart();
+			boardPoints.get(move.getOrigSpot()).setFloatingPiece(true);
+			Log.d("Animate", "Hiding a piece from " + move.getOrigSpot().toString());
 		}
 		
 		if (move.getNewSpot() == BoardPositions.BLACK_BUNKER) {
@@ -670,6 +699,30 @@ SurfaceHolder.Callback {
 			animateBlack.setAnimationPoints(startPoint, endPoint);
 		} else {
 			animateWhite.setAnimationPoints(startPoint, endPoint);
+		}
+	}
+	
+	public void clearAnimatedPieces() {
+		animateBlack.setTouched(false);
+		animateWhite.setTouched(false);
+	}
+	
+	public void clearFloater(BoardPositions position) {
+		switch (position) {
+		case WHITE_BUNKER:
+			whiteBunker.setFloatingPiece(false);
+			break;
+		case BLACK_BUNKER:
+			blackBunker.setFloatingPiece(false);
+			break;
+		case POKEY:
+			pokey.setFloatingPiece(false);
+			break;
+		case NONE:
+			break;
+		default:
+			boardPoints.get(position).setFloatingPiece(false);
+			break;
 		}
 	}
 }

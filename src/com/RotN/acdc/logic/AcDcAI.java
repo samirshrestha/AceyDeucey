@@ -239,12 +239,11 @@ public class AcDcAI {
 			int containerValue = container.getPosition().getIndex();
 			if (container.getPosition() == BoardPositions.WHITE_BUNKER){
 				if (acdc.allWhitePiecesOut) {
-					boardValue += container.getWhiteCheckerCount() * 6;
+					boardValue += container.getWhiteCheckerCount() * 12;
 				}
 			} else if (container.getPosition() == BoardPositions.POKEY) {
 				boardValue += container.getBlackCheckerCount() * 10;
 			} else if (container.getWhiteCheckerCount() > 1) {
-				boardValue += blockadeBonus(container, acdc);
 				boardValue += container.getWhiteCheckerCount() * containerValue;
 			} else if (container.getWhiteCheckerCount() == 1) {
 				
@@ -267,38 +266,6 @@ public class AcDcAI {
 		}
 		
 		return boardValue;
-	}
-	
-	private int blockadeBonus(CheckerContainer container, TheGame acdc) {
-		int bonus = 0;
-		
-		//go forward
-		int index = container.getPosition().getIndex() + 1;
-		while (acdc.containers.get(index).getCount(acdc.turn) > 1) {
-			BoardPositions position = acdc.containers.get(index).getPosition();
-			if (BoardPositions.POKEY == position ||
-					BoardPositions.WHITE_BUNKER == position || 
-					BoardPositions.BLACK_BUNKER == position ) {
-				break;
-			}
-			bonus += 1;
-			index++;
-		}
-		
-		//go backward
-		index = container.getPosition().getIndex() - 1;
-		while (acdc.containers.get(index).getCount(acdc.turn) > 1) {
-			BoardPositions position = acdc.containers.get(index).getPosition();
-			if (BoardPositions.POKEY == position ||
-					BoardPositions.WHITE_BUNKER == position || 
-					BoardPositions.BLACK_BUNKER == position ) {
-				break;
-			}
-			bonus += 1;
-			index--;
-		}
-		
-		return bonus;
 	}
 	
 	private boolean checkForBlackPieceWithinNineSpots(TheGame acdc, CheckerContainer container) {

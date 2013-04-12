@@ -27,10 +27,16 @@ public class GammonPoint {
 	private CheckerContainer.BoardPositions pointPos;
 	private Point animateStart = new Point();
 	private Point animateStop = new Point();
+	private boolean floatingPiece = false;
 	
+	public void setFloatingPiece(boolean floatingPiece) {
+		this.floatingPiece = floatingPiece;
+	}
+
 	int pointWidth;
 	int bitmapWidth;	
 	int left;
+	int pieceHeight;
 	
 	public GammonPoint(CheckerContainer.BoardPositions pointPos, Rect boardRect) {
 		this.isSelected = false;
@@ -40,6 +46,7 @@ public class GammonPoint {
 		this.isAIOrigMove = false;
 		
 		SetPointRect(boardRect);
+		pieceHeight = pointWidth;
 	}	
 
 	public CheckerContainer.BoardPositions getPointPos() {
@@ -119,10 +126,11 @@ public class GammonPoint {
 	}
 	
 	// the draw method which draws the corresponding frame
-	public void draw(Canvas canvas, SparseArray<Bitmap> pieceBitmaps, CheckerContainer pointData, boolean floatingPiece) {	
+	public void draw(Canvas canvas, SparseArray<Bitmap> pieceBitmaps, CheckerContainer pointData) {	
 		
 		pointWidth = pointRect.right - pointRect.left;
 		bitmapWidth = pieceBitmaps.get(1).getWidth();
+		pieceHeight = pieceBitmaps.get(1).getHeight();
 		
 		left = pointRect.left + (pointWidth - bitmapWidth) / 2;
 
@@ -133,7 +141,7 @@ public class GammonPoint {
 			count = pointData.getWhiteCheckerCount();
 		}
 		
-		if (isSelected && floatingPiece) {
+		if (floatingPiece) {
 			count--;
 		}
 		
@@ -289,15 +297,15 @@ public class GammonPoint {
 			}
 			
 			calculateAnimatePoints(count, false);
-		}		
+		}	
 	}
 	
 	private void calculateAnimatePoints(int count, boolean upperPoints) {
-		int offset = pointWidth;
+		int offset = pieceHeight;
 		int startY = pointRect.top;
 		if (false == upperPoints) {
 			offset *= -1;
-			startY = pointRect.bottom - pointWidth;
+			startY = pointRect.bottom - pieceHeight;
 		}
 		animateStop.x = pointRect.centerX();
 		animateStart.x = pointRect.centerX();
@@ -308,6 +316,7 @@ public class GammonPoint {
 			animateStop.y = startY;
 			animateStart.y = startY + offset * 4;
 		case 0:
+			animateStart.y = startY;
 			animateStop.y = startY;
 			break;
 		case 1:
@@ -335,6 +344,9 @@ public class GammonPoint {
 			animateStop.y = startY + offset * 4;
 			break;
 		}
+		
+		animateStart.y += (pieceHeight / 2);
+		animateStop.y += (pieceHeight / 2);
 	}
 	
 	public Point getAnimateStart() {

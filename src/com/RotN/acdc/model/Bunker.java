@@ -23,6 +23,7 @@ public class Bunker {
 	private boolean isSelected; 
 	private boolean isPossibleMove;
 	private BoardPositions boardPos;
+	private boolean floatingPiece;
 	
 	public void setPossibleMove(boolean isPossibleMove) {
 		this.isPossibleMove = isPossibleMove;
@@ -107,12 +108,16 @@ public class Bunker {
 		this.bunkerCount = bunkerCount;
 	}
 	
+	public void setFloatingPiece(boolean floatingPiece) {
+		this.floatingPiece = floatingPiece;
+	}
+	
 	// the draw method which draws the corresponding frame
-	public void draw(Canvas canvas, boolean floatingPiece) {
+	public void draw(Canvas canvas) {
 		// where to draw the bunker
 		int startPos = bunkerRect.top;
 		int count = bunkerCount;
-		if (isSelected && floatingPiece) {
+		if (floatingPiece) {
 			count--;
 		}
 		

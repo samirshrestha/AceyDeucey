@@ -18,10 +18,10 @@ public class Pokey {
 
 	private Rect pokeyRect;
 	private CheckerContainer.BoardPositions pointPos;
-	private boolean isSelected; 
 	SparseArray<Bitmap> pieceBlackBitmaps;
 	SparseArray<Bitmap> pieceWhiteBitmaps;
 	private GameColor turn;
+	private boolean floatingPiece;
 	
 	public Pokey(Rect boardRect, SparseArray<Bitmap> pieceBlackBitmaps, SparseArray<Bitmap> pieceWhiteBitmaps) {
 		this.pointPos = BoardPositions.POKEY;
@@ -36,15 +36,14 @@ public class Pokey {
 				(int)(boardRect.centerX() + boardRect.width() * .04), //right
 				(int)(boardRect.centerY() + boardRect.height() * .225) //bottom
 				);
-		isSelected = false;
 	}	
 	
 	public void setTurn(GameColor turn) {
 		this.turn = turn;
 	}
-
-	public void setSelected(boolean selected) {
-		isSelected = selected;
+	
+	public void setFloatingPiece(boolean floatingPiece) {
+		this.floatingPiece = floatingPiece;
 	}
 	
 	public CheckerContainer.BoardPositions getPointPos() {
@@ -83,7 +82,7 @@ public class Pokey {
 	}
 	
 	// the draw method which draws the corresponding frame
-	public void draw(Canvas canvas, CheckerContainer pokeyData, boolean floatingPiece) {				
+	public void draw(Canvas canvas, CheckerContainer pokeyData) {				
 		SparseArray<Bitmap> pieceBitmaps;
 		int count = 0;
 		SparseArray<Bitmap> pieceMinorBitmaps;
@@ -91,7 +90,7 @@ public class Pokey {
 		
 		int blackFloatingDecrement = 0, whiteFloatingDecrement = 0;
 		
-		if (isSelected && floatingPiece) {
+		if (floatingPiece) {
 			if (turn == GameColor.WHITE) {
 				whiteFloatingDecrement = 1;
 			} else if (turn == GameColor.BLACK) {

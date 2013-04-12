@@ -1,11 +1,11 @@
 package com.RotN.acdc.model;
 
+import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.util.Log;
 
 public class Piece {
 	private Bitmap bitmapBlack; // the actual bitmap
@@ -15,6 +15,15 @@ public class Piece {
 	private int y; // the y coord
 	private boolean touched; //if piece is touched/picked up
 	private Speed speed;
+	private BoardPositions wherePieceCameFrom = BoardPositions.NONE;
+
+	public BoardPositions getWherePieceCameFrom() {
+		return wherePieceCameFrom;
+	}
+
+	public void setWherePieceCameFrom(BoardPositions wherePieceCameFrom) {
+		this.wherePieceCameFrom = wherePieceCameFrom;
+	}
 
 	private Point animateStart = new Point(0,0);
 	private Point animateStop = new Point(0,0);
@@ -73,14 +82,14 @@ public class Piece {
 		//points are different, calculate speed
 		if (false == this.animateStart.equals(this.animateStop)) {
 			
-			speed.setXv(5);
+			speed.setXv(7);
 			if (this.animateStart.x < this.animateStop.x) {
 				speed.setxDirection(Speed.DIRECTION_RIGHT);
 			} else {
 				speed.setxDirection(Speed.DIRECTION_LEFT);
 			}
 			
-			speed.setYv(5);
+			speed.setYv(7);
 			if (this.animateStart.y < this.animateStop.y) {
 				speed.setyDirection(Speed.DIRECTION_DOWN);
 			} else {
@@ -120,17 +129,19 @@ public class Piece {
 				}
 			}
 		} else {
-			Log.d("Animate", "Starting the draw");
+			//Log.d("Animate", "Starting the draw");
 			this.touched = true;
 			x = animateStart.x;
-			y = animateStart.y;
+			y = animateStart.y;			
+
+			x += (speed.getXv() * speed.getxDirection()); 
+			y += (speed.getYv() * speed.getyDirection());
 		}
 		
 		boolean pieceFinished = false;		
 		if (xFinished && yFinished) {
-			Log.d("Animate", "Stopping the draw");
+			//Log.d("Animate", "Stopping the draw");
 			pieceFinished = true;
-			this.touched = false;
 		}
 		
 		return pieceFinished;
