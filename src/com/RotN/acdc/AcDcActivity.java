@@ -100,7 +100,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	                public void onClick(DialogInterface dialog, int id) {
 	                	dialog.dismiss();	                	
 	    	            board.newGame();
-	    	            actionButton.setText(beerGammon.getButtonText());
+	    	            actionButton.setText(getButtonText());
 	    	            board.render();	                	
 	                }
 	                })
@@ -144,6 +144,33 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		beerGammon.removeListener(this);
 	}
 	
+	private String getButtonText() {
+		String buttonText = "";
+		
+		switch (beerGammon.getButtonState()) {
+		case ROLL_FOR_TURN:
+			buttonText = getText(R.string.roll_for_turn).toString();
+			break;
+		case RED_ROLL:
+			buttonText = getText(R.string.red_roll).toString();
+			break;
+		case WHITE_ROLL:
+			buttonText = getText(R.string.white_roll).toString();
+			break;
+		case TURN_FINISHED:
+			buttonText = getText(R.string.clear_dice).toString();
+			break;
+		case WHITE_WON:
+			buttonText = getText(R.string.white_won).toString();
+			break;
+		case BLACK_WON:
+			buttonText = getText(R.string.red_won).toString();
+			break;
+		}
+		
+		return buttonText;
+	}
+	
 	private void startItUp() {
 		// set our GammonBoard as the View		
 
@@ -161,7 +188,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         Log.d(TAG, "View added");
         
         actionButton = (Button) findViewById(R.id.action_button);
-        actionButton.setText(beerGammon.getButtonText());
+        actionButton.setText(getButtonText());
         actionButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 beerGammon.buttonPushed();
@@ -280,7 +307,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 
 	@Override
 	public void onBoardUpdate() {
-		actionButton.setText(beerGammon.getButtonText());
+		actionButton.setText(getButtonText());
 		actionButton.setEnabled(beerGammon.canMove() == false);
 		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
 	}

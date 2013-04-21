@@ -14,17 +14,10 @@ public class TheGame implements Serializable {
 	private static final long serialVersionUID = 3L;
 	
 	public enum ButtonState {
-		ROLL_FOR_NUMBER("Roll For Numbers"), ROLL_FOR_TURN("Roll For Turn"), RED_ROLL("Red Roll"), WHITE_ROLL("White Roll"), TURN_FINISHED("Clear Dice"), 
-		WHITE_WON("White Won!!!"), BLACK_WON("Red Won!!!");
+		ROLL_FOR_TURN(), RED_ROLL(), WHITE_ROLL(), TURN_FINISHED(), 
+		WHITE_WON(), BLACK_WON();
 		
-		private String buttonText;
-		
-		private ButtonState(String buttonText) {
-			this.buttonText = buttonText;
-		}
-		
-		public String getText() {
-			return buttonText;
+		private ButtonState() {
 		}
 	}
 	public ArrayList<CheckerContainer> containers;

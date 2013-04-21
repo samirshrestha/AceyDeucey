@@ -61,7 +61,7 @@ public class GameButton {
 		return buttonPressed;
 	}
 	
-	public void draw(Canvas canvas, TheGameImpl game) {
+	public void draw(Canvas canvas, TheGameImpl game, String buttonText) {
 		
 		Paint buttonColor = new Paint();	
 		buttonColor.setARGB(255, 70, 70, 70);
@@ -71,7 +71,7 @@ public class GameButton {
 		font.setARGB(255, 200, 200, 200);		
 		font.setTextAlign(Paint.Align.CENTER);
 		font.setTextSize(25);
-		canvas.drawText(game.getButtonText(), buttonRect.exactCenterX(), buttonRect.exactCenterY() + (float)(buttonRect.height()*.15), font);
+		canvas.drawText(buttonText, buttonRect.exactCenterX(), buttonRect.exactCenterY() + (float)(buttonRect.height()*.15), font);
 				
 		if (touched)
 		{

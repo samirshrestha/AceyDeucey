@@ -846,10 +846,6 @@ public class TheGameImpl {
 		return this.gammon.whiteDie2;
 	}
 	
-	public String getButtonText() {
-		return this.gammon.buttonState.getText();
-	}
-	
 	public void buttonPushed() {
 		switch (gammon.buttonState) {
 		case ROLL_FOR_TURN:
