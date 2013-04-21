@@ -28,6 +28,22 @@ public class Piece {
 	private Point animateStart = new Point(0,0);
 	private Point animateStop = new Point(0,0);
 	
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public Point getAnimateStart() {
+		return animateStart;
+	}
+
+	public Point getAnimateStop() {
+		return animateStop;
+	}
+	
 	public void setAnimationPoints(Point animateStart, Point animateStop) {
 		this.animateStart = animateStart;
 		this.animateStop = animateStop;
@@ -99,35 +115,11 @@ public class Piece {
 	}
 	
 	public boolean updateAnimatePiece() {
-		boolean xFinished = false;
-		boolean yFinished = false;
 		
 		if (this.touched) {
 			x += (speed.getXv() * speed.getxDirection()); 
-			y += (speed.getYv() * speed.getyDirection());
-			if (speed.getxDirection() == Speed.DIRECTION_RIGHT) {
-				if (x > animateStop.x) {
-					x = animateStop.x;
-					xFinished = true;
-				}				
-			} else {
-				if (x < animateStop.x) {
-					x = animateStop.x;
-					xFinished = true;
-				}
-			}
+			y += (speed.getYv() * speed.getyDirection());			
 			
-			if (speed.getyDirection() == Speed.DIRECTION_DOWN) {
-				if (y > animateStop.y) {
-					y = animateStop.y;
-					yFinished = true;
-				}				
-			} else {
-				if (y < animateStop.y) {
-					y = animateStop.y;
-					yFinished = true;
-				}
-			}
 		} else {
 			//Log.d("Animate", "Starting the draw");
 			this.touched = true;
@@ -138,6 +130,39 @@ public class Piece {
 			y += (speed.getYv() * speed.getyDirection());
 		}
 		
+		boolean pieceFinished = reachedDestination();
+		
+		return pieceFinished;
+	}
+	
+	private boolean reachedDestination() {
+		boolean xFinished = false;
+		boolean yFinished = false;
+		
+		if (speed.getxDirection() == Speed.DIRECTION_RIGHT) {
+			if (x > animateStop.x) {
+				x = animateStop.x;
+				xFinished = true;
+			}				
+		} else {
+			if (x < animateStop.x) {
+				x = animateStop.x;
+				xFinished = true;
+			}
+		}
+		
+		if (speed.getyDirection() == Speed.DIRECTION_DOWN) {
+			if (y > animateStop.y) {
+				y = animateStop.y;
+				yFinished = true;
+			}				
+		} else {
+			if (y < animateStop.y) {
+				y = animateStop.y;
+				yFinished = true;
+			}
+		}
+		
 		boolean pieceFinished = false;		
 		if (xFinished && yFinished) {
 			//Log.d("Animate", "Stopping the draw");
@@ -145,5 +170,10 @@ public class Piece {
 		}
 		
 		return pieceFinished;
+	}
+	
+	public int getDistanceFromAnimateFinish() {
+		int distance = (int)Math.sqrt(Math.pow(animateStop.x - x, 2) + Math.pow(animateStop.y - y, 2));
+		return distance;
 	}
 }

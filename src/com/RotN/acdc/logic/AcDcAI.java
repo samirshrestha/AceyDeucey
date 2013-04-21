@@ -132,13 +132,22 @@ public class AcDcAI {
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcData);
-					//this.logAIMove("Possible ", possible);
+					this.logAIMove("Possible ", possible);
 				}
 
 				//undo what we did for the next check
 				for (Move movesToUndo : moves) {
 					acdcData.containers.get(movesToUndo.newSpot.getIndex()).removePiece(movesToUndo.color);
 					acdcData.containers.get(movesToUndo.origSpot.getIndex()).addPiece(movesToUndo.color);
+					if (movesToUndo.pokeyHappened()) {
+						GameColor pokeyColor = GameColor.BLACK;
+						if (movesToUndo.color == GameColor.BLACK) {
+							pokeyColor = GameColor.WHITE;
+						}
+						
+						acdcData.containers.get(BoardPositions.POKEY.getIndex()).removePiece(pokeyColor);
+						acdcData.containers.get(movesToUndo.newSpot.getIndex()).addPiece(pokeyColor);
+					}
 					if (movesToUndo.moveLength != -1) {
 						acdcData.movesRemaining.add(movesToUndo.moveLength);
 					}
@@ -183,7 +192,7 @@ public class AcDcAI {
 		Log.d("AI", tag + " Value: " + option.value);
 		
 		for (Move move: option.moves) {
-			Log.d("AI", move.origSpot.toString() + ", " + move.newSpot.toString() + ", " + move.color.toString());
+			Log.d("AI", move.origSpot.toString() + ", " + move.newSpot.toString() + ", " + move.color.toString() + ", " + move.pokeyHappened());
 		}
 	}
 	

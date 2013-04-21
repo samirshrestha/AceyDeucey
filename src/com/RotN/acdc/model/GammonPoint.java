@@ -34,6 +34,10 @@ public class GammonPoint {
 	}
 
 	int pointWidth;
+	public int getPointWidth() {
+		return pointWidth;
+	}
+
 	int bitmapWidth;	
 	int left;
 	int pieceHeight;

@@ -8,12 +8,14 @@ public class Move {
 	BoardPositions origSpot;
 	BoardPositions newSpot;
 	Integer moveLength;
+	boolean pokeyHappened;
 	
-	public Move(BoardPositions origSpot, BoardPositions newSpot, GameColor color, Integer moveLength) {
+	public Move(BoardPositions origSpot, BoardPositions newSpot, GameColor color, Integer moveLength, boolean pokey) {
 		this.color = color;
 		this.origSpot = origSpot;
 		this.newSpot = newSpot;
 		this.moveLength = moveLength;
+		this.pokeyHappened = pokey;
 	}
 	
 	public Integer getMoveLength() {
@@ -25,6 +27,11 @@ public class Move {
 		this.origSpot = rhs.origSpot;
 		this.newSpot = rhs.newSpot;
 		this.moveLength = rhs.moveLength;
+		this.pokeyHappened = rhs.pokeyHappened;
+	}
+	
+	public boolean pokeyHappened() {
+		return this.pokeyHappened;
 	}
 
 	public GameColor getColor() {

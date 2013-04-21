@@ -41,7 +41,7 @@ public class AnimationThread extends Thread {
 		for (Move move : moves) {	
 			//Log.d("Animate", "Moving a piece");
 			this.theBoard.setAnimatePiece(move);
-			while (false == this.theBoard.updateAnimatedPieces(move.getColor())) {
+			while (false == this.theBoard.updateAnimatedPieces(move.getColor(), move.pokeyHappened())) {
 				beginTime = System.currentTimeMillis();
 				framesSkipped = 0;	// resetting the frames skipped
 				// render state to the screen
@@ -65,7 +65,7 @@ public class AnimationThread extends Thread {
 				
 				while (sleepTime < 0 && framesSkipped < MAX_FRAME_SKIPS) {
 					// we need to catch up
-					timeToQuitDrawing = this.theBoard.updateAnimatedPieces(move.getColor()); // update without rendering
+					timeToQuitDrawing = this.theBoard.updateAnimatedPieces(move.getColor(), move.pokeyHappened()); // update without rendering
 					if (timeToQuitDrawing) {
 						break;
 					}

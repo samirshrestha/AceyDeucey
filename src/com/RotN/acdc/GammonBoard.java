@@ -209,11 +209,10 @@ SurfaceHolder.Callback {
 				if (upContainer == selectedPosition) {
 					//this.clickToMove = true;
 				} else if (upContainer != BoardPositions.NONE) {
-					//ArrayList<Move> moves = 
-					beerGammon.movePiece(selectedPosition, upContainer);
+					ArrayList<Move> moves = beerGammon.movePiece(selectedPosition, upContainer);
 					
 					if (this.clickToMove){
-						//animateMoves(moves);
+						animateMoves(moves);
 					}
 					
 					selectedPosition = BoardPositions.NONE;
@@ -651,13 +650,29 @@ SurfaceHolder.Callback {
 		draw.run();
 	}
 	
-	public boolean updateAnimatedPieces(GameColor pieceToUpdate) {
+	public boolean updateAnimatedPieces(GameColor pieceToUpdate, boolean pokey) {
 		boolean animationComplete = false;
+		
+		int width = this.boardPoints.get(BoardPositions.POINT_1).getPointWidth();
 		
 		if (pieceToUpdate == GameColor.BLACK) {
 			animationComplete = this.animateBlack.updateAnimatePiece();
+			//Log.d("Animate", "White x: " + animateWhite.getX() + ", Black x: " + animateBlack.getX() + ", width: " + width);
+			if (pokey) {
+				if (animateBlack.getDistanceFromAnimateFinish() < width) {
+					boardPoints.get(animateWhite.getWherePieceCameFrom()).setFloatingPiece(true);
+					animationComplete &= this.animateWhite.updateAnimatePiece();
+				}
+			}
 		} else {
 			animationComplete = this.animateWhite.updateAnimatePiece();
+			//Log.d("Animate", "White x: " + animateWhite.getX() + ", Black x: " + animateBlack.getX() + ", width: " + width);
+			if (pokey) {
+				if (animateWhite.getDistanceFromAnimateFinish() < width) {
+					boardPoints.get(animateBlack.getWherePieceCameFrom()).setFloatingPiece(true);
+					animationComplete &= this.animateBlack.updateAnimatePiece();
+				}
+			}
 		}
 		
 		return animationComplete;
@@ -666,6 +681,8 @@ SurfaceHolder.Callback {
 	public void setAnimatePiece(Move move) {
 		Point startPoint;
 		Point endPoint;
+		Point pokeyStart;
+		Point pokeyEnd;
 		
 		if (move.getOrigSpot() == BoardPositions.BLACK_BUNKER) {
 			startPoint = this.blackBunker.getAnimateStart();
@@ -687,18 +704,29 @@ SurfaceHolder.Callback {
 		
 		if (move.getNewSpot() == BoardPositions.BLACK_BUNKER) {
 			endPoint = this.blackBunker.getAnimateStop();
+			pokeyStart = this.blackBunker.getAnimateStart();
 		} else if (move.getNewSpot() == BoardPositions.WHITE_BUNKER) {
 			endPoint = this.whiteBunker.getAnimateStop();
+			pokeyStart = this.whiteBunker.getAnimateStart();
 		} else if (move.getNewSpot() == BoardPositions.POKEY) {
 			endPoint = pokey.getAnimateStop();
+			pokeyStart = this.pokey.getAnimateStart();
 		} else {
 			endPoint = boardPoints.get(move.getNewSpot()).getAnimateStop();
+			pokeyStart = boardPoints.get(move.getNewSpot()).getAnimateStart();
+			
 		}
+		
+		pokeyEnd = pokey.getAnimateStop();
 		
 		if (move.getColor() == GameColor.BLACK) {
 			animateBlack.setAnimationPoints(startPoint, endPoint);
+			animateWhite.setAnimationPoints(pokeyStart, pokeyEnd);
+			animateWhite.setWherePieceCameFrom(move.getNewSpot());
 		} else {
 			animateWhite.setAnimationPoints(startPoint, endPoint);
+			animateBlack.setAnimationPoints(pokeyStart, pokeyEnd);
+			animateBlack.setWherePieceCameFrom(move.getNewSpot());
 		}
 	}
 	
