@@ -39,7 +39,7 @@ public class TheGame implements Serializable {
 	public boolean whiteMovingIn, blackMovingIn, allBlackPiecesOut, allWhitePiecesOut;
 	public ButtonState buttonState;
 	public int savedStatesCount;
-	public boolean whiteHumanPlayer = true;
+	public boolean whiteHumanPlayer = false;
 	public boolean blackHumanPlayer = true;
 	
 	@SuppressLint("UseSparseArrays")

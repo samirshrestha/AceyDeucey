@@ -3,6 +3,7 @@ package com.RotN.acdc;
 import java.util.ArrayList;
 
 import com.RotN.acdc.logic.AcDcAI;
+import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
@@ -167,6 +168,27 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 board.render();
                 if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
+                	if ( (beerGammon.getTurn() == GameColor.BLACK && false == beerGammon.getGammonData().blackHumanPlayer) ||
+                    		(beerGammon.getTurn() == GameColor.WHITE && false == beerGammon.getGammonData().whiteHumanPlayer) ) {
+                    	AcDcAI ai = new AcDcAI();
+                    	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
+                    	for (Move move : moves) {
+                    		ArrayList<Move> moveToDraw = new ArrayList<Move>();
+                    		moveToDraw.add(move);
+                    		board.animateMoves(moveToDraw);
+                    		if (move.getColor() == beerGammon.getTurn()) {
+                    			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
+                    		}
+                			board.clearAnimatedPieces();
+                			board.clearFloater(move.getOrigSpot());
+                			board.render();
+                    	}
+                    	
+                    	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                    		beerGammon.buttonPushed();
+                    		board.render();
+                    	}
+                	}
                 } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
                 		beerGammon.getGammonData().blackHumanPlayer == false) || 
                 		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
@@ -187,7 +209,12 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             			board.clearFloater(move.getOrigSpot());
             			board.render();
                 	}
-                }
+                	
+                	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                		beerGammon.buttonPushed();
+                		board.render();
+                	}
+                } 
             }
         });            
 

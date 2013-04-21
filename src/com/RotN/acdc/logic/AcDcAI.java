@@ -253,7 +253,7 @@ public class AcDcAI {
 			} else if (container.getPosition() == BoardPositions.POKEY) {
 				boardValue += container.getBlackCheckerCount() * 10;
 			} else if (container.getWhiteCheckerCount() > 1) {
-				boardValue += container.getWhiteCheckerCount() * containerValue;
+				boardValue += container.getWhiteCheckerCount() * containerValue + containerValue;
 			} else if (container.getWhiteCheckerCount() == 1) {
 				
 				//pieces that get hit farther along hurt more so lower the value of the open ones
