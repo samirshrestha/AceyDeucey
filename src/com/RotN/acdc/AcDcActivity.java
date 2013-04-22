@@ -7,6 +7,8 @@ import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -53,6 +55,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		
 		// Remove any pending ad refreshes.
 		refreshHandler.removeCallbacks(refreshRunnable);
+		EasyTracker.getInstance().activityStop(this);
 	}
    	
    	@Override
@@ -71,6 +74,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 			// Request a new ad immediately.
 		    refreshHandler.post(refreshRunnable);
 		}
+		
+		EasyTracker.getInstance().activityStart(this);
 	}
 	
 	@Override
@@ -310,5 +315,11 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		actionButton.setText(getButtonText());
 		actionButton.setEnabled(beerGammon.canMove() == false);
 		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
+	}
+
+	@Override
+	public void onDiceRoll(int rollValue) {
+		Tracker myTracker = EasyTracker.getTracker();
+		myTracker.sendEvent("Dice roll", "Dice Roll", "Roll", (long) rollValue);
 	}
 }

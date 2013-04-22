@@ -36,6 +36,7 @@ public class TheGameImpl {
 
 	public interface GammonEventHandler{
 		void onBoardUpdate();
+		void onDiceRoll(int rollValue);
 	};
 	
 	public interface MoveEventHandler {
@@ -906,6 +907,11 @@ public class TheGameImpl {
 			gammon.blackDie1 = rollDie();
 			gammon.blackDie2 = rollDie();
 			
+			int rollValue = gammon.blackDie1 * 10 + gammon.blackDie2;
+			for (GammonEventHandler listener : handlers) {
+				listener.onDiceRoll(rollValue);
+			}
+			
 			// for testing
 			//gammon.blackDie1 = 2;
 			//gammon.blackDie2 = 1;
@@ -921,6 +927,11 @@ public class TheGameImpl {
 		} else {
 			gammon.whiteDie1 = rollDie();
 			gammon.whiteDie2 = rollDie();
+			
+			int rollValue = gammon.whiteDie1 * 10 + gammon.whiteDie2;
+			for (GammonEventHandler listener : handlers) {
+				listener.onDiceRoll(rollValue);
+			}
 			
 			// for testing
 			//gammon.whiteDie1 = 1;
