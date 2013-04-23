@@ -36,7 +36,7 @@ public class TheGameImpl {
 
 	public interface GammonEventHandler{
 		void onBoardUpdate();
-		void onDiceRoll(int rollValue);
+		void onDiceRoll(String action);
 	};
 	
 	public interface MoveEventHandler {
@@ -903,14 +903,12 @@ public class TheGameImpl {
 		gammon.whiteDie2 = 0;
 		gammon.blackDie1 = 0;
 		gammon.blackDie2 = 0;
+		
+		analyticEvent("Roll");
+		
 		if (gammon.turn == GameColor.BLACK) {
 			gammon.blackDie1 = rollDie();
 			gammon.blackDie2 = rollDie();
-			
-			int rollValue = gammon.blackDie1 * 10 + gammon.blackDie2;
-			for (GammonEventHandler listener : handlers) {
-				listener.onDiceRoll(rollValue);
-			}
 			
 			// for testing
 			//gammon.blackDie1 = 2;
@@ -921,17 +919,18 @@ public class TheGameImpl {
 			if (gammon.blackDie1 == gammon.blackDie2) {
 				gammon.movesRemaining.add(gammon.blackDie1);
 				gammon.movesRemaining.add(gammon.blackDie1);
+				
+				String event = gammon.blackDie1 + "s";
+				analyticEvent(event);
+				
 			} else if (gammon.blackDie1 + gammon.blackDie2 == 3) { //acdc
 				gammon.acdcOrigMove = true;
+				
+				analyticEvent("AcDc");
 			}
 		} else {
 			gammon.whiteDie1 = rollDie();
 			gammon.whiteDie2 = rollDie();
-			
-			int rollValue = gammon.whiteDie1 * 10 + gammon.whiteDie2;
-			for (GammonEventHandler listener : handlers) {
-				listener.onDiceRoll(rollValue);
-			}
 			
 			// for testing
 			//gammon.whiteDie1 = 1;
@@ -942,9 +941,14 @@ public class TheGameImpl {
 			if (gammon.whiteDie1 == gammon.whiteDie2) {
 				gammon.movesRemaining.add(gammon.whiteDie1);
 				gammon.movesRemaining.add(gammon.whiteDie1);
+				
+				String event = gammon.whiteDie1 + "s";
+				analyticEvent(event);
 			}
 			else if (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
 				gammon.acdcOrigMove = true;
+				
+				analyticEvent("AcDc");
 			}
 		}
 		gammon.buttonState = ButtonState.TURN_FINISHED;
@@ -1154,6 +1158,12 @@ public class TheGameImpl {
 			return this.getContainer(container).getBlackCheckerCount();
 		} else {
 			return this.getContainer(container).getWhiteCheckerCount();
+		}
+	}
+	
+	private void analyticEvent(String event) {
+		for (GammonEventHandler listener : handlers) {
+			listener.onDiceRoll(event);
 		}
 	}
 }

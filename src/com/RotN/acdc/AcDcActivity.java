@@ -214,6 +214,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 			board.clearAnimatedPieces();
                 			board.clearFloaters();
                 			board.render();
+                			
+                			if (beerGammon.canMove() == false) {
+                				break;
+                			}
                     	}
                     	
                     	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
@@ -240,6 +244,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             			board.clearAnimatedPieces();
             			board.clearFloaters();
             			board.render();
+            			
+            			if (beerGammon.canMove() == false) {
+            				break;
+            			}
                 	}
                 	
                 	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
@@ -318,8 +326,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	}
 
 	@Override
-	public void onDiceRoll(int rollValue) {
+	public void onDiceRoll(String event) {
 		Tracker myTracker = EasyTracker.getTracker();
-		myTracker.sendEvent("Dice roll", "Dice Roll", "Roll", (long) rollValue);
+		myTracker.sendEvent("Dice roll", "Dice Roll", event, null);
 	}
 }
