@@ -471,7 +471,7 @@ SurfaceHolder.Callback {
 		}
 	}
 	
-	private void clearFloaters(){
+	public void clearFloaters(){
 		blackBunker.setFloatingPiece(false);
 		whiteBunker.setFloatingPiece(false);
 		pokey.setFloatingPiece(false);

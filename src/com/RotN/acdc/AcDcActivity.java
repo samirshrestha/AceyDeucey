@@ -212,7 +212,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                     			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
                     		}
                 			board.clearAnimatedPieces();
-                			board.clearFloater(move.getOrigSpot());
+                			board.clearFloaters();
                 			board.render();
                     	}
                     	
@@ -238,7 +238,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
                 		}
             			board.clearAnimatedPieces();
-            			board.clearFloater(move.getOrigSpot());
+            			board.clearFloaters();
             			board.render();
                 	}
                 	

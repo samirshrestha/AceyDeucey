@@ -132,7 +132,7 @@ public class AcDcAI {
 				} else {
 					// returns a board value based on piece position
 					possible.value = evaluateBoard(acdcData);
-					this.logAIMove("Possible ", possible);
+					//this.logAIMove("Possible ", possible);
 				}
 
 				//undo what we did for the next check
