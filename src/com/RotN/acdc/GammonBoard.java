@@ -49,11 +49,16 @@ SurfaceHolder.Callback {
 	private Map<BoardPositions, GammonPoint> boardPoints;
 	private SparseArray<Bitmap> pieceWhiteBitmaps;
 	private SparseArray<Bitmap> pieceBlackBitmaps;
+	private SparseArray<Bitmap> movesBitmaps;
 	private BoardPositions selectedPosition;
 	private Piece floatingPiece;
 	private Piece animateWhite;
 	private Piece animateBlack;
 	private boolean clickToMove = false;
+	private static Integer A = 10;
+	private static Integer C = 12;
+	private static Integer D = 13;
+	
 	Context fileContext;
 
 	public String getWhiteValue() {
@@ -116,6 +121,7 @@ SurfaceHolder.Callback {
 		//determine the scale we're working with
 		BitmapFactory.Options options = getImageOutSize(getResources(), R.drawable.background);
 		float scale = (float) options.outHeight/ (float) getHeight();
+		createMovesRemainingArray(scale);
 		createPieceBitmapArray(scale);
 		createBoardPoints(getWidth(), getHeight());
 		float diceScale = (float) (scale / 1.5);
@@ -347,9 +353,33 @@ SurfaceHolder.Callback {
 		animateWhite.draw(canvas);
 		animateBlack.draw(canvas);
 		
+		renderMovesRemaining(canvas);
+		
 		if (canvas != null) {
 			getHolder().unlockCanvasAndPost(canvas);
 		}		
+	}
+	
+	private void renderMovesRemaining(Canvas canvas) {
+		float left = (float)(getWidth() * 0.922265);
+		float top = (float)(getHeight() * 0.05859);
+		float offset = movesBitmaps.get(1).getHeight() + (movesBitmaps.get(1).getHeight() / 4);
+		
+		if (beerGammon.getGammonData().aceyDeucey) {
+			float secondMoveTop = top + offset;
+			float thirdMoveTop = secondMoveTop + offset;
+			float fourthMoveTop = thirdMoveTop + offset;
+			
+			canvas.drawBitmap(movesBitmaps.get(A), left, top, null);
+			canvas.drawBitmap(movesBitmaps.get(C), left, secondMoveTop, null);
+			canvas.drawBitmap(movesBitmaps.get(D), left, thirdMoveTop, null);
+			canvas.drawBitmap(movesBitmaps.get(C), left, fourthMoveTop, null);
+		} else {
+			for (Integer move : beerGammon.getGammonData().movesRemaining) {
+				canvas.drawBitmap(movesBitmaps.get(move), left, top, null);
+				top += offset;
+			}
+		}
 	}
 	
 	private void updatePossibleMoves() {
@@ -427,6 +457,24 @@ SurfaceHolder.Callback {
 		diceBitmaps.put(R.drawable.white_dice6, getImageExactSize(getResources(), R.drawable.white_dice6, newWidth, newHeight));
 		
 		return diceBitmaps;
+	}
+	
+	private void createMovesRemainingArray(float scale) {
+		movesBitmaps = new SparseArray<Bitmap>();
+		
+		BitmapFactory.Options options = getImageOutSize(getResources(), R.drawable.red1);
+		int newWidth = Math.round(options.outWidth/scale);
+		int newHeight = Math.round(options.outHeight/scale);
+		
+		movesBitmaps.put(1, getImageExactSize(getResources(), R.drawable.red1, newWidth, newHeight));
+		movesBitmaps.put(2, getImageExactSize(getResources(), R.drawable.red2, newWidth, newHeight));
+		movesBitmaps.put(3, getImageExactSize(getResources(), R.drawable.red3, newWidth, newHeight));
+		movesBitmaps.put(4, getImageExactSize(getResources(), R.drawable.red4, newWidth, newHeight));
+		movesBitmaps.put(5, getImageExactSize(getResources(), R.drawable.red5, newWidth, newHeight));
+		movesBitmaps.put(6, getImageExactSize(getResources(), R.drawable.red6, newWidth, newHeight));
+		movesBitmaps.put(A, getImageExactSize(getResources(), R.drawable.red_a, newWidth, newHeight)); //hex a is 10
+		movesBitmaps.put(C, getImageExactSize(getResources(), R.drawable.red_c, newWidth, newHeight)); //hex c is 12
+		movesBitmaps.put(D, getImageExactSize(getResources(), R.drawable.red_d, newWidth, newHeight)); //hex d is 13
 	}
 	
 	private void createPieceBitmapArray(float scale) {
