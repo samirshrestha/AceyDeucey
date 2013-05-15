@@ -8,6 +8,7 @@ import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -53,7 +54,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		
 		// Remove any pending ad refreshes.
 		refreshHandler.removeCallbacks(refreshRunnable);
-		//EasyTracker.getInstance().activityStop(this);
 	}
    	
    	@Override
@@ -323,7 +323,5 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 
 	@Override
 	public void onDiceRoll(String event) {
-		//Tracker myTracker = EasyTracker.getTracker();
-		//myTracker.sendEvent("Dice roll", "Dice Roll", event, null);
 	}
 }
