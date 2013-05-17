@@ -38,7 +38,7 @@ import android.view.SurfaceView;
 
 public class GammonBoard extends SurfaceView implements
 SurfaceHolder.Callback {
-	
+	//test
 	//private Piece piece;
 	private Bitmap board;	
 	private Bunker blackBunker;
