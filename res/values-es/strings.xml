@@ -55,5 +55,7 @@
     <string name="clear_dice">Dado Claras</string>
     <string name="white_won">Blanco Ganó!!!</string>
     <string name="red_won">Rojo Ganó!!!</string>
+    <string name="white">Blanco</string>
+    <string name="red">Rojo</string>
 
 </resources>

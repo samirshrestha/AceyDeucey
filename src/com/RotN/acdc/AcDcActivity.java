@@ -1,6 +1,7 @@
 package com.RotN.acdc;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
@@ -11,6 +12,8 @@ import com.RotN.acdc.logic.TheGame.ButtonState;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -44,6 +47,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);    	
     	super.onCreate(savedInstanceState);
+	
     }
     
    	@Override
@@ -78,11 +82,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.gammon_menu, menu);
-	    MenuItem redPlayer = menu.findItem(R.id.human_red_player);
-	    redPlayer.setChecked(beerGammon.getGammonData().blackHumanPlayer);
-
-	    MenuItem whitePlayer = menu.findItem(R.id.human_white_player);
-	    whitePlayer.setChecked(beerGammon.getGammonData().whiteHumanPlayer);
+	    
 	    Log.d(TAG, "Menu inflated");
 	    return true;
 	}
@@ -94,7 +94,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	    // Handle item selection
 	    switch (item.getItemId()) {
 	        case R.id.new_game:
-	        	AlertDialog.Builder alert_newGame = new AlertDialog.Builder(this);
+	        	/*AlertDialog.Builder alert_newGame = new AlertDialog.Builder(this);
 	        	alert_newGame.setMessage("Are you sure you want to start a new game?")
 	            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 	            	GammonBoard board = (GammonBoard)findViewById(R.id.gammonBoard);
@@ -115,7 +115,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	            // Title for AlertDialog
 	            alert.setTitle("Warning!");
 	            // Icon for AlertDialog
-	            alert.show();
+	            alert.show();*/
+	        	Intent settingsIntent = new Intent(this, SettingsActivity.class);
+	        	startActivity(settingsIntent);
 	            return true;
 	        case R.id.undo_button:
 	        	beerGammon.undoMove();
@@ -124,17 +126,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        case R.id.directions:
 	        	Intent intent = new Intent(this, DirectionsActivity.class);
 	        	startActivity(intent);
-	        	return true;
-	        case R.id.human_red_player:
-	        	item.setChecked(!item.isChecked());
-	        	board.getTheGame().getGammonData().blackHumanPlayer = item.isChecked();
-	            onBoardUpdate();
-	            return true;
-	        case R.id.human_white_player:
-	        	item.setChecked(!item.isChecked());
-	        	board.getTheGame().getGammonData().whiteHumanPlayer = item.isChecked();
-	            onBoardUpdate();
-	            return true;		        	
+	        	return true;	        	
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -183,8 +175,35 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         mAdView.loadAd(adRequest);*/
         
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
-        board.loadGame();
-        beerGammon = board.getTheGame();
+		Bundle extras = getIntent().getExtras();
+    	if (extras != null) {	    		
+    		//startNewGame();
+    		board.newGame();
+    		beerGammon = board.getTheGame();
+    		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
+    		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
+    		if(extras.getInt("playMode") == 2){
+    			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+				startActivity(discoverableIntent);
+				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+				Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+				// If there are paired devices
+				if (pairedDevices.size() > 0) {
+				    // Loop through paired devices
+				    for (BluetoothDevice device : pairedDevices) {
+				        // Add the name and address to an array adapter to show in a ListView
+				        //mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+				    }
+				}
+    		}
+    		extras = null;
+    	} else {
+    		board.loadGame();
+    		beerGammon = board.getTheGame();
+    	}
+        
+        
         beerGammon.addListener(this);
         Log.d(TAG, "View added");
         
@@ -321,6 +340,15 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
 	}
 
+	public void startNewGame(){
+		Log.d(TAG, "Starting New Game...Danny");
+		//board = (GammonBoard)findViewById(R.id.gammonBoard);
+		board.newGame();
+		//actionButton = (Button) findViewById(R.id.action_button);
+        actionButton.setText(getButtonText());
+        board.render();		
+	}
+	
 	@Override
 	public void onDiceRoll(String event) {
 	}

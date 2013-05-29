@@ -6,7 +6,7 @@
     android:background="#FFF"
     android:orientation="vertical"
     android:padding="5dp" >
- 
+ 
     <TextView
         android:id="@+id/toast_player"
         android:layout_width="fill_parent"

@@ -60,5 +60,13 @@
     <string name="clear_dice">Clear Dice</string>
     <string name="white_won">White Won!!!</string>
     <string name="red_won">Red Won!!!</string>
+    <string name="play_mode_single">Human vs Computer</string>
+    <string name="play_mode_multi">Human vs Human</string>
+    <string name="play_mode_network">Human vs Human (Bluetooth)</string>    
+    <string name="start_game">Start Game</string>
+    <string name="title_activity_settings">New Game</string>
+    <string name="choose_color">Your Color:</string>
+    <string name="white">White</string>
+    <string name="red">Red</string>
 
 </resources>
