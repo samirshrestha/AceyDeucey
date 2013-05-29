@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbarSize="12dip">
+	
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" >
+	    
+		<RadioGroup
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginBottom="4dp"
+		    android:gravity="top">
+		    <RadioButton android:id="@+id/radio_single"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/play_mode_single"
+		        android:onClick="onPlayModeClicked"
+		        android:checked="true" />
+		    <RadioButton android:id="@+id/radio_multi"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/play_mode_multi"
+		        android:onClick="onPlayModeClicked"/>
+		    <RadioButton android:id="@+id/radio_network"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/play_mode_network"
+		        android:onClick="onPlayModeClicked"/>
+		</RadioGroup>
+		<TextView android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginBottom="4dp"
+		    android:gravity="top"
+		    android:text="@string/choose_color"/>		
+		<RadioGroup 
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:gravity="top">
+		    <RadioButton android:id="@+id/radio_white"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/white"
+		        android:checked="true" />
+		    <RadioButton android:id="@+id/radio_red"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/red"/>
+		</RadioGroup>
+		
+		<Button
+		    android:id="@+id/button_start"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/start_game"
+		    android:layout_gravity="right"
+		    android:onClick="startGame" />
+	</LinearLayout >
+</ScrollView>

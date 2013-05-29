@@ -183,19 +183,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
     		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
     		if(extras.getInt("playMode") == 2){
+    			extras = null;
     			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-				startActivity(discoverableIntent);
-				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-				Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-				// If there are paired devices
-				if (pairedDevices.size() > 0) {
-				    // Loop through paired devices
-				    for (BluetoothDevice device : pairedDevices) {
-				        // Add the name and address to an array adapter to show in a ListView
-				        //mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-				    }
-				}
+				startActivity(discoverableIntent);				
     		}
     		extras = null;
     	} else {
