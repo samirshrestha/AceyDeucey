@@ -63,6 +63,7 @@ public class SettingsActivity extends Activity {
 	public void startGame(View view) {
 		Intent intent = new Intent(this, AcDcActivity.class);
 
+		intent.putExtra("newGame", true);
 		intent.putExtra("playMode", playMode);
 		if(playMode == 1){
 			intent.putExtra("whitePlayerIsHuman", true);

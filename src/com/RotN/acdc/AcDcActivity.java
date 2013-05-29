@@ -176,19 +176,24 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
 		Bundle extras = getIntent().getExtras();
-    	if (extras != null) {	    		
-    		//startNewGame();
-    		board.newGame();
-    		beerGammon = board.getTheGame();
-    		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
-    		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
-    		if(extras.getInt("playMode") == 2){
-    			extras = null;
-    			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-				startActivity(discoverableIntent);				
+    	if (extras != null) {	  
+    		if (extras.getBoolean("newGame") == false) {
+        		board.loadGame();
+        		beerGammon = board.getTheGame();    			
+    		} else {
+	    		//startNewGame();
+	    		board.newGame();
+	    		beerGammon = board.getTheGame();
+	    		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
+	    		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
+	    		if(extras.getInt("playMode") == 2){
+	    			extras = null;
+	    			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+					discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+					startActivity(discoverableIntent);				
+	    		}
+	    		extras = null;
     		}
-    		extras = null;
     	} else {
     		board.loadGame();
     		beerGammon = board.getTheGame();
