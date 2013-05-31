@@ -14,10 +14,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -25,7 +28,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler {
 
@@ -39,15 +44,53 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	GammonBoard board;
     //private AdView mAdView;
     
-    private boolean firstAdReceived = false;private 
-	final Handler refreshHandler = new Handler();
-	private final Runnable refreshRunnable = new RefreshRunnable();
+	private SharedPreferences storage;
+    private boolean firstAdReceived = false;
+    private final Handler refreshHandler = new Handler();
+	private final Runnable refreshRunnable = new RefreshRunnable();	
+	
+	
+    // Message types sent from the BluetoothChatService Handler
+    public static final int MESSAGE_STATE_CHANGE = 1;
+    public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+    private int playMode = -1;
+    
+    //Play Mode
+    public static final String NEW_GAME_KEY = "NewGame";
+    private static final int EXISTING_GAME = 0;
+    private static final int SINGLE_PLAYER = 1;
+    private static final int MULTI_PLAYER = 2;
+    private static final int MULTI_PLAYER_BT = 3;
+    
+    // Key names received from the BluetoothChatService Handler
+    public static final String DEVICE_NAME = "device_name";
+    public static final String TOAST = "toast";
+
+    // Intent request codes
+    private static final int REQUEST_CONNECT_DEVICE = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
+    
+    // Name of the connected device
+    private String mConnectedDeviceName = null;
+    // Array adapter for the conversation thread
+    private ArrayAdapter<String> mConversationArrayAdapter;
+    // String buffer for outgoing messages
+    private StringBuffer mOutStringBuffer;
+    // Local BT adapter
+    private BluetoothAdapter mBluetoothAdapter = null;
+    // Member object for the chat services
+    private BluetoothChatService mChatService = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);    	
     	super.onCreate(savedInstanceState);
-	
+    	Log.e(TAG, "CREATING ACDC ACTIVITY");
+    	mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);
     }
     
    	@Override
@@ -66,7 +109,25 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		closeItDown();
    		super.onPause();
    	}
-	
+
+   	@Override
+    public synchronized void onResume() {
+        super.onResume();
+        Log.e(TAG, "+ ON RESUME +");
+
+        // Performing this check in onResume() covers the case in which BT was
+        // not enabled during onStart(), so we were paused to enable it...
+        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
+        if (mChatService != null && playMode == MULTI_PLAYER_BT) {
+        	Log.e(TAG, "Restart Chat Service...");
+        	// Only if the state is STATE_NONE, do we know that we haven't started already
+            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+              // Start the Bluetooth chat services
+              mChatService.start();
+            }
+        }
+    }
+   	
 	@Override
 	protected void onStart() {
 		Log.d(TAG, "Starting...");
@@ -76,6 +137,11 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 			// Request a new ad immediately.
 		    refreshHandler.post(refreshRunnable);
 		}
+		if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        // Otherwise, setup the chat session
+        }
 	}
 	
 	@Override
@@ -126,7 +192,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        case R.id.directions:
 	        	Intent intent = new Intent(this, DirectionsActivity.class);
 	        	startActivity(intent);
-	        	return true;	        	
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -163,42 +229,26 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		
 		return buttonText;
 	}
-	
+		
 	private void startItUp() {
 		// set our GammonBoard as the View		
-
         setContentView(R.layout.activity_ac_dc);
         
         /*mAdView = (AdView) this.findViewById(R.id.ad);
         mAdView.setAdListener(this);
         AdRequest adRequest = new AdRequest();
         mAdView.loadAd(adRequest);*/
-        
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
-		Bundle extras = getIntent().getExtras();
-    	if (extras != null) {	  
-    		if (extras.getBoolean("newGame") == false) {
-        		board.loadGame();
-        		beerGammon = board.getTheGame();    			
-    		} else {
-	    		//startNewGame();
-	    		board.newGame();
-	    		beerGammon = board.getTheGame();
-	    		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
-	    		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
-	    		if(extras.getInt("playMode") == 2){
-	    			extras = null;
-	    			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-					discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-					startActivity(discoverableIntent);				
-	    		}
-	    		extras = null;
-    		}
-    	} else {
-    		board.loadGame();
-    		beerGammon = board.getTheGame();
-    	}
+        boolean isNewGame = storage.getBoolean(NEW_GAME_KEY, false);   
         
+        if(isNewGame){
+        	storage.edit().putBoolean(NEW_GAME_KEY, false).commit();
+	    	startNewGame();			    		   		
+        } else {
+        	Log.d(TAG, "Loading Game");
+        	board.loadGame();
+    		beerGammon = board.getTheGame();
+        }		       
         
         beerGammon.addListener(this);
         Log.d(TAG, "View added");
@@ -318,6 +368,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		Log.d(TAG, "Destroying...");
 		//mAdView.destroy();
         super.onDestroy();
+        if (mChatService != null) mChatService.stop();
     }
 	
 	private class RefreshRunnable implements Runnable {
@@ -337,13 +388,115 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	}
 
 	public void startNewGame(){
-		Log.d(TAG, "Starting New Game...Danny");
-		//board = (GammonBoard)findViewById(R.id.gammonBoard);
+		Log.d(TAG, "Starting New Game...");
+		Bundle extras = getIntent().getExtras();
+    	playMode = extras.getInt("playMode");
 		board.newGame();
-		//actionButton = (Button) findViewById(R.id.action_button);
-        actionButton.setText(getButtonText());
-        board.render();		
+		beerGammon = board.getTheGame();
+		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
+		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
+		if(playMode == MULTI_PLAYER_BT){	    			
+			/*Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+			startActivity(discoverableIntent);*/
+			
+			// Initialize the BluetoothChatService to perform connections   			
+            Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);	
+            
+            Log.d(TAG, "Bind Handler to chat service...");
+			mChatService = new BluetoothChatService(this, mHandler);
+
+            //Initialize the buffer for outgoing messages
+            mOutStringBuffer = new StringBuffer(""); 
+		}		
 	}
+	
+	 // The Handler that gets information back from the BluetoothChatService
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MESSAGE_STATE_CHANGE:
+                Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                switch (msg.arg1) {
+                case BluetoothChatService.STATE_CONNECTED:
+                    /*mTitle.setText(R.string.title_connected_to);
+                    mTitle.append(mConnectedDeviceName);*/
+                    //mConversationArrayAdapter.clear();
+                    break;
+                case BluetoothChatService.STATE_CONNECTING:
+                    //mTitle.setText(R.string.title_connecting);
+                	Toast.makeText(getApplicationContext(), "Connecting..."
+                            , Toast.LENGTH_SHORT).show();
+                    break;
+                case BluetoothChatService.STATE_LISTEN:
+                case BluetoothChatService.STATE_NONE:
+                    //mTitle.setText(R.string.title_not_connected);
+                    break;
+                }
+                break;
+            case MESSAGE_WRITE:
+                byte[] writeBuf = (byte[]) msg.obj;
+                // construct a string from the buffer
+                String writeMessage = new String(writeBuf);
+                mConversationArrayAdapter.add("Me:  " + writeMessage);
+                break;
+            case MESSAGE_READ:
+                byte[] readBuf = (byte[]) msg.obj;
+                // construct a string from the valid bytes in the buffer
+                String readMessage = new String(readBuf, 0, msg.arg1);
+                if (readMessage.length() > 0) {
+                    mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
+                }
+                break;
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                break;
+            case MESSAGE_TOAST:
+            	//if (!msg.getData().getString(TOAST).contains("Unable to connect device")) {
+                    Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                            Toast.LENGTH_SHORT).show();            		
+            	//}
+                break;
+            }
+        }
+    };
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult " + resultCode);
+        switch (requestCode) {
+        case REQUEST_CONNECT_DEVICE:
+            // When DeviceListActivity returns with a device to connect
+            if (resultCode == Activity.RESULT_OK) {
+            	
+            	// Get the device MAC address
+                String address = data.getExtras()
+                                     .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                Log.d(TAG, "TRY CONNECTING!! " + address);
+                // Get the BLuetoothDevice object
+                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+                // Attempt to connect to the device
+                mChatService.connect(device);
+            }
+            break;
+        case REQUEST_ENABLE_BT:
+            // When the request to enable Bluetooth returns
+            if (resultCode == Activity.RESULT_OK) {
+                // Bluetooth is now enabled, so set up a chat session
+            	startItUp();
+            } else {
+                // User did not enable Bluetooth or an error occured
+                Log.d(TAG, "BT not enabled");
+                Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
 	
 	@Override
 	public void onDiceRoll(String event) {
