@@ -1,8 +1,11 @@
 package com.RotN.acdc;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 
 import com.RotN.acdc.logic.AcDcAI;
@@ -482,11 +485,28 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 break;
             case MESSAGE_READ:
                 byte[] readBuf = (byte[]) msg.obj;
+                Toast.makeText(getApplicationContext(), "Wooo gotta move"
+                        , Toast.LENGTH_SHORT).show();
                 // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 if (readMessage.length() > 0) {
                     mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
                 }
+                ByteArrayInputStream byteStream = new ByteArrayInputStream(readBuf);
+    			ObjectInputStream objIn;
+				try {
+					objIn = new ObjectInputStream(byteStream);
+					TheGame gammonData = (TheGame) objIn.readObject();
+				} catch (StreamCorruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}			
                 break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
