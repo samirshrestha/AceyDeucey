@@ -1,11 +1,15 @@
 package com.RotN.acdc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.BluetoothService;
 import com.RotN.acdc.logic.Move;
+import com.RotN.acdc.logic.TheGame;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
@@ -285,6 +289,22 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                     		board.render();
                     	}
                 	}
+                } else if ( (MULTI_PLAYER_BT == playMode) && 
+                		(beerGammon.getButtonState() == ButtonState.WHITE_ROLL || 
+                		beerGammon.getButtonState() == ButtonState.RED_ROLL) ) {
+                	
+                	TheGame acdc = beerGammon.getGammonData();
+                	ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                    try {
+						ObjectOutputStream stream = new ObjectOutputStream(byteStream);
+						stream.writeObject(acdc);
+						sendMoves(byteStream.toByteArray());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                    
+                	
                 } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
                 		beerGammon.getGammonData().blackHumanPlayer == false) || 
                 		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
@@ -411,7 +431,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		}		
 	}
 	
-	 private void sendMoves(String moves) {
+	 private void sendMoves(byte [] gameData) {
 	        // Check that we're actually connected before trying anything
 	        if (mChatService.getState() != BluetoothService.STATE_CONNECTED) {
 	            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
@@ -419,10 +439,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        }
 
 	        // Check that there's actually something to send
-	        if (moves.length() > 0) {
+	        if (gameData.length > 0) {
 	            // Get the message bytes and tell the BluetoothChatService to write
-	            byte[] send = moves.getBytes();
-	            mChatService.write(send);
+	            mChatService.write(gameData);
 
 	            // Reset out string buffer to zero 
 	            mOutStringBuffer.setLength(0);

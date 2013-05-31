@@ -19,7 +19,7 @@ import com.RotN.acdc.logic.TheGame.ButtonState;
 public class TheGameImpl {
 	Context fileContext;	
 	private TheGame gammon = new TheGame();	
-			
+
 	public void setFileContext(Context fileContext) {
 		this.fileContext = fileContext;
 	}
@@ -698,6 +698,7 @@ public class TheGameImpl {
 			this.onBoardUpdate();
 		}
 		
+		gammon.turnMoves.addAll(moves);
 		return moves;
 	}
 	
@@ -905,6 +906,7 @@ public class TheGameImpl {
 		gammon.blackDie2 = 0;
 		
 		analyticEvent("Roll");
+		gammon.turnMoves.clear();
 		
 		if (gammon.turn == GameColor.BLACK) {
 			gammon.blackDie1 = rollDie();
