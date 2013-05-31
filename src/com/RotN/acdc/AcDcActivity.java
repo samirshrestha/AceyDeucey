@@ -1,14 +1,12 @@
 package com.RotN.acdc;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
-
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -411,6 +409,25 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             mOutStringBuffer = new StringBuffer(""); 
 		}		
 	}
+	
+	 private void sendMoves(String moves) {
+	        // Check that we're actually connected before trying anything
+	        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+	            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
+	            return;
+	        }
+
+	        // Check that there's actually something to send
+	        if (moves.length() > 0) {
+	            // Get the message bytes and tell the BluetoothChatService to write
+	            byte[] send = moves.getBytes();
+	            mChatService.write(send);
+
+	            // Reset out string buffer to zero 
+	            mOutStringBuffer.setLength(0);
+	        }
+	    }
+
 	
 	 // The Handler that gets information back from the BluetoothChatService
     private final Handler mHandler = new Handler() {
