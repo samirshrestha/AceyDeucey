@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
+import com.RotN.acdc.logic.BluetoothService;
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
@@ -80,7 +81,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     // Local BT adapter
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for the chat services
-    private BluetoothChatService mChatService = null;
+    private BluetoothService mChatService = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +120,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         if (mChatService != null && playMode == MULTI_PLAYER_BT) {
         	Log.e(TAG, "Restart Chat Service...");
         	// Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+            if (mChatService.getState() == BluetoothService.STATE_NONE) {
               // Start the Bluetooth chat services
               mChatService.start();
             }
@@ -403,7 +404,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);	
             
             Log.d(TAG, "Bind Handler to chat service...");
-			mChatService = new BluetoothChatService(this, mHandler);
+			mChatService = new BluetoothService(this, mHandler);
 
             //Initialize the buffer for outgoing messages
             mOutStringBuffer = new StringBuffer(""); 
@@ -412,7 +413,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	 private void sendMoves(String moves) {
 	        // Check that we're actually connected before trying anything
-	        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+	        if (mChatService.getState() != BluetoothService.STATE_CONNECTED) {
 	            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
 	            return;
 	        }
@@ -437,18 +438,19 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             case MESSAGE_STATE_CHANGE:
                 Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
-                case BluetoothChatService.STATE_CONNECTED:
+                case BluetoothService.STATE_CONNECTED:
                     /*mTitle.setText(R.string.title_connected_to);
                     mTitle.append(mConnectedDeviceName);*/
                     //mConversationArrayAdapter.clear();
+                	Toast.makeText(getApplicationContext(), "Connected!", Toast.LENGTH_SHORT).show();
                     break;
-                case BluetoothChatService.STATE_CONNECTING:
+                case BluetoothService.STATE_CONNECTING:
                     //mTitle.setText(R.string.title_connecting);
                 	Toast.makeText(getApplicationContext(), "Connecting..."
                             , Toast.LENGTH_SHORT).show();
                     break;
-                case BluetoothChatService.STATE_LISTEN:
-                case BluetoothChatService.STATE_NONE:
+                case BluetoothService.STATE_LISTEN:
+                case BluetoothService.STATE_NONE:
                     //mTitle.setText(R.string.title_not_connected);
                     break;
                 }
