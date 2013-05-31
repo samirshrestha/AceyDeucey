@@ -1,9 +1,9 @@
 package com.RotN.acdc.model;
 
-import com.RotN.acdc.logic.TheGameImpl;
+import com.RotN.acdc.logic.TheGame.ButtonState;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -12,20 +12,48 @@ public class GameButton {
 
 	private boolean touched; 
 	private Rect buttonRect;
+	private Rect boardRect;
+	private Bitmap redRoll;
+	private Bitmap whiteRoll;
+	private Bitmap redRollPush;
+	private Bitmap whiteRollPush;
+	private Bitmap redClearDice;
+	private Bitmap whiteClearDice;
+	private Bitmap clearDice;
 	
-	public GameButton(int height, int width) {
-		this.touched = false;
-				
-		setButtonRect(height, width);
-	}	
-	
-	private void setButtonRect(int height, int width) {
-		buttonRect = new Rect();
-		buttonRect.left = (int)(width * 0.8);
-		buttonRect.right = (int)(width * 0.95);
-		buttonRect.top = (int)(height * 0.05);
-		buttonRect.bottom = (int)(height * 0.125);
+	public void setRedRoll(Bitmap redRoll) {
+		this.redRoll = redRoll;
 	}
+
+	public void setWhiteRoll(Bitmap whiteRoll) {
+		this.whiteRoll = whiteRoll;
+	}
+
+	public void setRedRollPush(Bitmap redRollPush) {
+		this.redRollPush = redRollPush;
+	}
+
+	public void setWhiteRollPush(Bitmap whiteRollPush) {
+		this.whiteRollPush = whiteRollPush;
+	}
+
+	public void setRedClearDice(Bitmap redClearDice) {
+		this.redClearDice = redClearDice;
+	}
+
+	public void setWhiteClearDice(Bitmap whiteClearDice) {
+		this.whiteClearDice = whiteClearDice;
+	}
+
+	public void setClearDice(Bitmap clearDice) {
+		this.clearDice = clearDice;
+	}
+
+	public GameButton(Rect boardRect) {
+		this.touched = false;
+		this.boardRect = boardRect;
+		this.buttonRect = new Rect();
+	}	
 	
 	public boolean wasTouched(float eventX, float eventY) {
 		boolean wasTouched = false;
@@ -39,7 +67,7 @@ public class GameButton {
 		
 		return wasTouched;
 	}
-	public void handleActionDown(float eventX, float eventY) {		
+	public boolean handleActionDown(float eventX, float eventY) {		
 		if (wasTouched(eventX, eventY)) {			
 			touched = true;
 		}
@@ -47,6 +75,8 @@ public class GameButton {
 		{
 			touched = false;
 		}
+		
+		return touched;
 	}
 	
 	public boolean handleActionUp(float eventX, float eventY) {
@@ -61,24 +91,65 @@ public class GameButton {
 		return buttonPressed;
 	}
 	
-	public void draw(Canvas canvas, TheGameImpl game, String buttonText) {
+	public void draw(Canvas canvas, ButtonState button, boolean canMove) {
+		float right = 0;
+		float top = 0;
 		
-		Paint buttonColor = new Paint();	
-		buttonColor.setARGB(255, 70, 70, 70);
-		canvas.drawRect(buttonRect, buttonColor);
-		
-		Paint font = new Paint();	
-		font.setARGB(255, 200, 200, 200);		
-		font.setTextAlign(Paint.Align.CENTER);
-		font.setTextSize(25);
-		canvas.drawText(buttonText, buttonRect.exactCenterX(), buttonRect.exactCenterY() + (float)(buttonRect.height()*.15), font);
-				
-		if (touched)
-		{
-			Paint paint = new Paint();
-			paint.setARGB(100, 0, 0, 255);
-			canvas.drawRect(buttonRect.left, buttonRect.top, buttonRect.right, buttonRect.bottom,  paint);
+		switch (button) {
+		case RED_ROLL:
+			right = (float)(boardRect.right * 0.64843);
+			top = (float)(boardRect.bottom * 0.44);
+			if (touched == false) {
+				canvas.drawBitmap(redRoll, right, top, null);
+			} else {
+				canvas.drawBitmap(redRollPush, right, top, null);
+			}
+			break;
+		case RED_WON:
+			break;
+		case ROLL_FOR_TURN:
+			break;
+		case CLEAR_RED:
+			right = (float)(boardRect.right * 0.64843);
+			top = (float)(boardRect.bottom * 0.44);
+			if (false == canMove) {
+				if (touched == false) {
+					canvas.drawBitmap(redClearDice, right, top, null);
+				} else {
+					canvas.drawBitmap(clearDice, right, top, null);
+				}
+			}
+			break;
+		case CLEAR_WHITE:
+			right = (float)(boardRect.right * 0.18828);
+			top = (float)(boardRect.bottom * 0.44);
+			if (false == canMove) {
+				if (touched == false) {
+					canvas.drawBitmap(whiteClearDice, right, top, null);
+				} else {
+					canvas.drawBitmap(clearDice, right, top, null);
+				}
+			}
+			break;
+		case WHITE_ROLL:
+			right = (float)(boardRect.right * 0.18828);
+			top = (float)(boardRect.bottom * 0.44);
+			if (touched == false) {
+				canvas.drawBitmap(whiteRoll, right, top, null);
+			} else {
+				canvas.drawBitmap(whiteRollPush, right, top, null);
+			}
+			break;
+		case WHITE_WON:
+			break;
+		default:
+			break;
+			
 		}
+		buttonRect.top = (int)(top);
+		buttonRect.left = (int)(right);
+		buttonRect.right = buttonRect.left + whiteRoll.getWidth();
+		buttonRect.bottom = buttonRect.top + whiteRoll.getHeight();		
 	}
 }
 

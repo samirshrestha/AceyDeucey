@@ -856,7 +856,8 @@ public class TheGameImpl {
 		case WHITE_ROLL:
 			roll();
 			break;
-		case TURN_FINISHED:
+		case CLEAR_RED:
+		case CLEAR_WHITE:
 			nextTurn();
 			break;
 		default:
@@ -928,6 +929,7 @@ public class TheGameImpl {
 				
 				analyticEvent("AcDc");
 			}
+			gammon.buttonState = ButtonState.CLEAR_RED;
 		} else {
 			gammon.whiteDie1 = rollDie();
 			gammon.whiteDie2 = rollDie();
@@ -950,8 +952,8 @@ public class TheGameImpl {
 				
 				analyticEvent("AcDc");
 			}
+			gammon.buttonState = ButtonState.CLEAR_WHITE;
 		}
-		gammon.buttonState = ButtonState.TURN_FINISHED;
 		this.onBoardUpdate();
 	}
 	
@@ -1067,7 +1069,7 @@ public class TheGameImpl {
 			gammon.whiteDie2 = 0;
 		}
 		else if (gammon.allBlackPiecesOut && getBlackBunkerCount() == 15) {
-			gammon.buttonState = ButtonState.BLACK_WON;
+			gammon.buttonState = ButtonState.RED_WON;
 			gammon.movesRemaining.clear();
 			gammon.blackDie1 = 0;
 			gammon.blackDie2 = 0;

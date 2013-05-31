@@ -87,8 +87,7 @@ public class GammonPoint {
 				topCheck = (int) (pointRect.top - pointRect.width());
 				bottomCheck = (int) (pointRect.bottom + pointRect.width());
 			}
-		}
-		
+		}		
 		
 		if (MotionEvent.ACTION_DOWN == mouseAction)  { //only check the mouse down if they is a movable piece
 			if (false == gammon.onPokey()) {
@@ -99,11 +98,15 @@ public class GammonPoint {
 					topCheck = (int) (pointRect.top - pointRect.width());
 					bottomCheck = (int) (pointRect.bottom + pointRect.width());	
 					
+					if (eventY >= topCheck && (eventY <= bottomCheck)) {
+						double xDistance = eventX - pointRect.exactCenterX();
+						double yDistance = eventY - pointRect.exactCenterY();
+						double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+						pointDistances.put(pointPos, distance);
+					}
 				} 
 			} 
-		} 
-		
-		if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
+		} else if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
 			if (eventY >= topCheck && (eventY <= bottomCheck)) {
 				double xDistance = eventX - pointRect.exactCenterX();
 				double yDistance = eventY - pointRect.exactCenterY();

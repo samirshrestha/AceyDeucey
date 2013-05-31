@@ -1,8 +1,6 @@
 package com.RotN.acdc;
 
 import java.util.ArrayList;
-import java.util.Set;
-
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.Move;
@@ -13,7 +11,6 @@ import com.RotN.acdc.logic.TheGame.ButtonState;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -150,13 +147,14 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		case WHITE_ROLL:
 			buttonText = getText(R.string.white_roll).toString();
 			break;
-		case TURN_FINISHED:
+		case CLEAR_WHITE:
+		case CLEAR_RED:
 			buttonText = getText(R.string.clear_dice).toString();
 			break;
 		case WHITE_WON:
 			buttonText = getText(R.string.white_won).toString();
 			break;
-		case BLACK_WON:
+		case RED_WON:
 			buttonText = getText(R.string.red_won).toString();
 			break;
 		}
@@ -209,7 +207,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             public void onClick(View v) {
                 beerGammon.buttonPushed();
                 board.render();
-                if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+                		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
                 	if ( (beerGammon.getTurn() == GameColor.BLACK && false == beerGammon.getGammonData().blackHumanPlayer) ||
                     		(beerGammon.getTurn() == GameColor.WHITE && false == beerGammon.getGammonData().whiteHumanPlayer) ) {
@@ -231,7 +230,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 			}
                     	}
                     	
-                    	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                    	if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+                        		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
                     		beerGammon.buttonPushed();
                     		board.render();
                     	}
@@ -261,7 +261,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             			}
                 	}
                 	
-                	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                	if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+                    		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
                 		beerGammon.buttonPushed();
                 		board.render();
                 	}
@@ -275,7 +276,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
             public void onClick(View v) {
                 beerGammon.undoMove();
                 board.render();
-                if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+                		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
                 }
             }

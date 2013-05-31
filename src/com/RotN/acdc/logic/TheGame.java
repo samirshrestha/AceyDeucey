@@ -11,11 +11,11 @@ public class TheGame implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3L;
+	private static final long serialVersionUID = 4L;
 	
 	public enum ButtonState {
-		ROLL_FOR_TURN(), RED_ROLL(), WHITE_ROLL(), TURN_FINISHED(), 
-		WHITE_WON(), BLACK_WON();
+		ROLL_FOR_TURN(), RED_ROLL(), WHITE_ROLL(), CLEAR_RED(), 
+		CLEAR_WHITE, WHITE_WON(), RED_WON();
 		
 		private ButtonState() {
 		}

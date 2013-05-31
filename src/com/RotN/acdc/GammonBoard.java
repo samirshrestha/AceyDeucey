@@ -18,6 +18,7 @@ import com.RotN.acdc.logic.TheGame;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.model.Bunker;
 import com.RotN.acdc.model.Dice;
+import com.RotN.acdc.model.GameButton;
 import com.RotN.acdc.model.GammonPoint;
 import com.RotN.acdc.model.Piece;
 import com.RotN.acdc.model.Pokey;
@@ -58,6 +59,7 @@ SurfaceHolder.Callback {
 	private static Integer A = 10;
 	private static Integer C = 12;
 	private static Integer D = 13;
+	private GameButton actionButton;
 	
 	Context fileContext;
 
@@ -138,6 +140,8 @@ SurfaceHolder.Callback {
 		whiteBunker = new Bunker(GameColor.WHITE, bitmapWhiteBunker, boardRect);
 		
 		pokey = new Pokey(new Rect(0, 0, getWidth(), getHeight()), pieceBlackBitmaps, pieceWhiteBitmaps);
+		actionButton = new GameButton(boardRect);
+		createButtonImages(scale);
 		
 		render();		
 	}
@@ -190,47 +194,55 @@ SurfaceHolder.Callback {
 			}			
 			
 		} if (event.getAction() == MotionEvent.ACTION_UP) {	
-			floatingPiece.setTouched(false);
-			
-			clearFloaters();						
-			
-			if (selectedPosition != BoardPositions.NONE) {
-
-				Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
-				Log.d(TAG, "Up Event, selected position: " + selectedPosition);
-				
-				whiteBunker.wasTouched(containerDistances, event.getX(), event.getY());
-				
-				blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
-				
-				Log.d(TAG, "We are checking points");
-				Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
-				Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
-				while (it.hasNext()) {
-					Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
-					m.getValue().wasTouched(containerDistances, event.getX(), event.getY(), MotionEvent.ACTION_UP, beerGammon);
-				}
-				
-				BoardPositions upContainer = findTheClosestContainer(containerDistances);
-				if (upContainer == selectedPosition) {
-					//this.clickToMove = true;
-				} else if (upContainer != BoardPositions.NONE) {
-					ArrayList<Move> moves = beerGammon.movePiece(selectedPosition, upContainer);
-					
-					if (this.clickToMove){
-						animateMoves(moves);
-					}
-					
-					selectedPosition = BoardPositions.NONE;
-					clearSelectedSpot();
-					clearPossibleMoves();
-					//this.clickToMove = false;
-				}
-			}
+			boardTouchUp(event);		
 		}
 		render();
 		
 		return true;
+	}
+	
+	private void boardTouchUp(MotionEvent event) {
+		floatingPiece.setTouched(false);
+		
+		if (actionButton.handleActionUp(event.getX(), event.getY())) {
+			beerGammon.buttonPushed();
+		}
+		
+		clearFloaters();						
+		
+		if (selectedPosition != BoardPositions.NONE) {
+
+			Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
+			Log.d(TAG, "Up Event, selected position: " + selectedPosition);
+			
+			whiteBunker.wasTouched(containerDistances, event.getX(), event.getY());
+			
+			blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
+			
+			Log.d(TAG, "We are checking points");
+			Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
+			Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
+			while (it.hasNext()) {
+				Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
+				m.getValue().wasTouched(containerDistances, event.getX(), event.getY(), MotionEvent.ACTION_UP, beerGammon);
+			}
+			
+			BoardPositions upContainer = findTheClosestContainer(containerDistances);
+			if (upContainer == selectedPosition) {
+				//this.clickToMove = true;
+			} else if (upContainer != BoardPositions.NONE) {
+				ArrayList<Move> moves = beerGammon.movePiece(selectedPosition, upContainer);
+				
+				if (this.clickToMove){
+					animateMoves(moves);
+				}
+				
+				selectedPosition = BoardPositions.NONE;
+				clearSelectedSpot();
+				clearPossibleMoves();
+				//this.clickToMove = false;
+			}
+		}
 	}
 	
 	private BoardPositions findTheClosestContainer(Map<BoardPositions, Double> pointDistances) {
@@ -256,75 +268,80 @@ SurfaceHolder.Callback {
 		floatingPiece.setX((int)event.getX());
 		floatingPiece.setY((int)event.getY());
 		
-		Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
-		
-		whiteBunker.wasTouched(containerDistances, event.getX(), event.getY());
-		
-		blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
-		
-		pokey.wasTouched(containerDistances, event.getX(), event.getY(), beerGammon.onPokey());
-		
-		Log.d(TAG, "We are checking points");
-		Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
-		Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
-		while (it.hasNext()) {
-			Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
-			m.getValue().wasTouched(containerDistances, event.getX(), event.getY(), MotionEvent.ACTION_DOWN, beerGammon);
-		}
-		
-		BoardPositions downContainer = findTheClosestContainer(containerDistances);
-		
-		if (downContainer == selectedPosition) {
-			selectedPosition = BoardPositions.NONE;
-			clearSelectedSpot();
-			clearPossibleMoves();
-		} else if (selectedPosition != BoardPositions.NONE) {
-			//don't set anything, we already have a selected position
-		} else {
-		
-			if (downContainer == BoardPositions.WHITE_BUNKER) {
-				whiteBunker.setSelected(true);
-				selectedPosition = BoardPositions.WHITE_BUNKER;
-				if (whiteBunker.getBunkerCount() > 0) {
-					floatingPiece.setColor(GameColor.WHITE);
-					floatingPiece.setTouched(true);
-					whiteBunker.setFloatingPiece(true);
-				}
-			} else if (BoardPositions.BLACK_BUNKER == downContainer){
-				blackBunker.setSelected(true);
-				selectedPosition = BoardPositions.BLACK_BUNKER;
-				if (blackBunker.getBunkerCount() > 0) {
-					floatingPiece.setColor(GameColor.BLACK);
-					floatingPiece.setTouched(true);
-					blackBunker.setFloatingPiece(true);
-				}
-			} else if (BoardPositions.POKEY == downContainer) {
-				selectedPosition = BoardPositions.POKEY;
-				CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
-				if (beerGammon.getTurn() == GameColor.BLACK && pokeyData.getBlackCheckerCount() > 0) {
-					floatingPiece.setColor(GameColor.BLACK);
-					floatingPiece.setTouched(true);
-					pokey.setFloatingPiece(true);
-				} else if (beerGammon.getTurn() == GameColor.WHITE && pokeyData.getWhiteCheckerCount() > 0) {
-					floatingPiece.setColor(GameColor.WHITE);
-					floatingPiece.setTouched(true);
-					pokey.setFloatingPiece(true);
-				}
-			} else if (BoardPositions.NONE != downContainer){
-				boardPoints.get(downContainer).setSelected(true);
-				selectedPosition = downContainer;
-				CheckerContainer pointData = beerGammon.getContainer(selectedPosition);
-				if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
-					floatingPiece.setColor(GameColor.BLACK);
-					floatingPiece.setTouched(true);
-					boardPoints.get(downContainer).setFloatingPiece(true);
-				} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
-					floatingPiece.setColor(GameColor.WHITE);
-					floatingPiece.setTouched(true);
-					boardPoints.get(downContainer).setFloatingPiece(true);
+		//TODO Only deal with the button in this case
+		if ( false == actionButton.handleActionDown(event.getX(), event.getY()) ) {
+			
+			Map<BoardPositions, Double> containerDistances = new HashMap<BoardPositions, Double>();
+			
+			whiteBunker.wasTouched(containerDistances, event.getX(), event.getY());
+			
+			blackBunker.wasTouched(containerDistances, event.getX(), event.getY());	
+			
+			pokey.wasTouched(containerDistances, event.getX(), event.getY(), beerGammon.onPokey());
+			
+			Log.d(TAG, "We are checking points");
+			Set<Entry<BoardPositions, GammonPoint>> set = boardPoints.entrySet();
+			Iterator<Entry<BoardPositions, GammonPoint>> it = set.iterator();
+			while (it.hasNext()) {
+				Map.Entry<BoardPositions, GammonPoint> m = (Map.Entry<BoardPositions, GammonPoint>)it.next();
+				m.getValue().wasTouched(containerDistances, event.getX(), event.getY(), MotionEvent.ACTION_DOWN, beerGammon);
+			}
+			
+			BoardPositions downContainer = findTheClosestContainer(containerDistances);
+			
+			if (downContainer == selectedPosition) {
+				selectedPosition = BoardPositions.NONE;
+				clearSelectedSpot();
+				clearPossibleMoves();
+			} else if (selectedPosition != BoardPositions.NONE) {
+				//don't set anything, we already have a selected position
+			} else {
+			
+				if (downContainer == BoardPositions.WHITE_BUNKER) {
+					whiteBunker.setSelected(true);
+					selectedPosition = BoardPositions.WHITE_BUNKER;
+					if (whiteBunker.getBunkerCount() > 0) {
+						floatingPiece.setColor(GameColor.WHITE);
+						floatingPiece.setTouched(true);
+						whiteBunker.setFloatingPiece(true);
+					}
+				} else if (BoardPositions.BLACK_BUNKER == downContainer){
+					blackBunker.setSelected(true);
+					selectedPosition = BoardPositions.BLACK_BUNKER;
+					if (blackBunker.getBunkerCount() > 0) {
+						floatingPiece.setColor(GameColor.BLACK);
+						floatingPiece.setTouched(true);
+						blackBunker.setFloatingPiece(true);
+					}
+				} else if (BoardPositions.POKEY == downContainer) {
+					selectedPosition = BoardPositions.POKEY;
+					CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
+					if (beerGammon.getTurn() == GameColor.BLACK && pokeyData.getBlackCheckerCount() > 0) {
+						floatingPiece.setColor(GameColor.BLACK);
+						floatingPiece.setTouched(true);
+						pokey.setFloatingPiece(true);
+					} else if (beerGammon.getTurn() == GameColor.WHITE && pokeyData.getWhiteCheckerCount() > 0) {
+						floatingPiece.setColor(GameColor.WHITE);
+						floatingPiece.setTouched(true);
+						pokey.setFloatingPiece(true);
+					}
+				} else if (BoardPositions.NONE != downContainer){
+					boardPoints.get(downContainer).setSelected(true);
+					selectedPosition = downContainer;
+					CheckerContainer pointData = beerGammon.getContainer(selectedPosition);
+					if (beerGammon.getTurn() == GameColor.BLACK && pointData.getBlackCheckerCount() > 0) {
+						floatingPiece.setColor(GameColor.BLACK);
+						floatingPiece.setTouched(true);
+						boardPoints.get(downContainer).setFloatingPiece(true);
+					} else if (beerGammon.getTurn() == GameColor.WHITE && pointData.getWhiteCheckerCount() > 0) {
+						floatingPiece.setColor(GameColor.WHITE);
+						floatingPiece.setTouched(true);
+						boardPoints.get(downContainer).setFloatingPiece(true);
+					}
 				}
 			}
-		}
+			
+		}		
 		
 		updatePossibleMoves();
 	}
@@ -340,6 +357,8 @@ SurfaceHolder.Callback {
 			board = decodeSampledBitmapFromResource(getResources(), R.drawable.background, getWidth(), getHeight());
 		}
 		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
+		
+		actionButton.draw(canvas, beerGammon.getButtonState(), beerGammon.canMove());
 		blackBunker.draw(canvas);
 		whiteBunker.draw(canvas);
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);
@@ -457,6 +476,21 @@ SurfaceHolder.Callback {
 		diceBitmaps.put(R.drawable.white_dice6, getImageExactSize(getResources(), R.drawable.white_dice6, newWidth, newHeight));
 		
 		return diceBitmaps;
+	}
+	
+	private void createButtonImages(float scale) {
+		BitmapFactory.Options options = getImageOutSize(getResources(), R.drawable.red_roll);
+		int newWidth = Math.round(options.outWidth/scale);
+		int newHeight = Math.round(options.outHeight/scale);
+		
+		actionButton.setRedRoll(getImageExactSize(getResources(), R.drawable.red_roll, newWidth, newHeight));
+		actionButton.setRedRollPush(getImageExactSize(getResources(), R.drawable.red_roll_push, newWidth, newHeight));
+		actionButton.setWhiteRoll(getImageExactSize(getResources(), R.drawable.white_roll, newWidth, newHeight));
+		actionButton.setWhiteRollPush(getImageExactSize(getResources(), R.drawable.white_roll_push, newWidth, newHeight));
+		
+		actionButton.setClearDice(getImageExactSize(getResources(), R.drawable.cleardice_push, newWidth, newHeight));
+		actionButton.setRedClearDice(getImageExactSize(getResources(), R.drawable.red_cleardice, newWidth, newHeight));
+		actionButton.setWhiteClearDice(getImageExactSize(getResources(), R.drawable.white_cleardice, newWidth, newHeight));
 	}
 	
 	private void createMovesRemainingArray(float scale) {
