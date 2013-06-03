@@ -1,8 +1,11 @@
 package com.RotN.acdc;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 
 import com.RotN.acdc.BtService.LocalBinder;
@@ -414,7 +417,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		}		
 	}
 	
-
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
