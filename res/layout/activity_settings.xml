@@ -35,7 +35,8 @@
 		<RelativeLayout 
 		    android:id="@+id/conntected_text"
 		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content">
+		    android:layout_height="wrap_content"
+		    android:visibility="gone">
 
 		    <TextView
 		        android:id="@+id/connected_title"
@@ -49,8 +50,7 @@
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
 			    android:layout_marginLeft="5dip"
-			    android:layout_toRightOf="@id/connected_title"
-			    android:text="@string/title_connected_to"
+			    android:layout_toRightOf="@id/connected_title"			    
 			    android:textSize="18sp" />
 		    
 		    <Button

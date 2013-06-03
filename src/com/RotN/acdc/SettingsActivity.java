@@ -1,35 +1,44 @@
 package com.RotN.acdc;
 
+import com.RotN.acdc.logic.BluetoothThread;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
 	private static final String TAG = AcDcActivity.class.getSimpleName();
 	private int playMode;
     private RadioButton red;
-    private RadioButton white;
+    private RadioButton white; 
+    private RelativeLayout connection;
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int SINGLE_PLAYER = 1;
     private static final int MULTI_PLAYER = 2;
     private static final int MULTI_PLAYER_BT = 3;
     public static final String NEW_GAME_KEY = "NewGame";
+    public static final String PLAY_MODE = "PlayMode";
     private SharedPreferences storage;
+    private BluetoothThread mChatService = null;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.activity_settings);
-		storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);	
-		
+		storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);
+		mChatService = new BluetoothThread(this, mHandler);
 		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();		
 		if (mBluetoothAdapter == null) {
 		    RadioButton network = (RadioButton) findViewById(R.id.radio_network);
@@ -43,6 +52,7 @@ public class SettingsActivity extends Activity {
 		super.onStart();
 		red = (RadioButton) findViewById(R.id.radio_red);
 		white = (RadioButton) findViewById(R.id.radio_white);
+		connection = (RelativeLayout) findViewById(R.id.conntected_text);
 	}
 	
 	public void onPlayModeClicked(View view) {
@@ -56,6 +66,7 @@ public class SettingsActivity extends Activity {
 	            if (checked){
 	            	red.setEnabled(true);
             		white.setEnabled(true);
+            		connection.setVisibility(View.GONE);
             		playMode = SINGLE_PLAYER;
 	            }
 	            break;
@@ -64,6 +75,7 @@ public class SettingsActivity extends Activity {
 	            	red.setEnabled(false);
 	            	white.setEnabled(false);
 	            	playMode = MULTI_PLAYER;
+	            	connection.setVisibility(View.GONE);
 	            }          
 	            break;
 	        case R.id.radio_network:
@@ -71,6 +83,11 @@ public class SettingsActivity extends Activity {
 	            	red.setEnabled(true);
 	            	white.setEnabled(true);
 	            	playMode = MULTI_PLAYER_BT;
+	            	if (mChatService.getState() == BluetoothThread.STATE_CONNECTED) {
+	            		TextView deviceText = (TextView) findViewById(R.id.connected_to);
+	            		deviceText.setText(BluetoothThread.connectedDeviceName);	
+	            		connection.setVisibility(View.VISIBLE);
+	                }            	
 	            }	            
 	            break;	    
 	         }
@@ -78,13 +95,13 @@ public class SettingsActivity extends Activity {
 	
 	public void startGame(View view) {
 		Intent intent = new Intent(this, AcDcActivity.class);	
-		intent.putExtra("playMode", playMode);
 		intent.putExtra("whitePlayerIsHuman", white.isChecked());
 		intent.putExtra("redPlayerIsHuman", red.isChecked());
 		
 		
 		storage.edit().putBoolean(NEW_GAME_KEY, true).commit();
-		
+		storage.edit().putInt(PLAY_MODE, playMode).commit();
+		storage.edit().remove(DeviceListActivity.EXTRA_DEVICE_ADDRESS).commit();
 		if(playMode == 1){
 			intent.putExtra("whitePlayerIsHuman", true);
 			intent.putExtra("redPlayerIsHuman", true);
@@ -109,6 +126,47 @@ public class SettingsActivity extends Activity {
     	
 	}
 	
+	 // The Handler that gets information back from the BluetoothService
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case BtService.MESSAGE_STATE_CHANGE:
+                Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                switch (msg.arg1) {
+                case BluetoothThread.STATE_CONNECTED:
+                    /*mTitle.setText(R.string.title_connected_to);
+                    mTitle.append(mConnectedDeviceName);*/
+                    //mConversationArrayAdapter.clear();
+                	Toast.makeText(getApplicationContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                    break;
+                case BluetoothThread.STATE_CONNECTING:
+                    //mTitle.setText(R.string.title_connecting);
+                	Toast.makeText(getApplicationContext(), "Connecting..."
+                            , Toast.LENGTH_SHORT).show();
+                    break;
+                case BluetoothThread.STATE_LISTEN:
+                case BluetoothThread.STATE_NONE:
+                    //mTitle.setText(R.string.title_not_connected);
+                    break;
+                }
+                break;
+            case BtService.MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+               /* mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();*/
+                break;
+            case BtService.MESSAGE_FAILED:
+            	//if (!msg.getData().getString(TOAST).contains("Unable to connect device")) {
+                    /*Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                            Toast.LENGTH_SHORT).show();     */       		
+            	//}
+                break;
+            }
+        }
+    };
+
 	 public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	        Log.d(TAG, "onActivityResult " + resultCode);
 	        switch (requestCode) {
@@ -117,10 +175,9 @@ public class SettingsActivity extends Activity {
 	            if (resultCode == Activity.RESULT_OK) {
 	            	Intent intent = new Intent(this, AcDcActivity.class);
 	        		intent.putExtra("newGame", true);
-	        		intent.putExtra("playMode", playMode);
 	        		intent.putExtra("whitePlayerIsHuman", white.isChecked());
 	        		intent.putExtra("redPlayerIsHuman", red.isChecked());;
-	        		startActivity(intent);
+	        		//startActivity(intent);
 	            } else {
 	                // User did not enable Bluetooth or an error occured
 	                Log.d(TAG, "BT not enabled");

@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import com.RotN.acdc.AcDcActivity;
+import com.RotN.acdc.BtService;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -34,7 +34,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-public class BluetoothService {
+public class BluetoothThread {
     // Debugging
     private static final String TAG = "BluetoothChatService";
     private static final boolean D = true;
@@ -48,6 +48,7 @@ public class BluetoothService {
     private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
+    public static String connectedDeviceName;
     private int mState;
 
     private ArrayList<String> mDeviceAddresses;
@@ -59,29 +60,30 @@ public class BluetoothService {
      * is listening for. When accepting incoming connections server listens for all 7 UUIDs. 
      * When trying to form an outgoing connection, the client tries each UUID one at a time. 
      */
-    private ArrayList<UUID> mUuids;
+    //private ArrayList<UUID> mUuids;
+    
     
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
-
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     /**
      * Constructor. Prepares a new BluetoothChat session.
      * @param context  The UI Activity Context
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothService(Context context, Handler handler) {
+    public BluetoothThread(Context context, Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
         mDeviceAddresses = new ArrayList<String>();
         mConnThreads = new ArrayList<ConnectedThread>();
         mSockets = new ArrayList<BluetoothSocket>();
-        mUuids = new ArrayList<UUID>();
+        //mUuids = new ArrayList<UUID>();
         // 7 randomly-generated UUIDs. These must match on both server and client.
-        mUuids.add(UUID.fromString("d4f6ef20-c96c-11e2-8b8b-0800200c9a66"));
+        //mUuids.add(UUID.fromString("00001105-0000-1000-8000-00805F9B34FB"));
         /*mUuids.add(UUID.fromString("2d64189d-5a2c-4511-a074-77f199fd0834"));
         mUuids.add(UUID.fromString("e442e09a-51f3-4a7b-91cb-f638491d1412"));
         mUuids.add(UUID.fromString("a81d6504-4536-49ee-a475-7d96d09439e4"));
@@ -99,7 +101,7 @@ public class BluetoothService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(AcDcActivity.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(BtService.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -146,7 +148,7 @@ public class BluetoothService {
         // Create a new thread and attempt to connect to each UUID one-by-one.    
         //for (int i = 0; i < 7; i++) {
         	try {
-                mConnectThread = new ConnectThread(device, mUuids.get(0));
+                mConnectThread = new ConnectThread(device, MY_UUID);
                 mConnectThread.start();
                 setState(STATE_CONNECTING);
         	} catch (Exception e) {
@@ -181,13 +183,21 @@ public class BluetoothService {
         mConnThreads.add(mConnectedThread);
 
         // Send the name of the connected device back to the UI Activity
-        /*Message msg = mHandler.obtainMessage(BluetoothChat.MESSAGE_DEVICE_NAME);
+        Message msg = mHandler.obtainMessage(BtService.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString(BluetoothChat.DEVICE_NAME, device.getName());
+        bundle.putString(BtService.DEVICE_NAME, device.getName());
         msg.setData(bundle);
-        mHandler.sendMessage(msg);*/
-
+        mHandler.sendMessage(msg);
+        connectedDeviceName = device.getName();
         setState(STATE_CONNECTED);
+    }
+    
+    public void getRemoteDeviceName(){
+    	Message msg = mHandler.obtainMessage(BtService.MESSAGE_DEVICE_NAME);
+        Bundle bundle = new Bundle();
+        bundle.putString(BtService.DEVICE_NAME, connectedDeviceName);
+        msg.setData(bundle);
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -208,17 +218,21 @@ public class BluetoothService {
      */
     public void write(byte[] out) {
     	// When writing, try to write out to all connected threads 
-    	for (int i = 0; i < mConnThreads.size(); i++) {
+    	Log.d(TAG, "Start Writing..." + mConnThreads.size());
+    	for (int i = 0; i < mConnThreads.size(); i++) {   		
     		try {
                 // Create temporary object
                 ConnectedThread r;
                 // Synchronize a copy of the ConnectedThread
                 synchronized (this) {
                     if (mState != STATE_CONNECTED) return;
-                    r = mConnThreads.get(i);
+                    r = mConnThreads.get(i);                                     
                 }
                 // Perform the write unsynchronized
-                r.write(out);
+                if(r.isAlive())
+                	r.write(out);
+                else
+                	r.cancel();
     		} catch (Exception e) {    			
     		}
     	}
@@ -229,6 +243,7 @@ public class BluetoothService {
      */
     private void connectionFailed() {
         setState(STATE_LISTEN);
+        if (D) Log.i(TAG, "Connection Failed");
         // Commented out, because when trying to connect to all 7 UUIDs, failures will occur
         // for each that was tried and unsuccessful, resulting in multiple failure toasts.
         /*
@@ -240,9 +255,9 @@ public class BluetoothService {
         mHandler.sendMessage(msg);
         */
      // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(AcDcActivity.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(BtService.MESSAGE_FAILED);
         Bundle bundle = new Bundle();
-        bundle.putString(AcDcActivity.TOAST, "Connection Failed");
+        bundle.putString(BtService.TOAST, "Connection Failed");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }
@@ -252,11 +267,11 @@ public class BluetoothService {
      */
     private void connectionLost() {
         setState(STATE_LISTEN);
-
+        if (D) Log.i(TAG, "Connection Lost");
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(AcDcActivity.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(BtService.MESSAGE_FAILED);
         Bundle bundle = new Bundle();
-        bundle.putString(AcDcActivity.TOAST, "Device connection was lost");
+        bundle.putString(BtService.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }
@@ -279,7 +294,7 @@ public class BluetoothService {
             try {
             	// Listen for all 7 UUIDs
             	//for (int i = 0; i < 7; i++) {
-            		serverSocket = mAdapter.listenUsingRfcommWithServiceRecord(NAME, mUuids.get(0));
+            		serverSocket = mAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
                     socket = serverSocket.accept();
                     if (socket != null) {
                     	String address = socket.getRemoteDevice().getAddress();
@@ -323,7 +338,7 @@ public class BluetoothService {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(uuidToTry);        	
+                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);              	
             } catch (IOException e) {
                 Log.e(TAG, "create() failed", e);
             }
@@ -343,7 +358,8 @@ public class BluetoothService {
                 // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-            	if (tempUuid.toString().contentEquals(mUuids.get(0).toString())) {
+            	if (tempUuid.toString().contentEquals(MY_UUID.toString())) {
+            		Log.i(TAG, e.getMessage());
                     connectionFailed();
             	}
                 // Close the socket
@@ -353,12 +369,12 @@ public class BluetoothService {
                     Log.e(TAG, "unable to close() socket during connection failure", e2);
                 }
                 // Start the service over to restart listening mode
-                BluetoothService.this.start();
+                BluetoothThread.this.start();
                 return;
             }
 
             // Reset the ConnectThread because we're done
-            synchronized (BluetoothService.this) {
+            synchronized (BluetoothThread.this) {
                 mConnectThread = null;
             }
 
@@ -414,10 +430,10 @@ public class BluetoothService {
                     bytes = mmInStream.read(buffer);
 
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(AcDcActivity.MESSAGE_READ, bytes, -1, buffer)
+                    mHandler.obtainMessage(BtService.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                 } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
+                    Log.e(TAG, "disconnected cuz of IOException");
                     connectionLost();
                     break;
                 }
@@ -433,8 +449,7 @@ public class BluetoothService {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(AcDcActivity.MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
+                mHandler.obtainMessage(BtService.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }

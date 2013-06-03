@@ -5,7 +5,6 @@
     android:background="@drawable/bartop" >
     
     <RelativeLayout
-	    xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/game_panel"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content">	  
@@ -38,17 +37,30 @@
 	    
 	</RelativeLayout>
 	
-     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        
+	<RelativeLayout 
 	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-		android:orientation="vertical" >    
-
+    	android:layout_height="match_parent"
+		android:orientation="vertical">
 		<com.RotN.acdc.GammonBoard
 			android:id="@+id/gammonBoard"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_gravity="center"
-		/>	
-	</LinearLayout>
+			android:layout_centerHorizontal="true"
+		/>
+		<TextView
+		    android:id="@+id/game_message"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:background="#000000"
+			android:layout_centerHorizontal="true"
+			android:layout_centerVertical="true"
+			android:padding="5dp"
+			android:visibility="gone" />		    
+	</RelativeLayout>
+	
+	
 
 </LinearLayout>

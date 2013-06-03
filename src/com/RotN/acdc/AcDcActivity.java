@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import com.RotN.acdc.BtService.LocalBinder;
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
-import com.RotN.acdc.logic.BluetoothService;
+
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGame;
 import com.RotN.acdc.logic.TheGameImpl;
@@ -16,14 +17,19 @@ import com.RotN.acdc.logic.TheGame.ButtonState;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.os.IBinder;
+import android.os.Messenger;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -31,8 +37,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler {
@@ -42,6 +48,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private static final String TAG = AcDcActivity.class.getSimpleName();
 	private TheGameImpl beerGammon;
 	private Button actionButton;
+	private TextView gameMessage;
 	//static TextView tvTurn;	
 	private Button undoButton;
 	GammonBoard board;
@@ -54,19 +61,18 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	
     // Message types sent from the BluetoothChatService Handler
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_WRITE = 3;
-    public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_TOAST = 5;
-    private int playMode = -1;
+    private int playMode;
+    private boolean mBound = false;
+    private BtService mService;
     
     //Play Mode
     public static final String NEW_GAME_KEY = "NewGame";
+    public static final String PLAY_MODE = "PlayMode";
     private static final int EXISTING_GAME = 0;
     private static final int SINGLE_PLAYER = 1;
     private static final int MULTI_PLAYER = 2;
     private static final int MULTI_PLAYER_BT = 3;
+    public static String EXTRA_DEVICE_ADDRESS = "device_address";
     
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
@@ -75,40 +81,60 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
+    private static final int ENABLE_BT_FOR_FIND_GAME = 3;
+    private boolean isBTEnabled = false;
+
     
-    // Name of the connected device
-    private String mConnectedDeviceName = null;
-    // Array adapter for the conversation thread
-    private ArrayAdapter<String> mConversationArrayAdapter;
-    // String buffer for outgoing messages
-    private StringBuffer mOutStringBuffer;
-    // Local BT adapter
-    private BluetoothAdapter mBluetoothAdapter = null;
-    // Member object for the chat services
-    private BluetoothService mChatService = null;
+   
+    private ResponseReceiver receiver;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);    	
     	super.onCreate(savedInstanceState);
     	Log.e(TAG, "CREATING ACDC ACTIVITY");
-    	mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);
+
+    	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);   	
+    	playMode = storage.getInt(PLAY_MODE, EXISTING_GAME);
+    	if(playMode == MULTI_PLAYER_BT){
+    		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            }
+    	}
+    	
+        bindService(new Intent(this, BtService.class), mConnection,
+                Context.BIND_AUTO_CREATE);
+    }
+    
+    private void RegisterReciever(){
+    	//if (receiver == null) {
+			receiver = new ResponseReceiver();
+	    	IntentFilter filter = new IntentFilter();
+	    	filter.addAction(ResponseReceiver.MSG_CONNECTED);
+	    	filter.addAction(ResponseReceiver.MSG_GAME_DATA);
+	    	filter.addAction(ResponseReceiver.MSG_MOVE);
+	        receiver = new ResponseReceiver();
+	        registerReceiver(receiver, filter);
+    	//}
+    	
     }
     
    	@Override
 	protected void onStop() {
+   		super.onStop();
+   		doUnbindService();
 		Log.d(TAG, "Stopping...");
-		closeItDown();
-		super.onStop();
 		
+		//closeItDown();
 		// Remove any pending ad refreshes.
-		refreshHandler.removeCallbacks(refreshRunnable);
+		//refreshHandler.removeCallbacks(refreshRunnable);
 	}
    	
    	@Override
    	protected void onPause() {
    		Log.d(TAG, "Pausing...");
+   		if (receiver != null) unregisterReceiver(receiver);
 		closeItDown();
    		super.onPause();
    	}
@@ -116,19 +142,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
    	@Override
     public synchronized void onResume() {
         super.onResume();
-        Log.e(TAG, "+ ON RESUME +");
-
-        // Performing this check in onResume() covers the case in which BT was
-        // not enabled during onStart(), so we were paused to enable it...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (mChatService != null && playMode == MULTI_PLAYER_BT) {
-        	Log.e(TAG, "Restart Chat Service...");
-        	// Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothService.STATE_NONE) {
-              // Start the Bluetooth chat services
-              mChatService.start();
-            }
-        }
+        Log.e(TAG, "ON RESUME...");
+        RegisterReciever();
     }
    	
 	@Override
@@ -140,18 +155,12 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 			// Request a new ad immediately.
 		    refreshHandler.post(refreshRunnable);
 		}
-		if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-        // Otherwise, setup the chat session
-        }
 	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.gammon_menu, menu);
-	    
 	    Log.d(TAG, "Menu inflated");
 	    return true;
 	}
@@ -162,29 +171,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		GammonBoard board = (GammonBoard)this.findViewById(R.id.gammonBoard);
 	    // Handle item selection
 	    switch (item.getItemId()) {
-	        case R.id.new_game:
-	        	/*AlertDialog.Builder alert_newGame = new AlertDialog.Builder(this);
-	        	alert_newGame.setMessage("Are you sure you want to start a new game?")
-	            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-	            	GammonBoard board = (GammonBoard)findViewById(R.id.gammonBoard);
-	                public void onClick(DialogInterface dialog, int id) {
-	                	dialog.dismiss();	                	
-	    	            board.newGame();
-	    	            actionButton.setText(getButtonText());
-	    	            board.render();	                	
-	                }
-	                })
-	            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-	                public void onClick(DialogInterface dialog, int id) {
-	                //  Action for 'NO' Button
-	                dialog.cancel();
-	                }
-	            });
-	            AlertDialog alert = alert_newGame.create();
-	            // Title for AlertDialog
-	            alert.setTitle("Warning!");
-	            // Icon for AlertDialog
-	            alert.show();*/
+	        case R.id.new_game:        	
 	        	Intent settingsIntent = new Intent(this, SettingsActivity.class);
 	        	startActivity(settingsIntent);
 	            return true;
@@ -192,6 +179,16 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        	beerGammon.undoMove();
 	        	board.render();
 	        	return true;
+	        case R.id.bluetoothMode:
+	        	storage.edit().putInt(PLAY_MODE, MULTI_PLAYER_BT).commit();
+        		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                    Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableIntent, ENABLE_BT_FOR_FIND_GAME);
+                } else {
+                	Intent serverIntent = new Intent(this, DeviceListActivity.class);
+    	            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+                }	        	 
+	            return true;
 	        case R.id.directions:
 	        	Intent intent = new Intent(this, DirectionsActivity.class);
 	        	startActivity(intent);
@@ -295,11 +292,12 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 	
                 	TheGame acdc = beerGammon.getGammonData();
                 	ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    try {
-						ObjectOutputStream stream = new ObjectOutputStream(byteStream);
+                    try {               	
+                    	ObjectOutputStream stream = new ObjectOutputStream(byteStream);
 						stream.writeObject(acdc);
-						sendMoves(byteStream.toByteArray());
+						mService.sendGameData(byteStream.toByteArray());
 					} catch (IOException e) {
+						Log.d(TAG, "Unable to send game data");
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -381,15 +379,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	@Override
-    public void onDestroy() {
-		Log.d(TAG, "Destroying...");
-		//mAdView.destroy();
-        super.onDestroy();
-        if (mChatService != null) mChatService.stop();
-    }
-	
+		
 	private class RefreshRunnable implements Runnable {
 		  @Override
 		  public void run() {
@@ -409,134 +399,118 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	public void startNewGame(){
 		Log.d(TAG, "Starting New Game...");
 		Bundle extras = getIntent().getExtras();
-    	playMode = extras.getInt("playMode");
+		
 		board.newGame();
 		beerGammon = board.getTheGame();
 		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
 		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
-		if(playMode == MULTI_PLAYER_BT){	    			
-			/*Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-			startActivity(discoverableIntent);*/
-			
-			// Initialize the BluetoothChatService to perform connections   			
-            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);	
-            
-            Log.d(TAG, "Bind Handler to chat service...");
-			mChatService = new BluetoothService(this, mHandler);
-
-            //Initialize the buffer for outgoing messages
-            mOutStringBuffer = new StringBuffer(""); 
+		if(playMode == MULTI_PLAYER_BT){	    						
+            //Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            //startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
+				startBTGame(R.string.waiting_for_join);
+			}
+	        
 		}		
 	}
 	
-	 private void sendMoves(byte [] gameData) {
-	        // Check that we're actually connected before trying anything
-	        if (mChatService.getState() != BluetoothService.STATE_CONNECTED) {
-	            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
-	            return;
-	        }
-
-	        // Check that there's actually something to send
-	        if (gameData.length > 0) {
-	            // Get the message bytes and tell the BluetoothChatService to write
-	            mChatService.write(gameData);
-
-	            // Reset out string buffer to zero 
-	            mOutStringBuffer.setLength(0);
-	        }
-	    }
-
-	
-	 // The Handler that gets information back from the BluetoothChatService
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MESSAGE_STATE_CHANGE:
-                Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                switch (msg.arg1) {
-                case BluetoothService.STATE_CONNECTED:
-                    /*mTitle.setText(R.string.title_connected_to);
-                    mTitle.append(mConnectedDeviceName);*/
-                    //mConversationArrayAdapter.clear();
-                	Toast.makeText(getApplicationContext(), "Connected!", Toast.LENGTH_SHORT).show();
-                    break;
-                case BluetoothService.STATE_CONNECTING:
-                    //mTitle.setText(R.string.title_connecting);
-                	Toast.makeText(getApplicationContext(), "Connecting..."
-                            , Toast.LENGTH_SHORT).show();
-                    break;
-                case BluetoothService.STATE_LISTEN:
-                case BluetoothService.STATE_NONE:
-                    //mTitle.setText(R.string.title_not_connected);
-                    break;
-                }
-                break;
-            case MESSAGE_WRITE:
-                byte[] writeBuf = (byte[]) msg.obj;
-                // construct a string from the buffer
-                String writeMessage = new String(writeBuf);
-                mConversationArrayAdapter.add("Me:  " + writeMessage);
-                break;
-            case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;
-                // construct a string from the valid bytes in the buffer
-                String readMessage = new String(readBuf, 0, msg.arg1);
-                if (readMessage.length() > 0) {
-                    mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
-                }
-                break;
-            case MESSAGE_DEVICE_NAME:
-                // save the connected device's name
-                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-                Toast.makeText(getApplicationContext(), "Connected to "
-                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                break;
-            case MESSAGE_TOAST:
-            	//if (!msg.getData().getString(TOAST).contains("Unable to connect device")) {
-                    Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
-                            Toast.LENGTH_SHORT).show();            		
-            	//}
-                break;
-            }
-        }
-    };
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
         case REQUEST_CONNECT_DEVICE:
-            // When DeviceListActivity returns with a device to connect
-            if (resultCode == Activity.RESULT_OK) {
-            	
-            	// Get the device MAC address
-                String address = data.getExtras()
-                                     .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                Log.d(TAG, "TRY CONNECTING!! " + address);
-                // Get the BLuetoothDevice object
-                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-                // Attempt to connect to the device
-                mChatService.connect(device);
-            }
-            break;
+        	
+        	break;
         case REQUEST_ENABLE_BT:
-            // When the request to enable Bluetooth returns
-            if (resultCode == Activity.RESULT_OK) {
-                // Bluetooth is now enabled, so set up a chat session
-            	startItUp();
+            if (resultCode == Activity.RESULT_OK) {      	
+            	startBTGame(R.string.waiting_for_join);
             } else {
                 // User did not enable Bluetooth or an error occured
                 Log.d(TAG, "BT not enabled");
                 Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
                 finish();
             }
+            break;
+        case ENABLE_BT_FOR_FIND_GAME:
+        	if (resultCode == Activity.RESULT_OK) {
+	        	Intent serverIntent = new Intent(this, DeviceListActivity.class);
+	            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+        	} else {
+        		//ADD NEW MESSAGING
+                Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
+                finish();
+        	}
+        	break;
         }
     }
 
+    private void startBTGame(int resourceIdForMessageText){
+    	Intent BtService = new Intent(this, BtService.class);        
+        startService(BtService);
+        Log.d(TAG, "Show Game Message");
+        gameMessage = (TextView) findViewById(R.id.game_message);
+        gameMessage.setText(resourceIdForMessageText);
+        gameMessage.setVisibility(View.VISIBLE);
+        actionButton = (Button) findViewById(R.id.action_button);
+        actionButton.setVisibility(View.INVISIBLE);
+    }
 	
 	@Override
 	public void onDiceRoll(String event) {
 	}
+
+	public class ResponseReceiver extends BroadcastReceiver {
+		public static final String MSG_CONNECTED = "com.RotN.acdc.intent.action.MESSAGE_CONNECTED";
+		public static final String MSG_MOVE = "com.RotN.acdc.intent.action.MESSAGE_MOVED";
+		public static final String MSG_GAME_DATA = "com.RotN.acdc.intent.action.MESSAGE_MOVED";
+		@Override
+	    public void onReceive(Context context, Intent intent) {
+			Log.d(TAG, "Recieved Msg From Service");
+			if (intent.getAction().equals(MSG_CONNECTED)) {
+				String message = intent.getExtras().getString("ConnectedTo");
+				Toast.makeText(getApplicationContext(), "Connected To: " + message, Toast.LENGTH_SHORT).show();
+				if(mService.isClient){
+					startBTGame(R.string.opponents_turn);
+				} else {
+					gameMessage = (TextView) findViewById(R.id.game_message);		       
+			        gameMessage.setVisibility(View.GONE);
+			        actionButton = (Button) findViewById(R.id.action_button);
+			        actionButton.setVisibility(View.VISIBLE);
+				}
+		    } else if (intent.getAction().equals(MSG_GAME_DATA)) {
+		    	byte[] data = intent.getExtras().getByteArray("GameData");
+		    	recieveGameData(data);		    	
+		    }
+	    }
+	}
+	
+	private void recieveGameData(byte[] data){
+		Log.d(TAG, "Recieved Game Data");
+		// TODO Convert into TheGame object and update the game board
+	}
+	
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+	};
+	
+	private void doUnbindService() {
+	    if (mBound) {
+	        // Detach our existing connection.
+	        unbindService(mConnection);
+	        mBound = false;
+	    }
+	}
+
 }

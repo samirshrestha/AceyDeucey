@@ -69,15 +69,18 @@
     <string name="white">White</string>
     <string name="red">Red</string>
     <string name="find_game">Find Game</string>
+    <string name="opponents_turn">Waiting for opponent\'s move &#8230;</string>
     <string name="title_activity_find_game">Find game to join on another device </string>
+    <string name="already_discoverable">This device is discoverable to other devices.</string>
+    <string name="waiting_for_join">Waiting for another player to join &#8230;</string>
     <!--  Bluetooth Chat -->
     <string name="send">Send</string>
 	<string name="not_connected">You are not connected to a device</string>
     <string name="bt_not_enabled">Bluetooth must be enabled to play across devices</string>
-    <string name="title_connecting">connecting...</string>
+    <string name="title_connecting">connecting&#8230;</string>
     <string name="title_connected_to">Connected to: </string>
     <string name="title_not_connected">not connected</string>
-    <string name="scanning">scanning for devices...</string>
+    <string name="scanning">scanning for devices&#8230;</string>
     <string name="select_device">select a device to connect</string>
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">No devices found</string>

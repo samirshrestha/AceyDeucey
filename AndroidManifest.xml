@@ -42,23 +42,18 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.RotN.beergammon.GammonActivity" />
-        </activity>
-        <activity
-            android:name="com.RotN.acdc.FindGameActivity"
-            android:label="@string/title_activity_find_game"
-            android:parentActivityName="com.RotN.beergammon.GammonActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.RotN.beergammon.GammonActivity" />
-        </activity>       
+        </activity>      
         <activity android:name="com.RotN.acdc.DeviceListActivity"
                   android:label="@string/select_device"
-                  android:theme="@android:style/Theme.Dialog"
                   android:configChanges="orientation|keyboardHidden" />
+        <service
+            android:name="com.RotN.acdc.BtService"
+            android:exported="false"/>
     </application>
     
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     
+    <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-	<uses-permission android:name="android.permission.BLUETOOTH" />
+	
 </manifest>

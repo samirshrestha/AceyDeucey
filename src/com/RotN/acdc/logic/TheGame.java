@@ -1,5 +1,8 @@
 package com.RotN.acdc.logic;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -35,6 +38,12 @@ public class TheGame implements Serializable {
 	public boolean whiteHumanPlayer = false;
 	public boolean blackHumanPlayer = true;	
 	public ArrayList<Move> turnMoves = new ArrayList<Move>();
+	
+	public static TheGame deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        ObjectInputStream o = new ObjectInputStream(b);
+        return (TheGame) o.readObject();
+    }
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {
