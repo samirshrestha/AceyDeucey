@@ -216,7 +216,7 @@ public class BluetoothThread {
      * @param out The bytes to write
      * @see ConnectedThread#write(byte[])
      */
-    public void write(byte[] out) {
+    public void write(byte[] out, int type) {
     	// When writing, try to write out to all connected threads 
     	Log.d(TAG, "Start Writing..." + mConnThreads.size());
     	for (int i = 0; i < mConnThreads.size(); i++) {   		
@@ -230,7 +230,15 @@ public class BluetoothThread {
                 }
                 // Perform the write unsynchronized
                 if(r.isAlive())
-                	r.write(out);
+                	switch (type){
+                		case BtService.DATA_GAME_DATA:
+                			r.write(out);
+                		break;
+                		case BtService.DATA_STRING:
+                			r.writeGame(out);
+                		break;
+                	}
+                	
                 else
                 	r.cancel();
     		} catch (Exception e) {    			
@@ -399,6 +407,7 @@ public class BluetoothThread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private int type;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "create ConnectedThread");
@@ -421,16 +430,20 @@ public class BluetoothThread {
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
+            byte[] gameBuffer = new byte[1024*5];
             int bytes;
+            int pos = 0;
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
-
+                    System.arraycopy(buffer,0,gameBuffer,pos,bytes);
+                    pos += bytes;
+                    
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(BtService.MESSAGE_READ, bytes, -1, buffer)
+                    mHandler.obtainMessage(BtService.MESSAGE_READ, pos, type, gameBuffer)
                             .sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected cuz of IOException");
@@ -447,9 +460,20 @@ public class BluetoothThread {
         public void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
-
+                type = BtService.DATA_STRING;
                 // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(BtService.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
+            } catch (IOException e) {
+                Log.e(TAG, "Exception during write", e);
+            }
+        }
+        
+        public void writeGame(byte[] buffer) {
+            try {
+                mmOutStream.write(buffer);
+                type = BtService.DATA_GAME_DATA;
+                // Share the sent message back to the UI Activity
+                mHandler.obtainMessage(BtService.MESSAGE_WRITE_GAME, -1, -1, buffer).sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }

@@ -36,6 +36,11 @@ public class BtService extends Service {
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_FAILED = 5;
+    public static final int MESSAGE_WRITE_GAME = 6;
+
+    public static final int DATA_STRING = 1;
+    public static final int DATA_GAME_DATA = 2;
+
 
     public static final String ACTION_CONNECTED = "connected";
     
@@ -52,6 +57,8 @@ public class BtService extends Service {
     private final IBinder mBinder = new LocalBinder();
     public boolean isClient = false;
     public boolean isConnected = false;
+ // String buffer for outgoing messages
+    private StringBuffer mOutStringBuffer;
     
 
     public void sendMessage(String message) {
@@ -65,10 +72,13 @@ public class BtService extends Service {
         // Check that there's actually something to send
         if (message.length() > 0) {
             // Get the message bytes and tell the BluetoothChatService to write
+        	
             byte[] send = message.getBytes();
-            btThread.write(send);
+            btThread.write(send, DATA_STRING);
+            mOutStringBuffer.setLength(0);
         }
     }
+    
     
     public void sendGameData(byte [] gameData){
 		if(btThread != null){
@@ -81,7 +91,7 @@ public class BtService extends Service {
 		    // Check that there's actually something to send
 		    if (gameData.length > 0) {
 		        // Get the message bytes and tell the BluetoothChatService to write
-		    	btThread.write(gameData);
+		    	btThread.write(gameData, DATA_GAME_DATA);
 		
 		        // Reset out string buffer to zero 
 		        //mOutStringBuffer.setLength(0);
@@ -109,6 +119,7 @@ public class BtService extends Service {
     private void StartBTService(){
     	Log.d(TAG, "Setting Up Bluetooth");
     	btThread = new BluetoothThread(this, BTHandler);
+    	mOutStringBuffer = new StringBuffer("");
     	if (btThread.getState() == BluetoothThread.STATE_NONE) {
     		btThread.start();
         }
@@ -120,9 +131,11 @@ public class BtService extends Service {
         sendBroadcast(broadcastIntent);
     }
     
-    private void writeGameData(byte[] gameData){
+    private void writeGameData(byte[] gameData, int size){
+    	byte[] data = new byte[size];
+    	System.arraycopy(gameData, 0, data, 0, size);
     	Intent broadcastIntent = new Intent(ResponseReceiver.MSG_GAME_DATA);
-        broadcastIntent.putExtra("GameData", gameData);
+        broadcastIntent.putExtra("GameData", data);
         sendBroadcast(broadcastIntent);
     }
     
@@ -155,12 +168,17 @@ public class BtService extends Service {
                 break;
             case MESSAGE_READ:           	
                 byte[] readBuf = (byte[]) msg.obj;
+                Log.i(TAG, "READ BYTE ARRAY SIZE: " + msg.arg1);
                 // construct a string from the valid bytes in the buffer
                 //String message = new String(readBuf, 0, msg.arg1);
                 /*if (readMessage.length() > 0) {
                     mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
-                }*/    
-                writeGameData(readBuf);
+                }*/
+                switch(msg.arg2){
+                	case DATA_GAME_DATA:
+                		writeGameData(readBuf, msg.arg1);
+                	break;
+                }              
                 break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name

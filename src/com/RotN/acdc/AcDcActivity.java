@@ -298,7 +298,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                     try {               	
                     	ObjectOutputStream stream = new ObjectOutputStream(byteStream);
 						stream.writeObject(acdc);
-						mService.sendGameData(byteStream.toByteArray());
+						byte[] gameData = byteStream.toByteArray();
+						Log.d(TAG, "Game Data Length" + gameData.length);
+						mService.sendGameData(gameData);
 					} catch (IOException e) {
 						Log.d(TAG, "Unable to send game data");
 						// TODO Auto-generated catch block
@@ -481,14 +483,31 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 				}
 		    } else if (intent.getAction().equals(MSG_GAME_DATA)) {
 		    	byte[] data = intent.getExtras().getByteArray("GameData");
-		    	recieveGameData(data);		    	
+		    	
+		    	receiveGameData(data);		    	
 		    }
 	    }
 	}
 	
-	private void recieveGameData(byte[] data){
+	private void receiveGameData(byte[] data){
 		Log.d(TAG, "Recieved Game Data");
-		// TODO Convert into TheGame object and update the game board
+		Log.d(TAG, "Game Data Length" + data.length);
+		Toast.makeText(getApplicationContext(), "Wooo gotta move", Toast.LENGTH_SHORT).show();
+		ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
+		ObjectInputStream objIn;
+		try {
+			objIn = new ObjectInputStream(byteStream);
+			TheGame gammonData = (TheGame) objIn.readObject();
+		} catch (StreamCorruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+        } catch (IOException e) {
+        	// TODO Auto-generated catch block
+        	e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+        	// TODO Auto-generated catch block
+        	e.printStackTrace();
+        }      
 	}
 	
 	private ServiceConnection mConnection = new ServiceConnection() {
