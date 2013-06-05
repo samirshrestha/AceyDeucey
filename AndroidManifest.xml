@@ -47,7 +47,7 @@
                   android:label="@string/select_device"
                   android:configChanges="orientation|keyboardHidden" />
         <service
-            android:name="com.RotN.acdc.BtService"
+            android:name="com.RotN.acdc.bluetooth.BtService"
             android:exported="false"/>
     </application>
     

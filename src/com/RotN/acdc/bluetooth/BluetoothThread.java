@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.RotN.acdc.logic;
+package com.RotN.acdc.bluetooth;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +22,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import com.RotN.acdc.BtService;
-import com.RotN.acdc.bluetooth.Constants;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -153,6 +151,7 @@ public class BluetoothThread {
                 mConnectThread.start();
                 setState(STATE_CONNECTING);
         	} catch (Exception e) {
+        		if (D) Log.d(TAG, "Couldn't connect to device: " + device);
         	}
         //}
     }

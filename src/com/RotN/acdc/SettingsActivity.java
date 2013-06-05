@@ -1,15 +1,20 @@
 package com.RotN.acdc;
 
+import com.RotN.acdc.bluetooth.BluetoothThread;
+import com.RotN.acdc.bluetooth.BtService;
 import com.RotN.acdc.bluetooth.Constants;
-import com.RotN.acdc.logic.BluetoothThread;
+import com.RotN.acdc.bluetooth.BtService.LocalBinder;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -24,14 +29,10 @@ public class SettingsActivity extends Activity {
     private RadioButton red;
     private RadioButton white; 
     private RelativeLayout connection;
-    private static final int REQUEST_ENABLE_BT = 2;
-    private static final int SINGLE_PLAYER = 1;
-    private static final int MULTI_PLAYER = 2;
-    private static final int MULTI_PLAYER_BT = 3;
-    public static final String NEW_GAME_KEY = "NewGame";
-    public static final String PLAY_MODE = "PlayMode";
     private SharedPreferences storage;
     private BluetoothThread mChatService = null;
+    private boolean mBound = false;
+    private BtService mService;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,14 +69,14 @@ public class SettingsActivity extends Activity {
 	            	red.setEnabled(true);
             		white.setEnabled(true);
             		connection.setVisibility(View.GONE);
-            		playMode = SINGLE_PLAYER;
+            		playMode = Constants.SINGLE_PLAYER;
 	            }
 	            break;
 	        case R.id.radio_multi:
 	            if (checked){
 	            	red.setEnabled(false);
 	            	white.setEnabled(false);
-	            	playMode = MULTI_PLAYER;
+	            	playMode = Constants.MULTI_PLAYER;
 	            	connection.setVisibility(View.GONE);
 	            }          
 	            break;
@@ -83,7 +84,7 @@ public class SettingsActivity extends Activity {
 	            if (checked){
 	            	red.setEnabled(true);
 	            	white.setEnabled(true);
-	            	playMode = MULTI_PLAYER_BT;
+	            	playMode = Constants.MULTI_PLAYER_BT;
 	            	if (mChatService.getState() == BluetoothThread.STATE_CONNECTED) {
 	            		TextView deviceText = (TextView) findViewById(R.id.connected_to);
 	            		deviceText.setText(BluetoothThread.connectedDeviceName);	
@@ -100,9 +101,11 @@ public class SettingsActivity extends Activity {
 		intent.putExtra("redPlayerIsHuman", red.isChecked());
 		
 		
-		storage.edit().putBoolean(NEW_GAME_KEY, true).commit();
-		storage.edit().putInt(PLAY_MODE, playMode).commit();
+		storage.edit().putBoolean(Constants.NEW_GAME_KEY, true).commit();
+		storage.edit().putInt(Constants.PLAY_MODE, playMode).commit();
 		storage.edit().remove(DeviceListActivity.EXTRA_DEVICE_ADDRESS).commit();
+		if(mBound)
+			mService.playMode = playMode;
 		if(playMode == 1){
 			intent.putExtra("whitePlayerIsHuman", true);
 			intent.putExtra("redPlayerIsHuman", true);
@@ -110,7 +113,7 @@ public class SettingsActivity extends Activity {
 		} else if(playMode == 2){
 			if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
 	            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);	        
+	            startActivityForResult(enableIntent, Constants.REQUEST_ENABLE_BT);	        
 	        } else {
 	        	startActivity(intent);
 	        }
@@ -171,7 +174,7 @@ public class SettingsActivity extends Activity {
 	 public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	        Log.d(TAG, "onActivityResult " + resultCode);
 	        switch (requestCode) {
-	        case REQUEST_ENABLE_BT:
+	        case Constants.REQUEST_ENABLE_BT:
 	            // When the request to enable Bluetooth returns
 	            if (resultCode == Activity.RESULT_OK) {
 	            	Intent intent = new Intent(this, AcDcActivity.class);
@@ -188,4 +191,20 @@ public class SettingsActivity extends Activity {
 	        }
 	    }
 
+	 private ServiceConnection mConnection = new ServiceConnection() {
+
+	        @Override
+	        public void onServiceDisconnected(ComponentName name) {
+	            mService = null;
+	            mBound = false;
+	        }
+
+	        @Override
+	        public void onServiceConnected(ComponentName name, IBinder service) {
+	            LocalBinder binder = (LocalBinder) service;
+	            mService = binder.getService();
+	            mBound = true;
+	        }
+		};
+		
 }

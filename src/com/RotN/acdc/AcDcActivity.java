@@ -8,9 +8,11 @@ import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 
-import com.RotN.acdc.BtService.LocalBinder;
+import com.RotN.acdc.bluetooth.BtService;
+import com.RotN.acdc.bluetooth.BtServiceConnector;
 import com.RotN.acdc.bluetooth.Constants;
 import com.RotN.acdc.bluetooth.ReceivedDataParser;
+import com.RotN.acdc.bluetooth.BtService.LocalBinder;
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
@@ -20,9 +22,7 @@ import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -66,38 +66,32 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		
     // Message types sent from the BluetoothChatService Handler
     private int playMode;
-    private boolean mBound = false;
-    private BtService mService;
-    
+    private ResponseReceiver receiver;
+    private BtServiceConnector connecter = new BtServiceConnector();
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
-
-    // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE = 1;
-    private static final int REQUEST_ENABLE_BT = 2;
-    private static final int ENABLE_BT_FOR_FIND_GAME = 3;
-
-    
    
-    private ResponseReceiver receiver;
+
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	
     	requestWindowFeature(Window.FEATURE_NO_TITLE);    	
     	super.onCreate(savedInstanceState);
     	Log.e(TAG, "CREATING ACDC ACTIVITY");
 
     	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);   	
     	playMode = storage.getInt(Constants.PLAY_MODE, Constants.EXISTING_GAME);
+   	
     	if(playMode == Constants.MULTI_PLAYER_BT){
     		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
                 Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+                startActivityForResult(enableIntent, Constants.REQUEST_ENABLE_BT);
             }
     	}
     	
-        bindService(new Intent(this, BtService.class), mConnection,
+        bindService(new Intent(this, BtService.class), connecter.btServiceConnection,
                 Context.BIND_AUTO_CREATE);
     }
     
@@ -165,10 +159,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        	storage.edit().putInt(Constants.PLAY_MODE, Constants.MULTI_PLAYER_BT).commit();
         		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
                     Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableIntent, ENABLE_BT_FOR_FIND_GAME);
+                    startActivityForResult(enableIntent, Constants.ENABLE_BT_FOR_FIND_GAME);
                 } else {
                 	Intent serverIntent = new Intent(this, DeviceListActivity.class);
-    	            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+    	            startActivityForResult(serverIntent, Constants.REQUEST_CONNECT_DEVICE);
                 }	        	 
 	            return true;
 	        case R.id.directions:
@@ -273,10 +267,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                     		board.render();
                     	}
                 	}
-                } else if ( (mService.isConnected) && 
-                		(beerGammon.getButtonState() == ButtonState.WHITE_ROLL || 
-                		beerGammon.getButtonState() == ButtonState.RED_ROLL) ) {               	
-                	
+                } else if ( (connecter.btService.playMode == Constants.MULTI_PLAYER_BT) && 
+                	(beerGammon.getButtonState() == ButtonState.RED_ROLL || beerGammon.getButtonState() == ButtonState.WHITE_ROLL)) {  
+                	//FINISHED TURN!!
                 	sendGameData();
                 } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
                 		beerGammon.getGammonData().blackHumanPlayer == false) || 
@@ -377,16 +370,14 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private void sendGameData() {
 		TheGame acdc = beerGammon.getGammonData();
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-		try {               	
+		try {    			
 			ObjectOutputStream stream = new ObjectOutputStream(byteStream);
-			stream.writeObject(acdc);
+			stream.writeObject(acdc); //Causes NotSerializableException on clear dice
 			byte[] gameData = byteStream.toByteArray();
-			Log.d(TAG, "Game Data Length" + gameData.length);
-			mService.sendGameData(gameData);
+			connecter.btService.sendGameData(gameData);
 			EndTurn();
 		} catch (IOException e) {
 			Log.d(TAG, "Unable to send game data");
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -407,36 +398,32 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
 				startBTGame(R.string.waiting_for_join);
 			}
-	        
-		}		
+		} 
 	}
 	
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
-        case REQUEST_CONNECT_DEVICE:
-        	
-        	break;
-        case REQUEST_ENABLE_BT:
-            if (resultCode == Activity.RESULT_OK) {      	
-            	startBTGame(R.string.waiting_for_join);
-            } else {
-                // User did not enable Bluetooth or an error occured
-                Log.d(TAG, "BT not enabled");
-                Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
-                finish();
-            }
-            break;
-        case ENABLE_BT_FOR_FIND_GAME:
-        	if (resultCode == Activity.RESULT_OK) {
-	        	Intent serverIntent = new Intent(this, DeviceListActivity.class);
-	            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
-        	} else {
-        		//ADD NEW MESSAGING
-                Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
-                finish();
-        	}
-        	break;
+	        case Constants.REQUEST_ENABLE_BT:
+	            if (resultCode == Activity.RESULT_OK) {      	
+	            	startBTGame(R.string.waiting_for_join);
+	            } else {
+	                // User did not enable Bluetooth or an error occured
+	                Log.d(TAG, "BT not enabled");
+	                Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
+	                finish();
+	            }
+	            break;
+	        case Constants.ENABLE_BT_FOR_FIND_GAME:
+	        	if (resultCode == Activity.RESULT_OK) {
+		        	Intent serverIntent = new Intent(this, DeviceListActivity.class);
+		            startActivityForResult(serverIntent, Constants.REQUEST_CONNECT_DEVICE);
+	        	} else {
+	        		//ADD NEW MESSAGING
+	                Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
+	                finish();
+	        	}
+	        	break;
         }
     }
 
@@ -457,16 +444,12 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	}
 	
 	private void RegisterReciever(){
-    	//if (receiver == null) {
-			receiver = new ResponseReceiver();
-	    	IntentFilter filter = new IntentFilter();
-	    	filter.addAction(ResponseReceiver.MSG_CONNECTED);
-	    	filter.addAction(ResponseReceiver.MSG_RECEIVED);
-	    	filter.addAction(ResponseReceiver.MSG_GAME_REQUEST);
-	        receiver = new ResponseReceiver();
-	        registerReceiver(receiver, filter);
-    	//}
-    	
+		receiver = new ResponseReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ResponseReceiver.MSG_CONNECTED);
+		filter.addAction(ResponseReceiver.MSG_RECEIVED);
+		filter.addAction(ResponseReceiver.MSG_GAME_REQUEST);
+		registerReceiver(receiver, filter);   	
     }
 
 	public class ResponseReceiver extends BroadcastReceiver {
@@ -481,7 +464,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 			if (intent.getAction().equals(MSG_CONNECTED)) {
 				String message = intent.getExtras().getString("ConnectedTo");
 				Toast.makeText(getApplicationContext(), "Connected To: " + message, Toast.LENGTH_SHORT).show();
-				if(mService.isClient){
+				if(connecter.btService.isClient){
 					EndTurn();
 				} else {
 					gameMessage = (TextView) findViewById(R.id.game_message);		       
@@ -550,27 +533,13 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         } 	
 	}
 	
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-            mBound = false;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LocalBinder binder = (LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-	};
 	
 	private void doUnbindService() {
-	    if (mBound) {
+	    if (connecter.isBound) {
+	    	Log.d(TAG, "UNBIND SERVICE");
 	        // Detach our existing connection.
-	        unbindService(mConnection);
-	        mBound = false;
+	        unbindService(connecter.btServiceConnection);
+	        connecter.isBound = false;
 	    }
 	}
 

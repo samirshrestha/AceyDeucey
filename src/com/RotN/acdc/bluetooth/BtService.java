@@ -1,10 +1,10 @@
-package com.RotN.acdc;
+package com.RotN.acdc.bluetooth;
 
 import java.nio.ByteBuffer;
 
+import com.RotN.acdc.R;
 import com.RotN.acdc.AcDcActivity.ResponseReceiver;
-import com.RotN.acdc.bluetooth.Constants;
-import com.RotN.acdc.logic.BluetoothThread;
+import com.RotN.acdc.R.string;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -51,6 +51,7 @@ public class BtService extends Service {
     private final IBinder mBinder = new LocalBinder();
     public boolean isClient = false;
     public boolean isConnected = false;
+    public int playMode;
 
 
     public void sendMessage(String message) {
@@ -105,6 +106,7 @@ public class BtService extends Service {
     	Log.e(TAG, "MAC Address: " + macAddress);
     	if(!isConnected){
 	        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(macAddress);
+	        
 	        // Attempt to connect to the device
 	        if (btThread == null) {
 	        	StartBTService();	       
@@ -155,6 +157,7 @@ public class BtService extends Service {
                 case BluetoothThread.STATE_CONNECTED:
                 	SendConnectedToMessage(deviceName);
                 	isConnected = true;
+                	playMode = Constants.MULTI_PLAYER_BT;
                 	if(!isClient){
                 		//TODO send game data
                 		requestGameData();
@@ -212,7 +215,7 @@ public class BtService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        BtService getService() {
+        public BtService getService() {
             // Return this instance of LocalService so clients can call public methods
             return BtService.this;
         }

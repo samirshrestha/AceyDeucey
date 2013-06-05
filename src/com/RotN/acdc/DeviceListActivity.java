@@ -18,11 +18,10 @@ package com.RotN.acdc;
 
 import java.util.Set;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-import java.lang.Runnable;
 
-import com.RotN.acdc.BtService.LocalBinder;
+import com.RotN.acdc.bluetooth.BtService;
+import com.RotN.acdc.bluetooth.BtServiceConnector;
+import com.RotN.acdc.bluetooth.BtService.LocalBinder;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -37,9 +36,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -60,20 +56,19 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 public class DeviceListActivity extends Activity {
     // Debugging
-    private static final String TAG = "DeviceListActivity";
+    private static final String TAG = DeviceListActivity.class.getSimpleName();;
     private static final boolean D = true;
 
     // Return Intent extra
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
     private static final int MAKE_DISCOVERABLE = 300;
     // Member fields
+    private BtServiceConnector connecter = new BtServiceConnector();
     private BluetoothAdapter mBtAdapter;
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
     private Button scanButton;
-    private Button discoverableButton;
-    private boolean mBound = false;
-    private BtService mService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +84,6 @@ public class DeviceListActivity extends Activity {
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         // Initialize the button to perform device discovery
         scanButton = (Button) findViewById(R.id.button_scan);
-        discoverableButton = (Button) findViewById(R.id.button_discoverable);
         scanButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 doDiscovery();
@@ -112,7 +106,7 @@ public class DeviceListActivity extends Activity {
    
         setProgressBarIndeterminateVisibility(false);
         setTitle(R.string.select_device);
-        bindService(new Intent(this, BtService.class), mConnection,
+        bindService(new Intent(this, BtService.class), connecter.btServiceConnection,
                 Context.BIND_AUTO_CREATE);
     }
     
@@ -149,9 +143,9 @@ public class DeviceListActivity extends Activity {
     protected void onStop() {
         super.onStop();
         // Unbind from the service
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
+        if (connecter.isBound) {
+            unbindService(connecter.btServiceConnection);
+            connecter.isBound = false;
         }
     }
     
@@ -216,15 +210,12 @@ public class DeviceListActivity extends Activity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);  
-            
-            if (mBound){
-            	mService.connectToDevice(address);
-            }         
-            
-            
-            // Set result and finish this Activity
-            Intent intent = new Intent();            
-            setResult(Activity.RESULT_OK, intent);
+
+            if (connecter.isBound){
+            	connecter.btService.connectToDevice(address);           	
+            }        
+            Intent intent = new Intent();
+			setResult(Activity.RESULT_OK, intent);
             finish();
         }
     };
@@ -280,22 +271,7 @@ public class DeviceListActivity extends Activity {
         }
     }
     
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-            mBound = false;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LocalBinder binder = (LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-            
-        }
-	};
+	
 }
 
     
