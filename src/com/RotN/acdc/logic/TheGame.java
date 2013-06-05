@@ -18,7 +18,7 @@ public class TheGame implements Serializable {
 	
 	public enum ButtonState {
 		ROLL_FOR_TURN(), RED_ROLL(), WHITE_ROLL(), TURN_FINISHED(), 
-		WHITE_WON(), BLACK_WON();
+		WHITE_WON(), BLACK_WON(), MAKE_DISCOVERABLE();
 		
 		private ButtonState() {
 		}
@@ -38,12 +38,6 @@ public class TheGame implements Serializable {
 	public boolean whiteHumanPlayer = false;
 	public boolean blackHumanPlayer = true;	
 	public ArrayList<Move> turnMoves = new ArrayList<Move>();
-	
-	public static TheGame deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-        ObjectInputStream o = new ObjectInputStream(b);
-        return (TheGame) o.readObject();
-    }
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {

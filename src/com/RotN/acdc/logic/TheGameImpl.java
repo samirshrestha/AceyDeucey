@@ -860,6 +860,9 @@ public class TheGameImpl {
 		case TURN_FINISHED:
 			nextTurn();
 			break;
+		case MAKE_DISCOVERABLE:
+			
+			break;
 		default:
 			initializeGame();
 			break;

@@ -1,5 +1,6 @@
 package com.RotN.acdc;
 
+import com.RotN.acdc.bluetooth.Constants;
 import com.RotN.acdc.logic.BluetoothThread;
 
 import android.app.Activity;
@@ -131,7 +132,7 @@ public class SettingsActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case BtService.MESSAGE_STATE_CHANGE:
+            case Constants.MESSAGE_STATE_CHANGE:
                 Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
                 case BluetoothThread.STATE_CONNECTED:
@@ -151,13 +152,13 @@ public class SettingsActivity extends Activity {
                     break;
                 }
                 break;
-            case BtService.MESSAGE_DEVICE_NAME:
+            case Constants.MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                /* mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
                 Toast.makeText(getApplicationContext(), "Connected to "
                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();*/
                 break;
-            case BtService.MESSAGE_FAILED:
+            case Constants.MESSAGE_FAILED:
             	//if (!msg.getData().getString(TOAST).contains("Unable to connect device")) {
                     /*Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
                             Toast.LENGTH_SHORT).show();     */       		

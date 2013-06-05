@@ -83,9 +83,9 @@ public class DeviceListActivity extends Activity {
         setContentView(R.layout.device_list);
 
         setResult(Activity.RESULT_CANCELED);
-        
         Intent BtService = new Intent(getBaseContext(), BtService.class);          
         startService(BtService); 
+        
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         // Initialize the button to perform device discovery
         scanButton = (Button) findViewById(R.id.button_scan);
@@ -232,7 +232,7 @@ public class DeviceListActivity extends Activity {
     private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.RotN.acdc.BtIntentService".equals(service.service.getClassName())) {
+            if ("com.RotN.acdc.BtService".equals(service.service.getClassName())) {
                 return true;
             }
         }

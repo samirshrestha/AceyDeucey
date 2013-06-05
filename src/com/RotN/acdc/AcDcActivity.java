@@ -9,6 +9,8 @@ import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 
 import com.RotN.acdc.BtService.LocalBinder;
+import com.RotN.acdc.bluetooth.Constants;
+import com.RotN.acdc.bluetooth.ReceivedDataParser;
 import com.RotN.acdc.logic.AcDcAI;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
@@ -18,7 +20,9 @@ import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -28,11 +32,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Messenger;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -56,26 +58,16 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private Button undoButton;
 	GammonBoard board;
     //private AdView mAdView;
-    
+	
 	private SharedPreferences storage;
     private boolean firstAdReceived = false;
     private final Handler refreshHandler = new Handler();
 	private final Runnable refreshRunnable = new RefreshRunnable();	
-	
-	
+		
     // Message types sent from the BluetoothChatService Handler
     private int playMode;
     private boolean mBound = false;
     private BtService mService;
-    
-    //Play Mode
-    public static final String NEW_GAME_KEY = "NewGame";
-    public static final String PLAY_MODE = "PlayMode";
-    private static final int EXISTING_GAME = 0;
-    private static final int SINGLE_PLAYER = 1;
-    private static final int MULTI_PLAYER = 2;
-    private static final int MULTI_PLAYER_BT = 3;
-    public static String EXTRA_DEVICE_ADDRESS = "device_address";
     
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
@@ -85,7 +77,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int ENABLE_BT_FOR_FIND_GAME = 3;
-    private boolean isBTEnabled = false;
 
     
    
@@ -98,8 +89,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     	Log.e(TAG, "CREATING ACDC ACTIVITY");
 
     	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);   	
-    	playMode = storage.getInt(PLAY_MODE, EXISTING_GAME);
-    	if(playMode == MULTI_PLAYER_BT){
+    	playMode = storage.getInt(Constants.PLAY_MODE, Constants.EXISTING_GAME);
+    	if(playMode == Constants.MULTI_PLAYER_BT){
     		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
                 Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
@@ -110,19 +101,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 Context.BIND_AUTO_CREATE);
     }
     
-    private void RegisterReciever(){
-    	//if (receiver == null) {
-			receiver = new ResponseReceiver();
-	    	IntentFilter filter = new IntentFilter();
-	    	filter.addAction(ResponseReceiver.MSG_CONNECTED);
-	    	filter.addAction(ResponseReceiver.MSG_GAME_DATA);
-	    	filter.addAction(ResponseReceiver.MSG_MOVE);
-	        receiver = new ResponseReceiver();
-	        registerReceiver(receiver, filter);
-    	//}
-    	
-    }
-    
+      
    	@Override
 	protected void onStop() {
    		super.onStop();
@@ -183,7 +162,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        	board.render();
 	        	return true;
 	        case R.id.bluetoothMode:
-	        	storage.edit().putInt(PLAY_MODE, MULTI_PLAYER_BT).commit();
+	        	storage.edit().putInt(Constants.PLAY_MODE, Constants.MULTI_PLAYER_BT).commit();
         		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
                     Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableIntent, ENABLE_BT_FOR_FIND_GAME);
@@ -228,6 +207,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		case BLACK_WON:
 			buttonText = getText(R.string.red_won).toString();
 			break;
+		case MAKE_DISCOVERABLE:
+			buttonText = getText(R.string.discoverable).toString();
+			break;
 		}
 		
 		return buttonText;
@@ -242,10 +224,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         AdRequest adRequest = new AdRequest();
         mAdView.loadAd(adRequest);*/
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
-        boolean isNewGame = storage.getBoolean(NEW_GAME_KEY, false);   
+        boolean isNewGame = storage.getBoolean(Constants.NEW_GAME_KEY, false);   
         
         if(isNewGame){
-        	storage.edit().putBoolean(NEW_GAME_KEY, false).commit();
+        	storage.edit().putBoolean(Constants.NEW_GAME_KEY, false).commit();
 	    	startNewGame();			    		   		
         } else {
         	Log.d(TAG, "Loading Game");
@@ -261,8 +243,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         actionButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 beerGammon.buttonPushed();
-                board.render();
-                if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+                board.render();              
+                if(beerGammon.getButtonState() == ButtonState.MAKE_DISCOVERABLE){
+                	ensureDiscoverable();
+                } else if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
                 	actionButton.setEnabled(beerGammon.canMove() == false);
                 	if ( (beerGammon.getTurn() == GameColor.BLACK && false == beerGammon.getGammonData().blackHumanPlayer) ||
                     		(beerGammon.getTurn() == GameColor.WHITE && false == beerGammon.getGammonData().whiteHumanPlayer) ) {
@@ -289,25 +273,11 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                     		board.render();
                     	}
                 	}
-                } else if ( (MULTI_PLAYER_BT == playMode) && 
+                } else if ( (mService.isConnected) && 
                 		(beerGammon.getButtonState() == ButtonState.WHITE_ROLL || 
-                		beerGammon.getButtonState() == ButtonState.RED_ROLL) ) {
+                		beerGammon.getButtonState() == ButtonState.RED_ROLL) ) {               	
                 	
-                	TheGame acdc = beerGammon.getGammonData();
-                	ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    try {               	
-                    	ObjectOutputStream stream = new ObjectOutputStream(byteStream);
-						stream.writeObject(acdc);
-						byte[] gameData = byteStream.toByteArray();
-						Log.d(TAG, "Game Data Length" + gameData.length);
-						mService.sendGameData(gameData);
-					} catch (IOException e) {
-						Log.d(TAG, "Unable to send game data");
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-                    
-                	
+                	sendGameData();
                 } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
                 		beerGammon.getGammonData().blackHumanPlayer == false) || 
                 		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
@@ -338,7 +308,10 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 		board.render();
                 	}
                 } 
+                
             }
+
+			
         });            
 
 	    undoButton = (Button) findViewById(R.id.undo_button);
@@ -400,6 +373,23 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		actionButton.setEnabled(beerGammon.canMove() == false);
 		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
 	}
+	
+	private void sendGameData() {
+		TheGame acdc = beerGammon.getGammonData();
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+		try {               	
+			ObjectOutputStream stream = new ObjectOutputStream(byteStream);
+			stream.writeObject(acdc);
+			byte[] gameData = byteStream.toByteArray();
+			Log.d(TAG, "Game Data Length" + gameData.length);
+			mService.sendGameData(gameData);
+			EndTurn();
+		} catch (IOException e) {
+			Log.d(TAG, "Unable to send game data");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public void startNewGame(){
 		Log.d(TAG, "Starting New Game...");
@@ -409,7 +399,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		beerGammon = board.getTheGame();
 		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
 		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
-		if(playMode == MULTI_PLAYER_BT){	    						
+		if(playMode == Constants.MULTI_PLAYER_BT){	
+			beerGammon.getGammonData().blackHumanPlayer = true;
+			beerGammon.getGammonData().whiteHumanPlayer = true;
             //Intent serverIntent = new Intent(this, DeviceListActivity.class);
             //startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
 			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
@@ -456,58 +448,106 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         gameMessage.setText(resourceIdForMessageText);
         gameMessage.setVisibility(View.VISIBLE);
         actionButton = (Button) findViewById(R.id.action_button);
-        actionButton.setVisibility(View.INVISIBLE);
+        actionButton.setText(R.string.discoverable);
+        beerGammon.getGammonData().buttonState = ButtonState.MAKE_DISCOVERABLE;
     }
 	
 	@Override
 	public void onDiceRoll(String event) {
 	}
+	
+	private void RegisterReciever(){
+    	//if (receiver == null) {
+			receiver = new ResponseReceiver();
+	    	IntentFilter filter = new IntentFilter();
+	    	filter.addAction(ResponseReceiver.MSG_CONNECTED);
+	    	filter.addAction(ResponseReceiver.MSG_RECEIVED);
+	    	filter.addAction(ResponseReceiver.MSG_GAME_REQUEST);
+	        receiver = new ResponseReceiver();
+	        registerReceiver(receiver, filter);
+    	//}
+    	
+    }
 
 	public class ResponseReceiver extends BroadcastReceiver {
 		public static final String MSG_CONNECTED = "com.RotN.acdc.intent.action.MESSAGE_CONNECTED";
-		public static final String MSG_MOVE = "com.RotN.acdc.intent.action.MESSAGE_MOVED";
-		public static final String MSG_GAME_DATA = "com.RotN.acdc.intent.action.MESSAGE_MOVED";
+		public static final String MSG_RECEIVED = "com.RotN.acdc.intent.action.MESSAGE_RECEIVED";
+		public static final String MSG_GAME_REQUEST = "com.RotN.acdc.intent.action.MESSAGE_GAME_REQUEST";
+	
 		@Override
 	    public void onReceive(Context context, Intent intent) {
 			Log.d(TAG, "Recieved Msg From Service");
+
 			if (intent.getAction().equals(MSG_CONNECTED)) {
 				String message = intent.getExtras().getString("ConnectedTo");
 				Toast.makeText(getApplicationContext(), "Connected To: " + message, Toast.LENGTH_SHORT).show();
 				if(mService.isClient){
-					startBTGame(R.string.opponents_turn);
+					EndTurn();
 				} else {
 					gameMessage = (TextView) findViewById(R.id.game_message);		       
 			        gameMessage.setVisibility(View.GONE);
 			        actionButton = (Button) findViewById(R.id.action_button);
+			        actionButton.setText(R.string.roll_for_turn);
 			        actionButton.setVisibility(View.VISIBLE);
 				}
-		    } else if (intent.getAction().equals(MSG_GAME_DATA)) {
-		    	byte[] data = intent.getExtras().getByteArray("GameData");
-		    	
-		    	receiveGameData(data);		    	
+		    } else if (intent.getAction().equals(MSG_RECEIVED)) {
+		    	byte[] rawData = intent.getExtras().getByteArray(BtService.BT_MESSAGE);	    	
+		    	ReceivedDataParser parser = new ReceivedDataParser(rawData);
+					
+				switch (parser.MsgType){
+					case Constants.DATA_GAME_DATA:
+						receivedGammonData(parser.Data);
+						break;
+					case Constants.DATA_PLAYER_COLOR:
+						break;
+					case Constants.DATA_STRING:
+						String writeMessage = new String(parser.Data);
+						Log.d(TAG, writeMessage);
+						Toast.makeText(getApplicationContext(), "Wooo gotta move", Toast.LENGTH_SHORT).show();
+						break;
+				}
+		    } else if (intent.getAction().equals(MSG_GAME_REQUEST)) {
+		    	Log.d(TAG, "Recieved GAME REQUEST");
+		    	beerGammon.getGammonData().buttonState = ButtonState.ROLL_FOR_TURN;
+		    	sendGameData();
 		    }
 	    }
 	}
+
+	private void StartTurn(){
+		gameMessage = (TextView) findViewById(R.id.game_message);		       
+        gameMessage.setVisibility(View.GONE);
+        actionButton = (Button) findViewById(R.id.action_button);
+        actionButton.setVisibility(View.VISIBLE);
+	}
 	
-	private void receiveGameData(byte[] data){
-		Log.d(TAG, "Recieved Game Data");
-		Log.d(TAG, "Game Data Length" + data.length);
-		Toast.makeText(getApplicationContext(), "Wooo gotta move", Toast.LENGTH_SHORT).show();
+	private void EndTurn(){
+        gameMessage = (TextView) findViewById(R.id.game_message);
+        gameMessage.setText(R.string.opponents_turn);
+        gameMessage.setVisibility(View.VISIBLE);
+        actionButton = (Button) findViewById(R.id.action_button);
+        actionButton = (Button) findViewById(R.id.action_button);
+        actionButton.setVisibility(View.INVISIBLE);
+	}
+
+	private void receivedGammonData(byte[] data){		
 		ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
 		ObjectInputStream objIn;
 		try {
+			
 			objIn = new ObjectInputStream(byteStream);
 			TheGame gammonData = (TheGame) objIn.readObject();
+			Log.d(TAG, "Recieved Game Data. Length: "+ data.length);
+			beerGammon.setGammonData(gammonData);
+			StartTurn();
+			
 		} catch (StreamCorruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.d(TAG, "Recieved StreamCorruptedException");
         } catch (IOException e) {
-        	// TODO Auto-generated catch block
-        	e.printStackTrace();
+			Log.d(TAG, "Not Game Data. Recieved IOException. Ignore.");
         } catch (ClassNotFoundException e) {
-        	// TODO Auto-generated catch block
-        	e.printStackTrace();
-        }      
+			Log.d(TAG, "Recieved ClassNotFoundException");
+        } 	
 	}
 	
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -534,4 +574,14 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	    }
 	}
 
+	private void ensureDiscoverable() {
+        Log.d(TAG, "ensure discoverable");
+        if (BluetoothAdapter.getDefaultAdapter().getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+        } else {
+        	Toast.makeText(this, R.string.already_discoverable, Toast.LENGTH_SHORT).show();
+        }
+    }
 }

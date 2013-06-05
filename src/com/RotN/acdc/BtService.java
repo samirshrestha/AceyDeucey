@@ -1,6 +1,9 @@
 package com.RotN.acdc;
 
+import java.nio.ByteBuffer;
+
 import com.RotN.acdc.AcDcActivity.ResponseReceiver;
+import com.RotN.acdc.bluetooth.Constants;
 import com.RotN.acdc.logic.BluetoothThread;
 
 import android.app.Service;
@@ -30,19 +33,10 @@ import android.widget.Toast;
 public class BtService extends Service {
 	
 	private static final String TAG = BtService.class.getSimpleName();
-    // Message types sent from the BluetoothChatService Handler
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_WRITE = 3;
-    public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_FAILED = 5;
-    public static final int MESSAGE_WRITE_GAME = 6;
-
-    public static final int DATA_STRING = 1;
-    public static final int DATA_GAME_DATA = 2;
-
-
+    
+    
     public static final String ACTION_CONNECTED = "connected";
+    public static final String BT_MESSAGE = "msg";
     
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
@@ -57,9 +51,7 @@ public class BtService extends Service {
     private final IBinder mBinder = new LocalBinder();
     public boolean isClient = false;
     public boolean isConnected = false;
- // String buffer for outgoing messages
-    private StringBuffer mOutStringBuffer;
-    
+
 
     public void sendMessage(String message) {
         // Check that we're actually connected before trying anything
@@ -73,13 +65,15 @@ public class BtService extends Service {
         if (message.length() > 0) {
             // Get the message bytes and tell the BluetoothChatService to write
         	
-            byte[] send = message.getBytes();
-            btThread.write(send, DATA_STRING);
-            mOutStringBuffer.setLength(0);
+        	byte[] type = ByteBuffer.allocate(4).putInt(Constants.DATA_STRING).array();
+            byte[] msg = message.getBytes();
+            byte[] send = new byte[type.length + msg.length];
+            System.arraycopy(type, 0, send, 0, type.length);
+            System.arraycopy(msg, 0, send, type.length, msg.length);
+            btThread.write(send);
         }
     }
-    
-    
+        
     public void sendGameData(byte [] gameData){
 		if(btThread != null){
 			Log.d(TAG, "GameData...");
@@ -90,13 +84,20 @@ public class BtService extends Service {
 		
 		    // Check that there's actually something to send
 		    if (gameData.length > 0) {
-		        // Get the message bytes and tell the BluetoothChatService to write
-		    	btThread.write(gameData, DATA_GAME_DATA);
-		
-		        // Reset out string buffer to zero 
-		        //mOutStringBuffer.setLength(0);
+		        // Get the message bytes and tell the BluetoothService to write	    	
+		    	byte[] send = mergeDataTransferObjects(Constants.DATA_GAME_DATA, gameData);
+	            btThread.write(send);
 		    }
 		}
+    }
+    
+    private byte[] mergeDataTransferObjects(int msgType, byte[] data){
+    	byte[] type = ByteBuffer.allocate(4).putInt(msgType).array();
+    	byte[] output = new byte[type.length + data.length];
+    	System.arraycopy(type, 0, output, 0, type.length);
+        System.arraycopy(data, 0, output, type.length, data.length);
+        
+        return output;
     }
  
     public void connectToDevice(String macAddress){
@@ -119,7 +120,6 @@ public class BtService extends Service {
     private void StartBTService(){
     	Log.d(TAG, "Setting Up Bluetooth");
     	btThread = new BluetoothThread(this, BTHandler);
-    	mOutStringBuffer = new StringBuffer("");
     	if (btThread.getState() == BluetoothThread.STATE_NONE) {
     		btThread.start();
         }
@@ -131,24 +131,34 @@ public class BtService extends Service {
         sendBroadcast(broadcastIntent);
     }
     
-    private void writeGameData(byte[] gameData, int size){
+    private void ReadMessage(byte[] gameData, int size){
     	byte[] data = new byte[size];
     	System.arraycopy(gameData, 0, data, 0, size);
-    	Intent broadcastIntent = new Intent(ResponseReceiver.MSG_GAME_DATA);
-        broadcastIntent.putExtra("GameData", data);
+    	Intent broadcastIntent = new Intent(ResponseReceiver.MSG_RECEIVED);
+        broadcastIntent.putExtra(BT_MESSAGE, data);
         sendBroadcast(broadcastIntent);
     }
+    
+	private void requestGameData() {
+		Intent broadcastIntent = new Intent(ResponseReceiver.MSG_GAME_REQUEST);
+        broadcastIntent.putExtra(BT_MESSAGE, true);
+        sendBroadcast(broadcastIntent);		
+	}
     
 	private final Handler BTHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case MESSAGE_STATE_CHANGE:
+            case Constants.MESSAGE_STATE_CHANGE:
                 Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
                 case BluetoothThread.STATE_CONNECTED:
                 	SendConnectedToMessage(deviceName);
                 	isConnected = true;
+                	if(!isClient){
+                		//TODO send game data
+                		requestGameData();
+                	}
                     break;
                 case BluetoothThread.STATE_CONNECTING:
                 	
@@ -159,33 +169,24 @@ public class BtService extends Service {
                     break;
                 }
                 break;
-            case MESSAGE_WRITE:
+            case Constants.MESSAGE_WRITE:
                 byte[] writeBuf = (byte[]) msg.obj;
                 // construct a string from the buffer
                 //String writeMessage = new String(writeBuf);
                 //mConversationArrayAdapter.add("Me:  " + writeMessage);
                 
                 break;
-            case MESSAGE_READ:           	
+            case Constants.MESSAGE_READ:           	
                 byte[] readBuf = (byte[]) msg.obj;
                 Log.i(TAG, "READ BYTE ARRAY SIZE: " + msg.arg1);
-                // construct a string from the valid bytes in the buffer
-                //String message = new String(readBuf, 0, msg.arg1);
-                /*if (readMessage.length() > 0) {
-                    mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
-                }*/
-                switch(msg.arg2){
-                	case DATA_GAME_DATA:
-                		writeGameData(readBuf, msg.arg1);
-                	break;
-                }              
+                ReadMessage(readBuf, msg.arg1);                  
                 break;
-            case MESSAGE_DEVICE_NAME:
+            case Constants.MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 deviceName = msg.getData().getString(DEVICE_NAME);
                 break;
 
-            case MESSAGE_FAILED:
+            case Constants.MESSAGE_FAILED:
             	isClient = false;
             	isConnected = false;
             	//storage.edit().putBoolean("isConnected", false).commit();

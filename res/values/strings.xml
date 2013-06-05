@@ -69,7 +69,7 @@
     <string name="white">White</string>
     <string name="red">Red</string>
     <string name="find_game">Find Game</string>
-    <string name="opponents_turn">Waiting for opponent\'s move &#8230;</string>
+    <string name="opponents_turn">Opponent\'s move &#8230;</string>
     <string name="title_activity_find_game">Find game to join on another device </string>
     <string name="already_discoverable">This device is discoverable to other devices.</string>
     <string name="waiting_for_join">Waiting for another player to join &#8230;</string>
@@ -89,6 +89,6 @@
     <string name="button_scan">Scan for devices</string>
     <string name="connect">Connect a device</string>
     <string name="disconnect">Disconnect</string>
-    <string name="discoverable">Make discoverable</string>
+    <string name="discoverable">Make Discoverable</string>
     <string name="chat">Chat</string>
 </resources>
