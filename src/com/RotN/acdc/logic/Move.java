@@ -1,9 +1,15 @@
 package com.RotN.acdc.logic;
 
+import java.io.Serializable;
+
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 
-public class Move {
+public class Move implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	GameColor color;
 	BoardPositions origSpot;
 	BoardPositions newSpot;

@@ -45,25 +45,13 @@ public class TheGameImpl {
 	
 	private List<GammonEventHandler> handlers = new ArrayList<GammonEventHandler>(); 
 	
-	private MoveEventHandler moveHandler;
-	
 	public void addListener(GammonEventHandler handler) {
 		handlers.add(handler);
-	}
-	
-	public void setMoveListener(MoveEventHandler handler) {
-		moveHandler = handler;
 	}
 	
 	private void onBoardUpdate(){
 		for (GammonEventHandler listener : handlers) {
 			listener.onBoardUpdate();
-		}
-	}
-	
-	private void onPieceMoved(Move move) {
-		if (moveHandler != null) {
-			moveHandler.onPieceMoved(move);
 		}
 	}
 	

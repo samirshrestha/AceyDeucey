@@ -21,21 +21,14 @@ import java.util.Set;
 
 import com.RotN.acdc.bluetooth.BtService;
 import com.RotN.acdc.bluetooth.BtServiceConnector;
-import com.RotN.acdc.bluetooth.BtService.LocalBinder;
-
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -219,16 +212,7 @@ public class DeviceListActivity extends Activity {
             finish();
         }
     };
-
-    private boolean isMyServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.RotN.acdc.BtService".equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+    
     // The BroadcastReceiver that listens for discovered devices and
     // changes the title when discovery is finished
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
