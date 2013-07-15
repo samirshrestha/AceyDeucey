@@ -20,6 +20,15 @@ public class TheGame implements Serializable {
 		private ButtonState() {
 		}
 	}
+	
+	public enum PlayerType {
+		HUMAN(), COMPUTER(), BT_HUMAN();
+		
+		private PlayerType() {
+			
+		}
+	}
+	
 	public ArrayList<CheckerContainer> containers;
 	public GameColor turn;
 	public int whiteDie1;
@@ -32,8 +41,8 @@ public class TheGame implements Serializable {
 	public boolean whiteMovingIn, blackMovingIn, allBlackPiecesOut, allWhitePiecesOut;
 	public ButtonState buttonState;
 	public int savedStatesCount;
-	public boolean whiteHumanPlayer = false;
-	public boolean blackHumanPlayer = true;	
+	public PlayerType whitePlayer;
+	public PlayerType blackPlayer;	
 	public ArrayList<Move> turnMoves = new ArrayList<Move>();
 	
 	@SuppressLint("UseSparseArrays")
@@ -120,8 +129,8 @@ public class TheGame implements Serializable {
 		this.allWhitePiecesOut = rhs.allWhitePiecesOut;
 		this.buttonState = rhs.buttonState;
 		this.savedStatesCount = rhs.savedStatesCount;
-		this.whiteHumanPlayer = rhs.whiteHumanPlayer;
-		this.blackHumanPlayer = rhs.blackHumanPlayer;
+		this.whitePlayer = rhs.whitePlayer;
+		this.blackPlayer = rhs.blackPlayer;
 	}
 }
 

@@ -15,6 +15,7 @@ import android.util.Log;
 import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.TheGame.ButtonState;
+import com.RotN.acdc.logic.TheGame.PlayerType;
 
 public class TheGameImpl {
 	Context fileContext;	
@@ -92,6 +93,8 @@ public class TheGameImpl {
 		gammon.savedStatesCount = 0;
 				
 		gammon.buttonState = ButtonState.ROLL_FOR_TURN;
+		gammon.blackPlayer = PlayerType.HUMAN;
+		gammon.whitePlayer = PlayerType.COMPUTER;
 		
 		//testing
 		/*gammon.containers.get(BoardPositions.BLACK_BUNKER.getIndex()).setBlackCheckerCount(9);
@@ -906,6 +909,24 @@ public class TheGameImpl {
 			// for testing
 			//gammon.blackDie1 = 2;
 			//gammon.blackDie2 = 1;
+		} else {
+			gammon.whiteDie1 = rollDie();
+			gammon.whiteDie2 = rollDie();
+			
+			// for testing
+			//gammon.whiteDie1 = 1;
+			//gammon.whiteDie2 = 2;
+		}
+		
+		calculateMovesRemaining();
+		
+		gammon.buttonState = ButtonState.TURN_FINISHED;
+		this.onBoardUpdate();
+	}
+	
+	public void calculateMovesRemaining() {
+		gammon.movesRemaining.clear();
+		if (gammon.turn == GameColor.BLACK) {
 			
 			gammon.movesRemaining.add(gammon.blackDie1);
 			gammon.movesRemaining.add(gammon.blackDie2);
@@ -922,12 +943,6 @@ public class TheGameImpl {
 				analyticEvent("AcDc");
 			}
 		} else {
-			gammon.whiteDie1 = rollDie();
-			gammon.whiteDie2 = rollDie();
-			
-			// for testing
-			//gammon.whiteDie1 = 1;
-			//gammon.whiteDie2 = 2;
 			
 			gammon.movesRemaining.add(gammon.whiteDie1);
 			gammon.movesRemaining.add(gammon.whiteDie2);
@@ -944,8 +959,6 @@ public class TheGameImpl {
 				analyticEvent("AcDc");
 			}
 		}
-		gammon.buttonState = ButtonState.TURN_FINISHED;
-		this.onBoardUpdate();
 	}
 	
 	private ArrayList<Integer> aceyDeuceyChosen(int adMoveLength, ArrayList<Integer> movesAvailable) {

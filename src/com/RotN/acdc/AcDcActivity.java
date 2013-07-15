@@ -19,6 +19,7 @@ import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGame;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.logic.TheGame.ButtonState;
+import com.RotN.acdc.logic.TheGame.PlayerType;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -232,75 +233,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         actionButton.setText(getButtonText());
         actionButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                beerGammon.buttonPushed();
-                board.render();              
-                if(beerGammon.getButtonState() == ButtonState.MAKE_DISCOVERABLE){
-                	ensureDiscoverable();
-                } else if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
-                	actionButton.setEnabled(beerGammon.canMove() == false);
-                	if ( (beerGammon.getTurn() == GameColor.BLACK && false == beerGammon.getGammonData().blackHumanPlayer) ||
-                    		(beerGammon.getTurn() == GameColor.WHITE && false == beerGammon.getGammonData().whiteHumanPlayer) ) {
-                    	AcDcAI ai = new AcDcAI();
-                    	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
-                    	for (Move move : moves) {
-                    		ArrayList<Move> moveToDraw = new ArrayList<Move>();
-                    		moveToDraw.add(move);
-                    		board.animateMoves(moveToDraw);
-                    		if (move.getColor() == beerGammon.getTurn()) {
-                    			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
-                    		}
-                			board.clearAnimatedPieces();
-                			board.clearFloaters();
-                			board.render();
-                			
-                			if (beerGammon.canMove() == false) {
-                				break;
-                			}
-                    	}
-                    	
-                    	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
-                    		beerGammon.buttonPushed();
-                    		board.render();
-                    	}
-                	}
-                } else if ( (connecter.btService.playMode == Constants.MULTI_PLAYER_BT) && 
-                	(beerGammon.getButtonState() == ButtonState.RED_ROLL || beerGammon.getButtonState() == ButtonState.WHITE_ROLL)) {  
-                	//FINISHED TURN!!
-                	sendGameData();
-                } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
-                		beerGammon.getGammonData().blackHumanPlayer == false) || 
-                		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
-                		false == beerGammon.getGammonData().whiteHumanPlayer)) {
-                	beerGammon.buttonPushed();
-                	board.render();                	
-
-                	AcDcAI ai = new AcDcAI();
-                	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
-                	for (Move move : moves) {
-                		ArrayList<Move> moveToDraw = new ArrayList<Move>();
-                		moveToDraw.add(move);
-                		board.animateMoves(moveToDraw);
-                		if (move.getColor() == beerGammon.getTurn()) {
-                			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
-                		}
-            			board.clearAnimatedPieces();
-            			board.clearFloaters();
-            			board.render();
-            			
-            			if (beerGammon.canMove() == false) {
-            				break;
-            			}
-                	}
-                	
-                	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
-                		beerGammon.buttonPushed();
-                		board.render();
-                	}
-                } 
-                
-            }
-
-			
+                actionButtonClicked();                
+            }			
         });            
 
 	    undoButton = (Button) findViewById(R.id.undo_button);
@@ -317,6 +251,52 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	    
 
         onBoardUpdate();
+	}
+	
+	private void actionButtonClicked() {
+		//tell the logic we clicked
+		beerGammon.buttonPushed();
+        board.render();              
+        if(beerGammon.getButtonState() == ButtonState.MAKE_DISCOVERABLE){
+        	ensureDiscoverable();
+        } else if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+        	//a player has rolled determine if they can clear the dice
+        	actionButton.setEnabled(beerGammon.canMove() == false);
+        	//determine if a computer is moving
+        	if ( (beerGammon.getTurn() == GameColor.BLACK && PlayerType.COMPUTER == beerGammon.getGammonData().blackPlayer) ||
+            		(beerGammon.getTurn() == GameColor.WHITE && PlayerType.COMPUTER == beerGammon.getGammonData().whitePlayer) ) {
+            	performComputerMove();
+        	}
+        } else if ( (connecter.btService.playMode == Constants.MULTI_PLAYER_BT) && 
+        	(beerGammon.getButtonState() == ButtonState.RED_ROLL || beerGammon.getButtonState() == ButtonState.WHITE_ROLL)) {  
+        	//FINISHED TURN!!
+        	sendGameData();
+        }
+	}
+	
+	private void performComputerMove() {
+		AcDcAI ai = new AcDcAI();
+    	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
+    	for (Move move : moves) {
+    		ArrayList<Move> moveToDraw = new ArrayList<Move>();
+    		moveToDraw.add(move);
+    		board.animateMoves(moveToDraw);
+    		if (move.getColor() == beerGammon.getTurn()) {
+    			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
+    		}
+			board.clearAnimatedPieces();
+			board.clearFloaters();
+			board.render();
+			
+			if (beerGammon.canMove() == false) {
+				break;
+			}
+    	}
+    	
+    	if (beerGammon.getButtonState() == ButtonState.TURN_FINISHED) {
+    		beerGammon.buttonPushed();
+    		board.render();
+    	}
 	}
 	
 	@Override
@@ -384,11 +364,25 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		
 		board.newGame();
 		beerGammon = board.getTheGame();
-		beerGammon.getGammonData().blackHumanPlayer = extras.getBoolean("redPlayerIsHuman");
-		beerGammon.getGammonData().whiteHumanPlayer = extras.getBoolean("whitePlayerIsHuman");
+		if (extras.getBoolean("redPlayerIsHuman")) {
+			beerGammon.getGammonData().blackPlayer = PlayerType.HUMAN;
+			if (playMode == Constants.MULTI_PLAYER_BT) {
+				beerGammon.getGammonData().whitePlayer = PlayerType.BT_HUMAN;
+			} else {
+				beerGammon.getGammonData().whitePlayer = PlayerType.COMPUTER;
+			}
+		}
+		
+		if (extras.getBoolean("whitePlayerIsHuman")) {
+			beerGammon.getGammonData().whitePlayer = PlayerType.HUMAN;
+			if (playMode == Constants.MULTI_PLAYER_BT) {
+				beerGammon.getGammonData().blackPlayer = PlayerType.BT_HUMAN;
+			} else {
+				beerGammon.getGammonData().blackPlayer = PlayerType.COMPUTER;
+			}
+		}
+		
 		if(playMode == Constants.MULTI_PLAYER_BT){	
-			beerGammon.getGammonData().blackHumanPlayer = true;
-			beerGammon.getGammonData().whiteHumanPlayer = true;
             //Intent serverIntent = new Intent(this, DeviceListActivity.class);
             //startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
 			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
@@ -517,6 +511,11 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 			objIn = new ObjectInputStream(byteStream);
 			TheGame gammonData = (TheGame) objIn.readObject();
 			Log.d(TAG, "Recieved Game Data. Length: "+ data.length);
+			beerGammon.getGammonData().blackDie1 = gammonData.blackDie1;
+			beerGammon.getGammonData().blackDie2 = gammonData.blackDie2;
+			beerGammon.getGammonData().whiteDie1 = gammonData.whiteDie1;
+			beerGammon.getGammonData().whiteDie2 = gammonData.whiteDie2;
+			beerGammon.calculateMovesRemaining();
 			beerGammon.setGammonData(gammonData);
 			StartTurn();
 			
