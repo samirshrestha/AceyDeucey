@@ -424,7 +424,7 @@ public class TheGameImpl {
 	private void checkBlackHomeBoardAcdc(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
 		for (Integer moveLength : movesAvailable) {
 			if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0 && 
-					moveLength == pieceLocation.getIndex()) {
+					moveLength == pieceLocation.getIndex() && gammon.blackMovingIn) {
 				moves.add(BoardPositions.BLACK_BUNKER);
 			} else {
 				boolean higherLegalMove = false;
@@ -453,7 +453,7 @@ public class TheGameImpl {
 					}
 				}
 				
-				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false && gammon.blackMovingIn) {
 					moves.add(BoardPositions.BLACK_BUNKER);
 				}
 			}
@@ -461,51 +461,49 @@ public class TheGameImpl {
 	}
 	
 	private void checkBlackBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
-		// do we even need to check?
-		if (gammon.blackMovingIn) {
-			if (gammon.aceyDeucey) {
-				checkBlackHomeBoardAcdc(pieceLocation, moves, movesAvailable);
-			} else if (movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
+
+		if (gammon.aceyDeucey) {
+			checkBlackHomeBoardAcdc(pieceLocation, moves, movesAvailable);
+		} else if (gammon.blackMovingIn && movesAvailable.contains((Object) pieceLocation.getIndex())) { // must make the exact move if possible
+			moves.add(BoardPositions.BLACK_BUNKER);
+		} else {
+			for (Integer moveLength: movesAvailable) {
+				if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0) {
+					// an exact move is possible might as well stop checking
+					return;
+				}
+			}
+			
+			boolean higherLegalMove = false;
+			for (int i = 6; i > pieceLocation.getIndex(); i--) {
+				CheckerContainer point = gammon.containers.get(i);
+				Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
+				if (point.getBlackCheckerCount() > 0) {
+					checkBlackBearingOff(point.getPosition(), tempMoves, movesAvailable);
+				}
+				if (tempMoves.size() > 0) {
+					higherLegalMove = true;
+					break;
+				}
+			}
+			
+			boolean homeBoardMove = false;
+			boolean moveIntoBunker = false;
+			for (Integer moveLength: movesAvailable) {
+				Integer moveIndex = pieceLocation.getIndex() - moveLength;
+				if (moveIndex <= 0) {
+					moveIntoBunker = true;
+				} else {
+					CheckerContainer possibleMove = gammon.containers.get(moveIndex);
+					if (possibleMove.getWhiteCheckerCount() < 2) {
+						moves.add(possibleMove.getPosition());
+						homeBoardMove = true;
+					}
+				}					
+			}
+			
+			if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false && gammon.blackMovingIn) {
 				moves.add(BoardPositions.BLACK_BUNKER);
-			} else {
-				for (Integer moveLength: movesAvailable) {
-					if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0) {
-						// an exact move is possible might as well stop checking
-						return;
-					}
-				}
-				
-				boolean higherLegalMove = false;
-				for (int i = 6; i > pieceLocation.getIndex(); i--) {
-					CheckerContainer point = gammon.containers.get(i);
-					Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
-					if (point.getBlackCheckerCount() > 0) {
-						checkBlackBearingOff(point.getPosition(), tempMoves, movesAvailable);
-					}
-					if (tempMoves.size() > 0) {
-						higherLegalMove = true;
-						break;
-					}
-				}
-				
-				boolean homeBoardMove = false;
-				boolean moveIntoBunker = false;
-				for (Integer moveLength: movesAvailable) {
-					Integer moveIndex = pieceLocation.getIndex() - moveLength;
-					if (moveIndex <= 0) {
-						moveIntoBunker = true;
-					} else {
-						CheckerContainer possibleMove = gammon.containers.get(moveIndex);
-						if (possibleMove.getWhiteCheckerCount() < 2) {
-							moves.add(possibleMove.getPosition());
-							homeBoardMove = true;
-						}
-					}					
-				}
-				
-				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
-					moves.add(BoardPositions.BLACK_BUNKER);
-				}
 			}
 		}
 	}
@@ -514,7 +512,7 @@ public class TheGameImpl {
 		for (Integer moveLength : movesAvailable) {
 			int reverseIndex = 25 - moveLength;
 			if (gammon.containers.get(reverseIndex).getWhiteCheckerCount() > 0 &&
-					reverseIndex == pieceLocation.getIndex() ) {
+					reverseIndex == pieceLocation.getIndex() && gammon.whiteMovingIn) {
 				moves.add(BoardPositions.WHITE_BUNKER);
 			} else {
 				boolean higherLegalMove = false;
@@ -543,7 +541,7 @@ public class TheGameImpl {
 					}
 				}
 				
-				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
+				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false && gammon.whiteMovingIn) {
 					moves.add(BoardPositions.WHITE_BUNKER);
 				}
 			}
@@ -551,52 +549,50 @@ public class TheGameImpl {
 	}
 	
 	private void checkWhiteBearingOff(CheckerContainer.BoardPositions pieceLocation, Vector<CheckerContainer.BoardPositions> moves, ArrayList<Integer> movesAvailable) {
-		// do we even need to check?
-		if (gammon.whiteMovingIn) {
-			int distanceFromBunker = 25 - pieceLocation.getIndex();
-			if (gammon.aceyDeucey) {
-				checkWhiteHomeBoardAcdc(pieceLocation, moves, movesAvailable);
-			} else if (movesAvailable.contains((Object) distanceFromBunker) ) { // must make the exact move if possible
+
+		int distanceFromBunker = 25 - pieceLocation.getIndex();
+		if (gammon.aceyDeucey) {
+			checkWhiteHomeBoardAcdc(pieceLocation, moves, movesAvailable);
+		} else if (movesAvailable.contains((Object) distanceFromBunker && gammon.whiteMovingIn) ) { // must make the exact move if possible
+			moves.add(BoardPositions.WHITE_BUNKER);
+		} else {
+			for (Integer moveLength: movesAvailable) {
+				int containerIndex = 25 - moveLength;
+				if (gammon.containers.get(containerIndex).getWhiteCheckerCount() > 0) {
+					// an exact move is possible might as well stop checking
+					return;
+				}
+			}
+			
+			boolean higherLegalMove = false;
+			for (int i = 19; i < pieceLocation.getIndex(); i++) {
+				CheckerContainer point = gammon.containers.get(i);
+				Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
+				if (point.getWhiteCheckerCount() > 0) {
+					checkWhiteBearingOff(point.getPosition(), tempMoves, movesAvailable);
+				}
+				if (tempMoves.size() > 0) {
+					higherLegalMove = true;
+				}
+			}
+			
+			boolean homeBoardMove = false;
+			boolean moveIntoBunker = false;
+			for (Integer moveLength: movesAvailable) {
+				Integer moveIndex = pieceLocation.getIndex() + moveLength;
+				if (moveIndex >= 25) {
+					moveIntoBunker = true;
+				} else {
+					CheckerContainer possibleMove = gammon.containers.get(moveIndex);
+					if (possibleMove.getBlackCheckerCount() < 2) {
+						moves.add(possibleMove.getPosition());
+						homeBoardMove = true;
+					}
+				}					
+			}
+			
+			if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false && gammon.whiteMovingIn) {
 				moves.add(BoardPositions.WHITE_BUNKER);
-			} else {
-				for (Integer moveLength: movesAvailable) {
-					int containerIndex = 25 - moveLength;
-					if (gammon.containers.get(containerIndex).getWhiteCheckerCount() > 0) {
-						// an exact move is possible might as well stop checking
-						return;
-					}
-				}
-				
-				boolean higherLegalMove = false;
-				for (int i = 19; i < pieceLocation.getIndex(); i++) {
-					CheckerContainer point = gammon.containers.get(i);
-					Vector<BoardPositions> tempMoves = new Vector<BoardPositions>();
-					if (point.getWhiteCheckerCount() > 0) {
-						checkWhiteBearingOff(point.getPosition(), tempMoves, movesAvailable);
-					}
-					if (tempMoves.size() > 0) {
-						higherLegalMove = true;
-					}
-				}
-				
-				boolean homeBoardMove = false;
-				boolean moveIntoBunker = false;
-				for (Integer moveLength: movesAvailable) {
-					Integer moveIndex = pieceLocation.getIndex() + moveLength;
-					if (moveIndex >= 25) {
-						moveIntoBunker = true;
-					} else {
-						CheckerContainer possibleMove = gammon.containers.get(moveIndex);
-						if (possibleMove.getBlackCheckerCount() < 2) {
-							moves.add(possibleMove.getPosition());
-							homeBoardMove = true;
-						}
-					}					
-				}
-				
-				if (homeBoardMove == false && moveIntoBunker == true && higherLegalMove == false) {
-					moves.add(BoardPositions.WHITE_BUNKER);
-				}
 			}
 		}
 	}
