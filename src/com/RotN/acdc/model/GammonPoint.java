@@ -96,9 +96,10 @@ public class GammonPoint {
 					leftCheck = (int) (pointRect.left - pointRect.width());
 					rightCheck = (int) (pointRect.right + pointRect.width());
 					topCheck = (int) (pointRect.top - pointRect.width());
-					bottomCheck = (int) (pointRect.bottom + pointRect.width());	
+					bottomCheck = (int) (pointRect.bottom + pointRect.width());
+					Rect searchRect = new Rect(leftCheck, rightCheck, topCheck, bottomCheck);
 					
-					if (eventY >= topCheck && (eventY <= bottomCheck)) {
+					if ( searchRect.contains((int)eventX, (int)eventY) ) {
 						double xDistance = eventX - pointRect.exactCenterX();
 						double yDistance = eventY - pointRect.exactCenterY();
 						double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
