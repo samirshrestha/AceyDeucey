@@ -30,9 +30,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	private static final String TAG = AcDcActivity.class.getSimpleName();
 	private TheGameImpl beerGammon;
-	private Button actionButton;
-	//static TextView tvTurn;	
-	private Button undoButton;
 	GammonBoard board;
     //private AdView mAdView;
     
@@ -42,7 +39,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	requestWindowFeature(Window.FEATURE_NO_TITLE);    	
+    	requestWindowFeature(Window.FEATURE_ACTION_BAR);    	
     	super.onCreate(savedInstanceState);
 	
     }
@@ -201,7 +198,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         beerGammon.addListener(this);
         Log.d(TAG, "View added");
         
-        actionButton = (Button) findViewById(R.id.action_button);
+        /*actionButton = (Button) findViewById(R.id.action_button);
         actionButton.setText(getButtonText());
         actionButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -268,32 +265,14 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
                 	}
                 } 
             }
-        });            
-
-	    undoButton = (Button) findViewById(R.id.undo_button);
-	    undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
-	    undoButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                beerGammon.undoMove();
-                board.render();
-                if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
-                		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
-                	actionButton.setEnabled(beerGammon.canMove() == false);
-                }
-            }
-        });    
-	    
+        });*/ 	    
 
         onBoardUpdate();
 	}
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK && undoButton.isEnabled()) {
-        	beerGammon.undoMove();
-        	board.render();
-        	return true;
-		} else if (keyCode == KeyEvent.KEYCODE_BACK) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			//Ask the user if they want to quit
 			new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
@@ -333,17 +312,14 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 
 	@Override
 	public void onBoardUpdate() {
-		actionButton.setText(getButtonText());
-		actionButton.setEnabled(beerGammon.canMove() == false);
-		undoButton.setEnabled(beerGammon.getGammonData().savedStatesCount > 0);
+
 	}
 
 	public void startNewGame(){
 		Log.d(TAG, "Starting New Game...Danny");
 		//board = (GammonBoard)findViewById(R.id.gammonBoard);
 		board.newGame();
-		//actionButton = (Button) findViewById(R.id.action_button);
-        actionButton.setText(getButtonText());
+
         board.render();		
 	}
 	

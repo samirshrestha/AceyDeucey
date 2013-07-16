@@ -75,30 +75,26 @@ public class GammonPoint {
 	}
 	
 	public void wasTouched(Map<BoardPositions, Double> pointDistances, float eventX, float eventY, int mouseAction, TheGameImpl gammon) {
-		int leftCheck = pointRect.left;
-		int rightCheck = pointRect.right;
-		int topCheck = pointRect.top;
-		int bottomCheck = pointRect.bottom;
+		Rect searchRect = new Rect(pointRect);
 		
 		if (MotionEvent.ACTION_UP == mouseAction) {
 			if (isPossibleMove) {
-				leftCheck = (int) (pointRect.left - pointRect.width());
-				rightCheck = (int) (pointRect.right + pointRect.width());
-				topCheck = (int) (pointRect.top - pointRect.width());
-				bottomCheck = (int) (pointRect.bottom + pointRect.width());
+				searchRect.left = (int) (pointRect.left - pointRect.width());
+				searchRect.right = (int) (pointRect.right + pointRect.width());
+				searchRect.top = (int) (pointRect.top - pointRect.width());
+				searchRect.bottom = (int) (pointRect.bottom + pointRect.width());
 			}
 		}		
 		
-		if (MotionEvent.ACTION_DOWN == mouseAction)  { //only check the mouse down if they is a movable piece
+		if (MotionEvent.ACTION_DOWN == mouseAction)  { //only check the mouse down if there is a movable piece
 			if (false == gammon.onPokey()) {
 				if ( (gammon.getTurn() == GameColor.BLACK && gammon.getContainer(pointPos).getBlackCheckerCount() > 0) ||
 						(gammon.getTurn() == GameColor.WHITE && gammon.getContainer(pointPos).getWhiteCheckerCount() > 0) ) {
-					leftCheck = (int) (pointRect.left - pointRect.width());
-					rightCheck = (int) (pointRect.right + pointRect.width());
-					topCheck = (int) (pointRect.top - pointRect.width());
-					bottomCheck = (int) (pointRect.bottom + pointRect.width());
-					Rect searchRect = new Rect(leftCheck, rightCheck, topCheck, bottomCheck);
-					
+					searchRect.left = (int) (pointRect.left - pointRect.width());
+					searchRect.right = (int) (pointRect.right + pointRect.width());
+					searchRect.top = (int) (pointRect.top - pointRect.width());
+					searchRect.bottom = (int) (pointRect.bottom + pointRect.width());
+										
 					if ( searchRect.contains((int)eventX, (int)eventY) ) {
 						double xDistance = eventX - pointRect.exactCenterX();
 						double yDistance = eventY - pointRect.exactCenterY();
@@ -107,13 +103,11 @@ public class GammonPoint {
 					}
 				} 
 			} 
-		} else if ((eventX >= leftCheck) && (eventX <= rightCheck)) {
-			if (eventY >= topCheck && (eventY <= bottomCheck)) {
-				double xDistance = eventX - pointRect.exactCenterX();
-				double yDistance = eventY - pointRect.exactCenterY();
-				double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
-				pointDistances.put(pointPos, distance);
-			}
+		} else if ( searchRect.contains((int)eventX, (int)eventY) ) {
+			double xDistance = eventX - pointRect.exactCenterX();
+			double yDistance = eventY - pointRect.exactCenterY();
+			double distance = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+			pointDistances.put(pointPos, distance);
 		}	
 	}
 	

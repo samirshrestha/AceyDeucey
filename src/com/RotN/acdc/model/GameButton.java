@@ -15,11 +15,11 @@ public class GameButton {
 	private Rect boardRect;
 	private Bitmap redRoll;
 	private Bitmap whiteRoll;
-	private Bitmap redRollPush;
-	private Bitmap whiteRollPush;
 	private Bitmap redClearDice;
 	private Bitmap whiteClearDice;
 	private Bitmap clearDice;
+	private Bitmap push;
+	private Bitmap start;
 	
 	public void setRedRoll(Bitmap redRoll) {
 		this.redRoll = redRoll;
@@ -29,12 +29,12 @@ public class GameButton {
 		this.whiteRoll = whiteRoll;
 	}
 
-	public void setRedRollPush(Bitmap redRollPush) {
-		this.redRollPush = redRollPush;
+	public void setPush(Bitmap push) {
+		this.push = push;
 	}
 
-	public void setWhiteRollPush(Bitmap whiteRollPush) {
-		this.whiteRollPush = whiteRollPush;
+	public void setStart(Bitmap start) {
+		this.start = start;
 	}
 
 	public void setRedClearDice(Bitmap redClearDice) {
@@ -102,12 +102,19 @@ public class GameButton {
 			if (touched == false) {
 				canvas.drawBitmap(redRoll, right, top, null);
 			} else {
-				canvas.drawBitmap(redRollPush, right, top, null);
+				canvas.drawBitmap(push, right, top, null);
 			}
 			break;
 		case RED_WON:
 			break;
 		case ROLL_FOR_TURN:
+			right = (float)(boardRect.right * 0.64843);
+			top = (float)(boardRect.bottom * 0.44);
+			if (touched == false) {
+				canvas.drawBitmap(start, right, top, null);
+			} else {
+				canvas.drawBitmap(push, right, top, null);
+			}
 			break;
 		case CLEAR_RED:
 			right = (float)(boardRect.right * 0.64843);
@@ -137,7 +144,7 @@ public class GameButton {
 			if (touched == false) {
 				canvas.drawBitmap(whiteRoll, right, top, null);
 			} else {
-				canvas.drawBitmap(whiteRollPush, right, top, null);
+				canvas.drawBitmap(push, right, top, null);
 			}
 			break;
 		case WHITE_WON:

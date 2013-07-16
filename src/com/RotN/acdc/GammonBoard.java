@@ -15,6 +15,7 @@ import com.RotN.acdc.logic.CheckerContainer.BoardPositions;
 import com.RotN.acdc.logic.CheckerContainer.GameColor;
 import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGame;
+import com.RotN.acdc.logic.TheGame.ButtonState;
 import com.RotN.acdc.logic.TheGameImpl;
 import com.RotN.acdc.model.Bunker;
 import com.RotN.acdc.model.Dice;
@@ -201,11 +202,75 @@ SurfaceHolder.Callback {
 		return true;
 	}
 	
+	private void handleActionButton() {
+		beerGammon.buttonPushed();
+		render();
+        if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+        		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
+        	if ( (beerGammon.getTurn() == GameColor.BLACK && false == beerGammon.getGammonData().blackHumanPlayer) ||
+            		(beerGammon.getTurn() == GameColor.WHITE && false == beerGammon.getGammonData().whiteHumanPlayer) ) {
+            	AcDcAI ai = new AcDcAI();
+            	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
+            	for (Move move : moves) {
+            		ArrayList<Move> moveToDraw = new ArrayList<Move>();
+            		moveToDraw.add(move);
+            		animateMoves(moveToDraw);
+            		if (move.getColor() == beerGammon.getTurn()) {
+            			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
+            		}
+        			clearAnimatedPieces();
+        			clearFloaters();
+        			render();
+        			
+        			if (beerGammon.canMove() == false) {
+        				break;
+        			}
+            	}
+            	
+            	if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+                		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
+            		beerGammon.buttonPushed();
+            		render();
+            	}
+        	}
+        } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
+        		beerGammon.getGammonData().blackHumanPlayer == false) || 
+        		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
+        		false == beerGammon.getGammonData().whiteHumanPlayer)) {
+        	beerGammon.buttonPushed();
+        	render();                	
+
+        	AcDcAI ai = new AcDcAI();
+        	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
+        	for (Move move : moves) {
+        		ArrayList<Move> moveToDraw = new ArrayList<Move>();
+        		moveToDraw.add(move);
+        		animateMoves(moveToDraw);
+        		if (move.getColor() == beerGammon.getTurn()) {
+        			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
+        		}
+    			clearAnimatedPieces();
+    			clearFloaters();
+    			render();
+    			
+    			if (beerGammon.canMove() == false) {
+    				break;
+    			}
+        	}
+        	
+        	if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+            		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
+        		beerGammon.buttonPushed();
+        		render();
+        	}
+        } 
+    }
+	
 	private void boardTouchUp(MotionEvent event) {
 		floatingPiece.setTouched(false);
 		
 		if (actionButton.handleActionUp(event.getX(), event.getY())) {
-			beerGammon.buttonPushed();
+			this.handleActionButton();
 		}
 		
 		clearFloaters();						
@@ -484,9 +549,9 @@ SurfaceHolder.Callback {
 		int newHeight = Math.round(options.outHeight/scale);
 		
 		actionButton.setRedRoll(getImageExactSize(getResources(), R.drawable.red_roll, newWidth, newHeight));
-		actionButton.setRedRollPush(getImageExactSize(getResources(), R.drawable.red_roll_push, newWidth, newHeight));
+		actionButton.setPush(getImageExactSize(getResources(), R.drawable.push, newWidth, newHeight));
 		actionButton.setWhiteRoll(getImageExactSize(getResources(), R.drawable.white_roll, newWidth, newHeight));
-		actionButton.setWhiteRollPush(getImageExactSize(getResources(), R.drawable.white_roll_push, newWidth, newHeight));
+		actionButton.setStart(getImageExactSize(getResources(), R.drawable.red_start, newWidth, newHeight));
 		
 		actionButton.setClearDice(getImageExactSize(getResources(), R.drawable.cleardice_push, newWidth, newHeight));
 		actionButton.setRedClearDice(getImageExactSize(getResources(), R.drawable.red_cleardice, newWidth, newHeight));

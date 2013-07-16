@@ -24,8 +24,8 @@ public class SettingsActivity extends Activity {
 		playMode = 0;
 		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
-		    RadioButton network = (RadioButton) findViewById(R.id.radio_network);
-		    network.setEnabled(false);
+//		    RadioButton network = (RadioButton) findViewById(R.id.radio_network);
+//		    network.setEnabled(false);
 		}
 	}
 	
@@ -50,13 +50,13 @@ public class SettingsActivity extends Activity {
 	            	playMode = 1;
 	            }          
 	            break;
-	        case R.id.radio_network:
-	            if (checked){
-	            	red.setEnabled(true);
-	            	white.setEnabled(true);
-	            	playMode = 2;
-	            }	            
-	            break;	    
+//	        case R.id.radio_network:
+//	            if (checked){
+//	            	red.setEnabled(true);
+//	            	white.setEnabled(true);
+//	            	playMode = 2;
+//	            }	            
+//	            break;	    
 	         }
 	}
 	

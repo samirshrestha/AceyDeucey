@@ -45,25 +45,13 @@ public class TheGameImpl {
 	
 	private List<GammonEventHandler> handlers = new ArrayList<GammonEventHandler>(); 
 	
-	private MoveEventHandler moveHandler;
-	
 	public void addListener(GammonEventHandler handler) {
 		handlers.add(handler);
-	}
-	
-	public void setMoveListener(MoveEventHandler handler) {
-		moveHandler = handler;
 	}
 	
 	private void onBoardUpdate(){
 		for (GammonEventHandler listener : handlers) {
 			listener.onBoardUpdate();
-		}
-	}
-	
-	private void onPieceMoved(Move move) {
-		if (moveHandler != null) {
-			moveHandler.onPieceMoved(move);
 		}
 	}
 	
@@ -468,7 +456,7 @@ public class TheGameImpl {
 			moves.add(BoardPositions.BLACK_BUNKER);
 		} else {
 			for (Integer moveLength: movesAvailable) {
-				if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0) {
+				if (gammon.containers.get(moveLength).getBlackCheckerCount() > 0 && gammon.blackMovingIn) {
 					// an exact move is possible might as well stop checking
 					return;
 				}
@@ -553,12 +541,12 @@ public class TheGameImpl {
 		int distanceFromBunker = 25 - pieceLocation.getIndex();
 		if (gammon.aceyDeucey) {
 			checkWhiteHomeBoardAcdc(pieceLocation, moves, movesAvailable);
-		} else if (movesAvailable.contains((Object) distanceFromBunker && gammon.whiteMovingIn) ) { // must make the exact move if possible
+		} else if (movesAvailable.contains((Object) distanceFromBunker ) && gammon.whiteMovingIn ) { // must make the exact move if possible
 			moves.add(BoardPositions.WHITE_BUNKER);
 		} else {
 			for (Integer moveLength: movesAvailable) {
 				int containerIndex = 25 - moveLength;
-				if (gammon.containers.get(containerIndex).getWhiteCheckerCount() > 0) {
+				if (gammon.containers.get(containerIndex).getWhiteCheckerCount() > 0 && gammon.whiteMovingIn) {
 					// an exact move is possible might as well stop checking
 					return;
 				}

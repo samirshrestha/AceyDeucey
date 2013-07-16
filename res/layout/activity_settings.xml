@@ -25,11 +25,6 @@
 		        android:layout_height="wrap_content"
 		        android:text="@string/play_mode_multi"
 		        android:onClick="onPlayModeClicked"/>
-		    <RadioButton android:id="@+id/radio_network"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="@string/play_mode_network"
-		        android:onClick="onPlayModeClicked"/>
 		</RadioGroup>
 		<TextView android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
@@ -53,7 +48,7 @@
 		
 		<Button
 		    android:id="@+id/button_start"
-		    android:layout_width="match_parent"
+		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:text="@string/start_game"
 		    android:layout_gravity="right"
