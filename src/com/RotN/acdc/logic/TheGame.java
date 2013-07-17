@@ -34,8 +34,8 @@ public class TheGame implements Serializable {
 	public int savedStatesCount;
 	public boolean whiteHumanPlayer = false;
 	public boolean blackHumanPlayer = true;
-	public Stats redStats;
-	public Stats whiteStats;
+	public Stats redStats = new Stats();
+	public Stats whiteStats = new Stats();
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {
@@ -73,6 +73,7 @@ public class TheGame implements Serializable {
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame(TheGame rhs) {
+		//TODO add copy for stats
 		this.containers = new ArrayList<CheckerContainer>();
 		this.movesRemaining = new ArrayList<Integer>();
 		
