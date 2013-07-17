@@ -233,38 +233,49 @@ SurfaceHolder.Callback {
             		render();
             	}
         	}
-        } else if ( (beerGammon.getButtonState() == ButtonState.RED_ROLL &&
-        		beerGammon.getGammonData().blackHumanPlayer == false) || 
-        		( beerGammon.getButtonState() == ButtonState.WHITE_ROLL &&
-        		false == beerGammon.getGammonData().whiteHumanPlayer)) {
-        	beerGammon.buttonPushed();
-        	render();                	
-
-        	AcDcAI ai = new AcDcAI();
-        	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
-        	for (Move move : moves) {
-        		ArrayList<Move> moveToDraw = new ArrayList<Move>();
-        		moveToDraw.add(move);
-        		animateMoves(moveToDraw);
-        		if (move.getColor() == beerGammon.getTurn()) {
-        			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
-        		}
-    			clearAnimatedPieces();
-    			clearFloaters();
-    			render();
-    			
-    			if (beerGammon.canMove() == false) {
-    				break;
-    			}
-        	}
-        	
-        	if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
-            		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
-        		beerGammon.buttonPushed();
-        		render();
+        } else if ( ( beerGammon.getButtonState() == ButtonState.RED_ROLL || beerGammon.getButtonState() == ButtonState.WHITE_ROLL) && 
+        		computersMove() ){
+        	while ( computersMove() ) {
+	        	beerGammon.buttonPushed();
+	        	render();                	
+	
+	        	AcDcAI ai = new AcDcAI();
+	        	ArrayList<Move> moves = ai.GetNextMove(beerGammon.getGammonData());
+	        	for (Move move : moves) {
+	        		ArrayList<Move> moveToDraw = new ArrayList<Move>();
+	        		moveToDraw.add(move);
+	        		animateMoves(moveToDraw);
+	        		if (move.getColor() == beerGammon.getTurn()) {
+	        			beerGammon.movePiece(move.getOrigSpot(), move.getNewSpot());
+	        		}
+	    			clearAnimatedPieces();
+	    			clearFloaters();
+	    			render();
+	    			
+	    			if (beerGammon.canMove() == false) {
+	    				break;
+	    			}
+	        	}
+	        	
+	        	if (beerGammon.getButtonState() == ButtonState.CLEAR_RED ||
+	            		beerGammon.getButtonState() == ButtonState.CLEAR_WHITE) {
+	        		beerGammon.buttonPushed();
+	        		render();
+	        	} else if (beerGammon.getButtonState() == ButtonState.WHITE_WON ||
+	        			beerGammon.getButtonState() == ButtonState.RED_WON) {
+	        		break;
+	        	}
         	}
         } 
     }
+	
+	private boolean computersMove() {
+		boolean computerMove = ( (beerGammon.getTurn() == GameColor.BLACK && 
+				false == beerGammon.getGammonData().blackHumanPlayer) ||
+				(beerGammon.getTurn() == GameColor.WHITE && 
+				false == beerGammon.getGammonData().whiteHumanPlayer) );
+		return computerMove;
+	}
 	
 	private void boardTouchUp(MotionEvent event) {
 		floatingPiece.setTouched(false);
@@ -423,7 +434,12 @@ SurfaceHolder.Callback {
 		}
 		canvas.drawBitmap(board, null, new Rect(0,0,getWidth(), getHeight()), null);
 		
-		actionButton.draw(canvas, beerGammon.getButtonState(), beerGammon.canMove());
+		//only draw the human buttons
+		if ( (beerGammon.getTurn() == GameColor.BLACK && true == beerGammon.getGammonData().blackHumanPlayer) ||
+        		(beerGammon.getTurn() == GameColor.WHITE && true == beerGammon.getGammonData().whiteHumanPlayer) ||
+        		beerGammon.getTurn() == GameColor.NEITHER) {
+			actionButton.draw(canvas, beerGammon.getButtonState(), beerGammon.canMove());
+		}
 		blackBunker.draw(canvas);
 		whiteBunker.draw(canvas);
 		CheckerContainer pokeyData = beerGammon.getContainer(BoardPositions.POKEY);

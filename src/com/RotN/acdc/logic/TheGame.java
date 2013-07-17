@@ -11,7 +11,7 @@ public class TheGame implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4L;
+	private static final long serialVersionUID = 5L;
 	
 	public enum ButtonState {
 		ROLL_FOR_TURN(), RED_ROLL(), WHITE_ROLL(), CLEAR_RED(), 
@@ -34,6 +34,8 @@ public class TheGame implements Serializable {
 	public int savedStatesCount;
 	public boolean whiteHumanPlayer = false;
 	public boolean blackHumanPlayer = true;
+	public Stats redStats;
+	public Stats whiteStats;
 	
 	@SuppressLint("UseSparseArrays")
 	public TheGame() {

@@ -162,15 +162,15 @@ public class TheGameImpl {
 		
 		gammon.movesRemaining.clear();
 		
-		while (gammon.whiteDie1 == gammon.blackDie1) {
-			gammon.whiteDie1 = rollDie();
-			gammon.blackDie1 = rollDie();
+		while (gammon.whiteDie2 == gammon.blackDie2) {
+			gammon.whiteDie2 = rollDie();
+			gammon.blackDie2 = rollDie();
 		}
 		
-		if (gammon.whiteDie1 > gammon.blackDie1) {
+		if (gammon.whiteDie2 > gammon.blackDie2) {
 			gammon.turn = GameColor.WHITE;
 		}
-		else if (gammon.blackDie1 > gammon.whiteDie1) {
+		else if (gammon.blackDie2 > gammon.whiteDie2) {
 			gammon.turn = GameColor.BLACK;
 		}
 		if (gammon.turn == GameColor.WHITE) {
@@ -895,6 +895,8 @@ public class TheGameImpl {
 			gammon.blackDie1 = rollDie();
 			gammon.blackDie2 = rollDie();
 			
+			gammon.redStats.rolls++;
+			
 			// for testing
 			//gammon.blackDie1 = 2;
 			//gammon.blackDie2 = 1;
@@ -907,16 +909,19 @@ public class TheGameImpl {
 				
 				String event = gammon.blackDie1 + "s";
 				analyticEvent(event);
+				doubleHappened(gammon.blackDie1, gammon.redStats);
 				
 			} else if (gammon.blackDie1 + gammon.blackDie2 == 3) { //acdc
 				gammon.acdcOrigMove = true;
 				
 				analyticEvent("AcDc");
+				gammon.redStats.acdcs++;
 			}
 			gammon.buttonState = ButtonState.CLEAR_RED;
 		} else {
 			gammon.whiteDie1 = rollDie();
 			gammon.whiteDie2 = rollDie();
+			gammon.whiteStats.rolls++;
 			
 			// for testing
 			//gammon.whiteDie1 = 1;
@@ -930,11 +935,13 @@ public class TheGameImpl {
 				
 				String event = gammon.whiteDie1 + "s";
 				analyticEvent(event);
+				doubleHappened(gammon.whiteDie1, gammon.whiteStats);
 			}
 			else if (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
 				gammon.acdcOrigMove = true;
 				
 				analyticEvent("AcDc");
+				gammon.whiteStats.acdcs++;
 			}
 			gammon.buttonState = ButtonState.CLEAR_WHITE;
 		}
@@ -1151,6 +1158,31 @@ public class TheGameImpl {
 		for (GammonEventHandler listener : handlers) {
 			listener.onDiceRoll(event);
 		}
+	}
+	
+	private void doubleHappened(int doubleValue, Stats stats) {
+		switch (doubleValue) {
+		case 1:
+			stats.ones++;
+			break;
+		case 2:
+			stats.twos++;
+			break;
+		case 3:
+			stats.threes++;
+			break;
+		case 4:
+			stats.fours++;
+			break;
+		case 5:
+			stats.fives++;
+			break;
+		case 6:
+			stats.sixes++;
+			break;
+		default:
+			break;
+		} 
 	}
 }
 
