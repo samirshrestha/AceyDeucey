@@ -32,6 +32,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private static final String TAG = AcDcActivity.class.getSimpleName();
 	private TheGameImpl beerGammon;
 	GammonBoard board;
+	static final int NEW_GAME_REQUEST = 0;
     //private AdView mAdView;
     
     private boolean firstAdReceived = false;private 
@@ -41,6 +42,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_ACTION_BAR); 
+    	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
+                                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
     	super.onCreate(savedInstanceState);
 	
     }
@@ -89,30 +92,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	    // Handle item selection
 	    switch (item.getItemId()) {
 	        case R.id.new_game:
-	        	/*AlertDialog.Builder alert_newGame = new AlertDialog.Builder(this);
-	        	alert_newGame.setMessage("Are you sure you want to start a new game?")
-	            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-	            	GammonBoard board = (GammonBoard)findViewById(R.id.gammonBoard);
-	                public void onClick(DialogInterface dialog, int id) {
-	                	dialog.dismiss();	                	
-	    	            board.newGame();
-	    	            actionButton.setText(getButtonText());
-	    	            board.render();	                	
-	                }
-	                })
-	            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-	                public void onClick(DialogInterface dialog, int id) {
-	                //  Action for 'NO' Button
-	                dialog.cancel();
-	                }
-	            });
-	            AlertDialog alert = alert_newGame.create();
-	            // Title for AlertDialog
-	            alert.setTitle("Warning!");
-	            // Icon for AlertDialog
-	            alert.show();*/
 	        	Intent settingsIntent = new Intent(this, SettingsActivity.class);
-	        	startActivity(settingsIntent);
+	        	startActivityForResult(settingsIntent, NEW_GAME_REQUEST);
 	            return true;
 	        case R.id.undo_button:
 	        	beerGammon.undoMove();
