@@ -82,6 +82,9 @@ public class TheGameImpl {
 		gammon.allBlackPiecesOut = false;
 		gammon.allWhitePiecesOut = false;
 		
+		gammon.redStats.clear();
+		gammon.whiteStats.clear();
+		
 		gammon.aceyDeucey = false;
 		gammon.acdcOrigMove = false;
 		
