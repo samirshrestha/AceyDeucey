@@ -1,18 +1,14 @@
 package com.RotN.acdc;
 
-import java.util.ArrayList;
-import com.RotN.acdc.logic.AcDcAI;
-import com.RotN.acdc.logic.CheckerContainer.GameColor;
-import com.RotN.acdc.logic.Move;
 import com.RotN.acdc.logic.TheGameImpl;
-import com.RotN.acdc.logic.TheGame.ButtonState;
-
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -20,10 +16,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 
 public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler {
 
@@ -33,7 +27,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private TheGameImpl beerGammon;
 	GammonBoard board;
 	static final int NEW_GAME_REQUEST = 0;
-    //private AdView mAdView;
+	private SharedPreferences storage;
     
     private boolean firstAdReceived = false;private 
 	final Handler refreshHandler = new Handler();
@@ -44,6 +38,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
     	requestWindowFeature(Window.FEATURE_ACTION_BAR); 
     	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);
     	super.onCreate(savedInstanceState);
 	
     }
@@ -111,34 +106,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private void closeItDown() {
 		board.saveGame();
 		beerGammon.removeListener(this);
-	}
-	
-	private String getButtonText() {
-		String buttonText = "";
-		
-		switch (beerGammon.getButtonState()) {
-		case ROLL_FOR_TURN:
-			buttonText = getText(R.string.roll_for_turn).toString();
-			break;
-		case RED_ROLL:
-			buttonText = getText(R.string.red_roll).toString();
-			break;
-		case WHITE_ROLL:
-			buttonText = getText(R.string.white_roll).toString();
-			break;
-		case CLEAR_WHITE:
-		case CLEAR_RED:
-			buttonText = getText(R.string.clear_dice).toString();
-			break;
-		case WHITE_WON:
-			buttonText = getText(R.string.white_won).toString();
-			break;
-		case RED_WON:
-			buttonText = getText(R.string.red_won).toString();
-			break;
-		}
-		
-		return buttonText;
 	}
 	
 	private void startItUp() {
@@ -307,5 +274,22 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	@Override
 	public void onDiceRoll(String event) {
+	}
+	
+	protected void onActivityResult(int requestCode, int resultCode,
+            Intent data) {
+		if (requestCode == NEW_GAME_REQUEST) {
+			if (resultCode == Activity.RESULT_OK) {
+		        boolean redHumanPlayer = storage.getBoolean("redPlayerHuman", false); 
+		        boolean whiteHumanPlayer = storage.getBoolean("whitePlayerHuman", false); 
+		        
+		        board.newGame();
+				beerGammon = board.getTheGame();
+				
+				beerGammon.getGammonData().blackHumanPlayer = redHumanPlayer;
+				beerGammon.getGammonData().whiteHumanPlayer = whiteHumanPlayer;
+				board.render();
+			}
+		}
 	}
 }

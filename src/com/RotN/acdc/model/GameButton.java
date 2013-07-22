@@ -106,7 +106,7 @@ public class GameButton {
 			}
 			break;
 		case RED_WON:
-			break;
+		case WHITE_WON:
 		case ROLL_FOR_TURN:
 			right = (float)(boardRect.right * 0.64843);
 			top = (float)(boardRect.bottom * 0.44);
@@ -146,8 +146,6 @@ public class GameButton {
 			} else {
 				canvas.drawBitmap(push, right, top, null);
 			}
-			break;
-		case WHITE_WON:
 			break;
 		default:
 			break;
