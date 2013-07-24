@@ -97,7 +97,13 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        case R.id.directions:
 	        	Intent intent = new Intent(this, DirectionsActivity.class);
 	        	startActivity(intent);
-	        	return true;	        	
+	        	return true;	
+	        case R.id.stats:
+	        	Intent statsIntent = new Intent(this, StatsActivity.class);
+	        	statsIntent.putExtra("redStats", beerGammon.getGammonData().redStats);
+	        	statsIntent.putExtra("whiteStats", beerGammon.getGammonData().whiteStats);
+	        	startActivity(statsIntent);
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -278,7 +284,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
-		if (requestCode == NEW_GAME_REQUEST) {
+		/*if (requestCode == NEW_GAME_REQUEST) {
 			if (resultCode == Activity.RESULT_OK) {
 		        boolean redHumanPlayer = storage.getBoolean("redPlayerHuman", false); 
 		        boolean whiteHumanPlayer = storage.getBoolean("whitePlayerHuman", false); 
@@ -290,6 +296,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 				beerGammon.getGammonData().whiteHumanPlayer = whiteHumanPlayer;
 				board.render();
 			}
-		}
+		}*/
 	}
 }

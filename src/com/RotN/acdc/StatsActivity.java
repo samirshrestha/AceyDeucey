@@ -2,6 +2,7 @@ package com.RotN.acdc;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
 
 public class StatsActivity extends Activity {
@@ -10,6 +11,7 @@ public class StatsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stats);
+		fillOutData();
 	}
 
 	@Override
@@ -18,5 +20,9 @@ public class StatsActivity extends Activity {
 		getMenuInflater().inflate(R.menu.stats, menu);
 		return true;
 	}
+	
+	private void fillOutData() {
+		Intent intent = getIntent();
 
+	}
 }
