@@ -1,9 +1,12 @@
 package com.RotN.acdc;
 
+import com.RotN.acdc.logic.Stats;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
+import android.widget.TextView;
 
 public class StatsActivity extends Activity {
 
