@@ -16,13 +16,6 @@ public class StatsActivity extends Activity {
 		setContentView(R.layout.activity_stats);
 		fillOutData();
 	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.stats, menu);
-		return true;
-	}
 	
 	private void fillOutData() {
 		Intent intent = getIntent();

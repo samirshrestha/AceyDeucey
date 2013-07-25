@@ -29,10 +29,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	static final int NEW_GAME_REQUEST = 0;
 	private SharedPreferences storage;
     
-    private boolean firstAdReceived = false;private 
-	final Handler refreshHandler = new Handler();
-	private final Runnable refreshRunnable = new RefreshRunnable();
-    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_ACTION_BAR); 
@@ -48,9 +44,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		Log.d(TAG, "Stopping...");
 		closeItDown();
 		super.onStop();
-		
-		// Remove any pending ad refreshes.
-		refreshHandler.removeCallbacks(refreshRunnable);
 	}
    	
    	@Override
@@ -62,13 +55,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	@Override
 	protected void onStart() {
-		Log.d(TAG, "Starting...");
+		Log.d(TAG, "Starting AcDc...");
 		startItUp();
 		super.onStart();
-		if (!firstAdReceived) {
-			// Request a new ad immediately.
-		    refreshHandler.post(refreshRunnable);
-		}
 	}
 	
 	@Override
@@ -83,11 +72,12 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
-		GammonBoard board = (GammonBoard)this.findViewById(R.id.gammonBoard);
+		board = (GammonBoard)this.findViewById(R.id.gammonBoard);
 	    // Handle item selection
 	    switch (item.getItemId()) {
 	        case R.id.new_game:
 	        	Intent settingsIntent = new Intent(this, SettingsActivity.class);
+	        	settingsIntent.putExtra("TheGame", beerGammon.getGammonData());
 	        	startActivityForResult(settingsIntent, NEW_GAME_REQUEST);
 	            return true;
 	        case R.id.undo_button:
@@ -118,11 +108,6 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		// set our GammonBoard as the View		
 
         setContentView(R.layout.activity_ac_dc);
-        
-        /*mAdView = (AdView) this.findViewById(R.id.ad);
-        mAdView.setAdListener(this);
-        AdRequest adRequest = new AdRequest();
-        mAdView.loadAd(adRequest);*/
         
         board = (GammonBoard)this.findViewById(R.id.gammonBoard);
 		Bundle extras = getIntent().getExtras();
@@ -284,18 +269,19 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
-		/*if (requestCode == NEW_GAME_REQUEST) {
+		board = (GammonBoard)this.findViewById(R.id.gammonBoard);
+		if (requestCode == NEW_GAME_REQUEST) {
 			if (resultCode == Activity.RESULT_OK) {
 		        boolean redHumanPlayer = storage.getBoolean("redPlayerHuman", false); 
 		        boolean whiteHumanPlayer = storage.getBoolean("whitePlayerHuman", false); 
 		        
-		        board.newGame();
-				beerGammon = board.getTheGame();
+		        beerGammon = board.getTheGame();
 				
 				beerGammon.getGammonData().blackHumanPlayer = redHumanPlayer;
 				beerGammon.getGammonData().whiteHumanPlayer = whiteHumanPlayer;
-				board.render();
+				board.newGame();
+				board.saveGame();
 			}
-		}*/
+		}
 	}
 }
