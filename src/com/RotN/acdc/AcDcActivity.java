@@ -1,5 +1,6 @@
 package com.RotN.acdc;
 
+import com.RotN.acdc.logic.TheGame.ButtonState;
 import com.RotN.acdc.logic.TheGameImpl;
 
 import android.app.Activity;
@@ -90,6 +91,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	        	return true;	
 	        case R.id.stats:
 	        	Intent statsIntent = new Intent(this, StatsActivity.class);
+	        	statsIntent.putExtra("title", (int)0);
 	        	statsIntent.putExtra("redStats", beerGammon.getGammonData().redStats);
 	        	statsIntent.putExtra("whiteStats", beerGammon.getGammonData().whiteStats);
 	        	startActivity(statsIntent);
@@ -241,18 +243,23 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
         super.onDestroy();
     }
 	
-	private class RefreshRunnable implements Runnable {
-		  @Override
-		  public void run() {
-		    // Load an ad with an ad request.
-			  //AdRequest adRequest = new AdRequest();
-		      //mAdView.loadAd(adRequest);
-		  }
-		}
-
 	@Override
 	public void onBoardUpdate() {
-
+		if (beerGammon.getButtonState() == ButtonState.RED_WON) {
+			Intent statsIntent = new Intent(this, StatsActivity.class);
+			statsIntent.putExtra("title", (int)1);
+        	statsIntent.putExtra("redStats", beerGammon.getGammonData().redStats);
+        	statsIntent.putExtra("whiteStats", beerGammon.getGammonData().whiteStats);
+        	startActivity(statsIntent);
+        	beerGammon.buttonPushed();
+		} else if (beerGammon.getButtonState() == ButtonState.WHITE_WON) {
+			Intent statsIntent = new Intent(this, StatsActivity.class);
+			statsIntent.putExtra("title", (int)2);
+        	statsIntent.putExtra("redStats", beerGammon.getGammonData().redStats);
+        	statsIntent.putExtra("whiteStats", beerGammon.getGammonData().whiteStats);
+        	startActivity(statsIntent);
+        	beerGammon.buttonPushed();
+		}
 	}
 
 	public void startNewGame(){
@@ -272,8 +279,9 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 		board = (GammonBoard)this.findViewById(R.id.gammonBoard);
 		if (requestCode == NEW_GAME_REQUEST) {
 			if (resultCode == Activity.RESULT_OK) {
-		        boolean redHumanPlayer = storage.getBoolean("redPlayerHuman", false); 
-		        boolean whiteHumanPlayer = storage.getBoolean("whitePlayerHuman", false); 
+				
+				boolean redHumanPlayer = data.getBooleanExtra("redPlayerIsHuman", beerGammon.getGammonData().blackHumanPlayer);
+				boolean whiteHumanPlayer = data.getBooleanExtra("whitePlayerIsHuman", beerGammon.getGammonData().whiteHumanPlayer);
 		        
 		        beerGammon = board.getTheGame();
 				

@@ -5,7 +5,7 @@ import com.RotN.acdc.logic.Stats;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
-import android.view.Menu;
+import android.view.View;
 import android.widget.TextView;
 
 public class StatsActivity extends Activity {
@@ -14,6 +14,20 @@ public class StatsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stats);
+		TextView viewTitle = (TextView) findViewById(R.id.textViewStatsTitle);
+		Bundle extras = getIntent().getExtras();
+    	if (extras != null) {
+    		int titleValue = extras.getInt("title");
+    		if (titleValue == 0) {
+    			viewTitle.setVisibility(View.GONE);
+    			viewTitle.setHeight(1);
+    		}
+    		else if (titleValue == 1){
+    			viewTitle.setText("RED WON");
+    		} else if (titleValue == 2) {
+    			viewTitle.setText("WHITE WON");
+    		}
+    	}
 		fillOutData();
 	}
 	

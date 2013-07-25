@@ -11,6 +11,14 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:isScrollContainer="true">
+    
+    <TextView
+        android:id="@+id/textViewStatsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Whatever"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
         android:id="@+id/textView1"
@@ -26,7 +34,8 @@
         android:id="@+id/textViewRedStats"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/textViewStatsTitle"
+        android:layout_marginTop="5dp"
         android:layout_toRightOf="@+id/textViewAcDc"
         android:layout_marginLeft="25dp"
         android:text="Red"
@@ -38,7 +47,8 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/textViewRedStats"
         android:layout_marginLeft="25dp"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/textViewStatsTitle"
+        android:layout_marginTop="5dp"
         android:text="White"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
