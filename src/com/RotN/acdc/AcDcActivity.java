@@ -6,12 +6,9 @@ import com.RotN.acdc.logic.TheGameImpl;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -19,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import com.google.analytics.tracking.android.EasyTracker;
 
 public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler {
 
@@ -28,14 +26,12 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	private TheGameImpl beerGammon;
 	GammonBoard board;
 	static final int NEW_GAME_REQUEST = 0;
-	private SharedPreferences storage;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_ACTION_BAR); 
     	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    	storage = getSharedPreferences("GameStorage", Context.MODE_PRIVATE);
     	super.onCreate(savedInstanceState);
 	
     }
@@ -44,6 +40,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	protected void onStop() {
 		Log.d(TAG, "Stopping...");
 		closeItDown();
+		EasyTracker.getInstance().activityStop(this);
 		super.onStop();
 	}
    	
@@ -58,6 +55,7 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	protected void onStart() {
 		Log.d(TAG, "Starting AcDc...");
 		startItUp();
+		EasyTracker.getInstance().activityStart(this);
 		super.onStart();
 	}
 	
