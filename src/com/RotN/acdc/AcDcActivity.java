@@ -270,6 +270,8 @@ public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHan
 	
 	@Override
 	public void onDiceRoll(String event) {
+		Tracker myTracker = EasyTracker.getTracker();
+		myTracker.sendEvent("Dice roll", "Dice Roll", event, null);
 	}
 	
 	protected void onActivityResult(int requestCode, int resultCode,
