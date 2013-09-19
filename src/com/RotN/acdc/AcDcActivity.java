@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 public class AcDcActivity extends Activity implements TheGameImpl.GammonEventHandler {
 
