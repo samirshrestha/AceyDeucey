@@ -892,7 +892,13 @@ public class TheGameImpl {
 		gammon.blackDie1 = 0;
 		gammon.blackDie2 = 0;
 		
-		analyticEvent("Roll");
+		String analyticString = "HU: ";
+		if ( (gammon.turn == GameColor.BLACK && gammon.blackHumanPlayer == false) || 
+				(gammon.turn == GameColor.WHITE && gammon.whiteHumanPlayer == false) ) {
+			analyticString = "CPU: ";
+		}
+		
+		analyticEvent(analyticString + "Roll");
 		
 		if (gammon.turn == GameColor.BLACK) {
 			gammon.blackDie1 = rollDie();
@@ -911,13 +917,13 @@ public class TheGameImpl {
 				gammon.movesRemaining.add(gammon.blackDie1);
 				
 				String event = gammon.blackDie1 + "s";
-				analyticEvent(event);
+				analyticEvent(analyticString + event);
 				doubleHappened(gammon.blackDie1, gammon.redStats);
 				
 			} else if (gammon.blackDie1 + gammon.blackDie2 == 3) { //acdc
 				gammon.acdcOrigMove = true;
 				
-				analyticEvent("AcDc");
+				analyticEvent(analyticString + "AcDc");
 				gammon.redStats.acdcs++;
 			}
 			gammon.buttonState = ButtonState.CLEAR_RED;
@@ -937,13 +943,13 @@ public class TheGameImpl {
 				gammon.movesRemaining.add(gammon.whiteDie1);
 				
 				String event = gammon.whiteDie1 + "s";
-				analyticEvent(event);
+				analyticEvent(analyticString + event);
 				doubleHappened(gammon.whiteDie1, gammon.whiteStats);
 			}
 			else if (gammon.whiteDie1 + gammon.whiteDie2 == 3) {
 				gammon.acdcOrigMove = true;
 				
-				analyticEvent("AcDc");
+				analyticEvent(analyticString + "AcDc");
 				gammon.whiteStats.acdcs++;
 			}
 			gammon.buttonState = ButtonState.CLEAR_WHITE;
